@@ -1,0 +1,3 @@
+[submodule "DX12Programming/ThirdParty/assimp"]
+	path = DX12Programming/ThirdParty/assimp
+	url = https://github.com/assimp/assimp
