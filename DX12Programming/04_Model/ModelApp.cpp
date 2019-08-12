@@ -20,7 +20,7 @@ ModelApp::~ModelApp()
 void ModelApp::Prepare()
 {
     // モデル読み込み
-    m_modelLoader.Load(m_device.Get(), "assets/shaderball/shaderBall.fbx");
+    m_modelLoader.Load(m_device.Get(), "../assets/shaderball/shaderBall.fbx");
 
     // シェーダーをコンパイル.
     HRESULT hr;
