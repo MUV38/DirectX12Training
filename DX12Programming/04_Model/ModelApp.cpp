@@ -180,7 +180,7 @@ void ModelApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
 
     // DescriptorTable.
     command->SetGraphicsRootDescriptorTable(0, m_cbViews[m_frameIndex]);
-
+    
     // DrawModel
     m_modelLoader.Draw(command.Get());
 }
