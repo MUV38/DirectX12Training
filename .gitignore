@@ -1,0 +1,14 @@
+/DX12Programming/packages
+/DX12Programming/01_ClearScreen/x64
+/DX12Programming/02_SimpleTriangle/x64
+/DX12Programming/03_TexturedCube/x64
+/DX12Programming/03_TexturedCube/03_TexturedCube.vcxproj.user
+/DX12Programming/01_ClearScreen/ClearScreen.vcxproj.user
+/DX12Programming/02_SimpleTriangle/02_SimpleTriangle.vcxproj.user
+/DX12Programming/common/common.vcxproj.user
+/DX12Programming/04_Model/x64
+/DX12Programming/.vs
+/DX12Programming/common/lib
+/DX12Programming/04_Model/04_Model.vcxproj.user
+/DX12Programming/05_TexturedModel/x64
+/DX12Programming/05_TexturedModel/05_TexturedModel.vcxproj.user
