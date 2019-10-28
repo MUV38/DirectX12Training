@@ -1,4 +1,5 @@
-#include "ModelLoader.h"
+#include "pch.h"
+#include "Model/ModelLoader.h"
 
 #undef min
 #undef max
@@ -8,7 +9,7 @@
 #include <assimp/postprocess.h>
 
 #include <vector>
-#include "Polygon.h"
+#include "Model/Polygon.h"
 
 ModelLoader::ModelLoader()
     : m_isLoaded(false)

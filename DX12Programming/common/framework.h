@@ -7,4 +7,4 @@
 #include <dxgi1_6.h>
 #include <dxcapi.h>
 #include <DirectXMath.h>
-#include "d3dx12.h"
+#include "D3D12/d3dx12.h"

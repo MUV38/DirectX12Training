@@ -3,10 +3,6 @@
 #undef min
 #undef max
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
 #include <stdexcept>
 
 ModelApp::ModelApp()

@@ -8,7 +8,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)common\;$(SolutionDir)ThirdParty\assimp\include;$(SolutionDir)packages\directxtex_desktop_win10.2019.5.31.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)common\include;$(SolutionDir)ThirdParty\assimp\include;$(SolutionDir)packages\directxtex_desktop_win10.2019.5.31.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Lib>
       <AdditionalDependencies>

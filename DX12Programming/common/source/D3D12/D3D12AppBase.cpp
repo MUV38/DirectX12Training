@@ -3,8 +3,8 @@
 #include <exception>
 #include <stdexcept>
 #include <experimental/filesystem>
-#include "D3D12AppBase.h"
-#include "Util.h"
+#include "D3D12/D3D12AppBase.h"
+#include "Util/Util.h"
 
 D3D12AppBase::D3D12AppBase()
     : m_rtvDescriptorSize(0)

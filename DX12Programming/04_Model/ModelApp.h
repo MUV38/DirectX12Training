@@ -1,8 +1,8 @@
 #pragma once
 
-#include <D3D12AppBase.h>
-#include "assimp/types.h"
-#include "ModelLoader.h"
+#include <D3D12/D3D12AppBase.h>
+#include <Model/ModelLoader.h>
+//#include "assimp/types.h"
 
 class ModelApp : public D3D12AppBase
 {

@@ -13,6 +13,27 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="ヘッダー ファイル\D3D12">
+      <UniqueIdentifier>{fc6a917b-577e-463b-b736-5329656f87aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Model">
+      <UniqueIdentifier>{2fe9c3d5-7ae3-429a-a61f-3fbbb8843584}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Util">
+      <UniqueIdentifier>{3013030f-c1c0-4233-93a1-6283615f9ef4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\ThirdParty">
+      <UniqueIdentifier>{5d044a2c-9a55-4331-a009-937fbff3267c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\ThirdParty\stb">
+      <UniqueIdentifier>{9b1df5c8-9ff1-44ec-9af2-3113137d0d11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\D3D12">
+      <UniqueIdentifier>{c8d18ea6-93d7-42ad-bea3-518dc9e4d3f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Model">
+      <UniqueIdentifier>{2888d87f-7d39-408b-b219-c0bacdb3d6fc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -21,17 +42,26 @@
     <ClInclude Include="pch.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="D3D12AppBase.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="include\D3D12\D3D12AppBase.h">
+      <Filter>ヘッダー ファイル\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="d3dx12.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="include\D3D12\d3dx12.h">
+      <Filter>ヘッダー ファイル\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="stb_image.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="include\Model\Mesh.h">
+      <Filter>ヘッダー ファイル\Model</Filter>
     </ClInclude>
-    <ClInclude Include="Util.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="include\Model\ModelLoader.h">
+      <Filter>ヘッダー ファイル\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Model\Polygon.h">
+      <Filter>ヘッダー ファイル\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Util\Util.h">
+      <Filter>ヘッダー ファイル\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ThirdParty\stb\stb_image.h">
+      <Filter>ヘッダー ファイル\ThirdParty\stb</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -41,8 +71,14 @@
     <ClCompile Include="common.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="D3D12AppBase.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="source\D3D12\D3D12AppBase.cpp">
+      <Filter>ソース ファイル\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Model\Mesh.cpp">
+      <Filter>ソース ファイル\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Model\ModelLoader.cpp">
+      <Filter>ソース ファイル\Model</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

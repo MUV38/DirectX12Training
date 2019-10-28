@@ -2,7 +2,7 @@
 #include <Windows.h>
 #include <stdexcept>
 
-#include "D3D12AppBase.h"
+#include <D3D12/D3D12AppBase.h>
 
 const int WINDOW_WIDTH = 1280; 
 const int WINDOW_HEIGHT = 720;

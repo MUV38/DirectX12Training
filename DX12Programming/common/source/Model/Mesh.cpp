@@ -1,6 +1,6 @@
-#include "Mesh.h"
-
-#include <d3dx12.h>
+#include "pch.h"
+#include "Model/Mesh.h"
+#include "D3D12/d3dx12.h"
 
 Mesh::Mesh(ID3D12Device* device, const std::vector<Vertex>& vertices, const std::vector<Index>& indices)
     : m_vertices(vertices)

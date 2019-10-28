@@ -1,6 +1,6 @@
 #pragma once
 
-#include "D3D12AppBase.h"
+#include <D3D12/D3D12AppBase.h>
 #include <DirectXMath.h>
 
 class TriangleApp : public D3D12AppBase
