@@ -35,14 +35,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
     wc.lpfnWndProc = WndProc;
     wc.hInstance = hInstance;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wc.lpszClassName = L"HelloDirectX12";
+    wc.lpszClassName = L"03_TexturedCube";
     RegisterClassEx(&wc);
 
     DWORD dwStyle = WS_OVERLAPPEDWINDOW & ~WS_SIZEBOX;
     RECT rect = { 0,0, WINDOW_WIDTH, WINDOW_HEIGHT };
     AdjustWindowRect(&rect, dwStyle, FALSE);
 
-    auto hwnd = CreateWindow(wc.lpszClassName, L"HelloDirectX12",
+    auto hwnd = CreateWindow(wc.lpszClassName, L"03_TexturedCube",
         dwStyle,
         CW_USEDEFAULT, CW_USEDEFAULT,
         rect.right - rect.left, rect.bottom - rect.top,
