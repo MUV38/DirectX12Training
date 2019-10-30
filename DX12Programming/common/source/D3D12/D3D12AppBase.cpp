@@ -25,6 +25,21 @@ void D3D12AppBase::Initialize(HWND hWnd)
 {
     HRESULT hr;
 
+	// DirectXTexのための初期化
+#if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
+	Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
+	if (FAILED(initialize))
+	{
+		throw std::runtime_error("RoInitializeWrapper failed.");
+	}
+#else // (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
+	HRESULT hr = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
+	if (FAILED(initialize))
+	{
+		throw std::runtime_error("CoInitializeEx() failed.");
+	}
+#endif //  (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
+
     // デバッグ
     UINT dxgiFlags = 0;
 #if (_DEBUG)

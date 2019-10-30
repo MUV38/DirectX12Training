@@ -2,7 +2,6 @@
 
 #include <D3D12/D3D12AppBase.h>
 #include <Model/ModelLoader.h>
-//#include "assimp/types.h"
 
 class App : public D3D12AppBase
 {

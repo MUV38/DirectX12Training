@@ -8,4 +8,5 @@
 #include <dxgi1_6.h>
 #include <dxcapi.h>
 #include <DirectXMath.h>
+#include <DirectXTex.h>
 #include "D3D12/d3dx12.h"
