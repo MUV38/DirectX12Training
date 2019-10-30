@@ -2,7 +2,7 @@
 #include <Windows.h>
 #include <stdexcept>
 
-#include "ModelApp.h"
+#include "App.h"
 
 const int WINDOW_WIDTH = 1280; 
 const int WINDOW_HEIGHT = 720;
@@ -27,7 +27,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
-    ModelApp theApp{};
+    App theApp{};
 
     WNDCLASSEX wc{};
     wc.cbSize = sizeof(wc);

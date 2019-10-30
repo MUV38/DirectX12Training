@@ -4,11 +4,11 @@
 #include <Model/ModelLoader.h>
 //#include "assimp/types.h"
 
-class ModelApp : public D3D12AppBase
+class App : public D3D12AppBase
 {
 public:
-    ModelApp();
-    ~ModelApp();
+	App();
+    ~App();
 
 public:
     struct ShaderParameters

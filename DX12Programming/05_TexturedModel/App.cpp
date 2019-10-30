@@ -1,19 +1,19 @@
-#include "ModelApp.h"
+#include "App.h"
 
 #undef min
 #undef max
 
 #include <stdexcept>
 
-ModelApp::ModelApp()
+App::App()
 {
 }
 
-ModelApp::~ModelApp()
+App::~App()
 {
 }
 
-void ModelApp::Prepare()
+void App::Prepare()
 {
     // モデル読み込み
     m_modelLoader.Load(m_device.Get(), "../assets/shaderball/shaderBall.fbx");
@@ -124,7 +124,7 @@ void ModelApp::Prepare()
 
 }
 
-void ModelApp::Cleanup()
+void App::Cleanup()
 {
     auto index = m_swapChain->GetCurrentBackBufferIndex();
     auto fence = m_frameFences[index];
@@ -134,7 +134,7 @@ void ModelApp::Cleanup()
     WaitForSingleObject(m_fenceWaitEvent, GpuWaitTimeout);
 }
 
-void ModelApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
+void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
 {
     using namespace DirectX;
 
@@ -181,7 +181,7 @@ void ModelApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
     m_modelLoader.Draw(command.Get());
 }
 
-ModelApp::ComPtr<ID3D12Resource1> ModelApp::CreateBuffer(UINT bufferSize, const void* initialData)
+App::ComPtr<ID3D12Resource1> App::CreateBuffer(UINT bufferSize, const void* initialData)
 {
     HRESULT hr;
     ComPtr<ID3D12Resource1> buffer;
@@ -210,7 +210,7 @@ ModelApp::ComPtr<ID3D12Resource1> ModelApp::CreateBuffer(UINT bufferSize, const 
     return buffer;
 }
 
-void ModelApp::PrepareDescriptorHeapForModelApp()
+void App::PrepareDescriptorHeapForModelApp()
 {
     // ディスクリプターヒープ
     UINT count = FrameBufferCount + 1;
