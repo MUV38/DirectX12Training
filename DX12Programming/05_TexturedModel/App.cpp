@@ -33,12 +33,16 @@ void App::Prepare()
     }
 
     // DescripterRange.
-    CD3DX12_DESCRIPTOR_RANGE cbv;
+    CD3DX12_DESCRIPTOR_RANGE cbv, srv, sampler;
     cbv.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
+	srv.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+	sampler.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER, 1, 0);
 
     // RootParameter.
-    CD3DX12_ROOT_PARAMETER rootParams[1];
-    rootParams[0].InitAsDescriptorTable(1, &cbv, D3D12_SHADER_VISIBILITY_VERTEX);
+    CD3DX12_ROOT_PARAMETER rootParams[3];
+	rootParams[0].InitAsDescriptorTable(1, &cbv, D3D12_SHADER_VISIBILITY_VERTEX);
+	rootParams[1].InitAsDescriptorTable(1, &srv, D3D12_SHADER_VISIBILITY_PIXEL);
+	rootParams[2].InitAsDescriptorTable(1, &sampler, D3D12_SHADER_VISIBILITY_PIXEL);
 
     // RootSignature.
     CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc{};
@@ -121,7 +125,119 @@ void App::Prepare()
         m_cbViews[i] = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetGPUDescriptorHandleForHeapStart(), ConstantBufferDescriptorBase + i, m_srvcbvDescriptorSize);
     }
 
+	// sampler.
+	{
+		// sampler desc.
+		D3D12_SAMPLER_DESC samplerDesc{};
+		{
+			samplerDesc.Filter = D3D12_ENCODE_BASIC_FILTER(
+				D3D12_FILTER_TYPE_LINEAR, // min
+				D3D12_FILTER_TYPE_LINEAR, // mag
+				D3D12_FILTER_TYPE_LINEAR, // mip
+				D3D12_FILTER_REDUCTION_TYPE_STANDARD
+			);
+			samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+			samplerDesc.MaxLOD = FLT_MAX;
+			samplerDesc.MinLOD = -FLT_MAX;
+			samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+		}
 
+		// DescriptorHeap.
+		auto descriptorSampler = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heapSampler->GetCPUDescriptorHandleForHeapStart(), SamplerDescriptorBase, m_samplerDescriptorSize);
+		m_device->CreateSampler(&samplerDesc, descriptorSampler);
+		m_sampler = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSampler->GetGPUDescriptorHandleForHeapStart(), SamplerDescriptorBase, m_samplerDescriptorSize);
+	}
+
+	// テクスチャ読み込み
+	{
+		DirectX::TexMetadata metadata;
+		auto image = std::make_unique<DirectX::ScratchImage>();
+		HRESULT hr = DirectX::LoadFromDDSFile(
+			L"../assets/textures/antique/antique_albedo.dds",
+			DirectX::DDS_FLAGS_NONE,
+			&metadata, *image
+		);
+		if (FAILED(hr))
+		{
+			throw std::runtime_error("DirectXLoadFromDDSFile faild.");
+		}
+
+		hr = DirectX::CreateTexture(m_device.Get(), metadata, &m_texture);
+		if (FAILED(hr))
+		{
+			throw std::runtime_error("CreateTexture faild.");
+		}
+
+		std::vector<D3D12_SUBRESOURCE_DATA> subresources;
+		hr = DirectX::PrepareUpload(m_device.Get(), image->GetImages(), image->GetImageCount(), metadata, subresources);
+		if (FAILED(hr))
+		{
+			throw std::runtime_error("PrepareUpload faild.");
+		}
+
+		const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_texture.Get(), 0, static_cast<unsigned int>(subresources.size()));
+
+		ComPtr<ID3D12Resource> textureUploadHeap;
+		hr = m_device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(textureUploadHeap.GetAddressOf())
+		);
+		if (FAILED(hr))
+		{
+			throw std::runtime_error("CreateCommittedResource faild.");
+		}
+
+		// コマンド準備
+		ComPtr<ID3D12GraphicsCommandList> command;
+		m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), nullptr, IID_PPV_ARGS(&command));
+		ComPtr<ID3D12Fence1> fence;
+		m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+
+		UpdateSubresources(command.Get(), m_texture.Get(), textureUploadHeap.Get(), 0, 0, static_cast<unsigned int>(subresources.size()), subresources.data());
+
+		auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+			m_texture.Get(),
+			D3D12_RESOURCE_STATE_COPY_DEST,
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+		);
+		command->ResourceBarrier(1, &barrier);
+
+		command->Close();
+
+		// コマンド実行
+		ID3D12CommandList* cmds[] = { command.Get() };
+		m_commandQueue->ExecuteCommandLists(_countof(cmds), cmds);
+
+		// 完了したらシグナルを立てる
+		const UINT64 expected = 1;
+		m_commandQueue->Signal(fence.Get(), expected);
+
+		// テクスチャの処理が完了するまで待つ
+		while (expected != fence->GetCompletedValue())
+		{
+			Sleep(1);
+		}
+
+		// texture srv.
+		{
+			auto srvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetCPUDescriptorHandleForHeapStart(), TextureSrvDescriptorBase, m_srvcbvDescriptorSize);
+			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+			{
+				srvDesc.Texture2D.MipLevels = metadata.mipLevels;
+				srvDesc.Format = metadata.format;
+				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+				srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			}
+			m_device->CreateShaderResourceView(m_texture.Get(), &srvDesc, srvHandle);
+			m_textureSrv = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetGPUDescriptorHandleForHeapStart(), TextureSrvDescriptorBase, m_srvcbvDescriptorSize);
+		}
+	}
 }
 
 void App::Cleanup()
@@ -170,12 +286,14 @@ void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
 
     // DescriptorHeap.
     ID3D12DescriptorHeap* heaps[] = {
-        m_heapSrvCbv.Get()
+        m_heapSrvCbv.Get(), m_heapSampler.Get()
     };
     command->SetDescriptorHeaps(_countof(heaps), heaps);
 
     // DescriptorTable.
-    command->SetGraphicsRootDescriptorTable(0, m_cbViews[m_frameIndex]);
+	command->SetGraphicsRootDescriptorTable(0, m_cbViews[m_frameIndex]);
+	command->SetGraphicsRootDescriptorTable(1, m_textureSrv);
+	command->SetGraphicsRootDescriptorTable(2, m_sampler);
     
     // DrawModel
     m_modelLoader.Draw(command.Get());
@@ -222,4 +340,14 @@ void App::PrepareDescriptorHeapForModelApp()
     };
     m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_heapSrvCbv));
     m_srvcbvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+	// ダイナミックサンプラーのディスクリプターヒープ
+	D3D12_DESCRIPTOR_HEAP_DESC samplerHeapDesc{
+		D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
+		1,
+		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+		0
+	};
+	m_device->CreateDescriptorHeap(&samplerHeapDesc, IID_PPV_ARGS(&m_heapSampler));
+	m_samplerDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 }

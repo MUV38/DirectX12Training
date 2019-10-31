@@ -74,9 +74,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
     }
     catch (std::runtime_error e)
     {
+		OutputDebugStringA(e.what());
+		OutputDebugStringA("\n");
+
         DebugBreak();
-        OutputDebugStringA(e.what());
-        OutputDebugStringA("\n");
     }
     return 0;
 }

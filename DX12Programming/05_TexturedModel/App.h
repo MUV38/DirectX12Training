@@ -19,7 +19,8 @@ public:
 
     enum
     {
-        ConstantBufferDescriptorBase = 0,
+		TextureSrvDescriptorBase = 0,
+		ConstantBufferDescriptorBase = 1,
 
         SamplerDescriptorBase = 0,
     };
@@ -39,11 +40,16 @@ private:
 private:
     ModelLoader m_modelLoader;
 
-    ComPtr<ID3D12DescriptorHeap> m_heapSrvCbv;
-    UINT m_samplerDescriptorSize;
+	ComPtr<ID3D12Resource> m_texture;
+	std::vector<ComPtr<ID3D12Resource1>> m_constantBuffers;
 
-    std::vector<ComPtr<ID3D12Resource1>> m_constantBuffers;
+    ComPtr<ID3D12DescriptorHeap> m_heapSrvCbv;
+	ComPtr<ID3D12DescriptorHeap> m_heapSampler;
+	UINT m_samplerDescriptorSize;
+
     std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_cbViews;
+	D3D12_GPU_DESCRIPTOR_HANDLE m_textureSrv;
+	D3D12_GPU_DESCRIPTOR_HANDLE m_sampler;
 
     ComPtr<ID3DBlob> m_vs, m_ps;
 
