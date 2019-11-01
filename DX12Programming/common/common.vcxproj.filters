@@ -34,6 +34,12 @@
     <Filter Include="ソース ファイル\Model">
       <UniqueIdentifier>{2888d87f-7d39-408b-b219-c0bacdb3d6fc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\Texture">
+      <UniqueIdentifier>{7a240881-a3ab-4797-8606-90d33d63a4e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Texture">
+      <UniqueIdentifier>{88bda843-6c56-4cef-afff-495fdf3ab49f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -63,6 +69,9 @@
     <ClInclude Include="include\ThirdParty\stb\stb_image.h">
       <Filter>ヘッダー ファイル\ThirdParty\stb</Filter>
     </ClInclude>
+    <ClInclude Include="source\Texture\Texture.h">
+      <Filter>ヘッダー ファイル\Texture</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -79,6 +88,9 @@
     </ClCompile>
     <ClCompile Include="source\Model\ModelLoader.cpp">
       <Filter>ソース ファイル\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Texture\Texture.cpp">
+      <Filter>ソース ファイル\Texture</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
