@@ -2,6 +2,7 @@
 
 #include <D3D12/D3D12AppBase.h>
 #include <Model/ModelLoader.h>
+#include <Texture/Texture.h>
 
 class App : public D3D12AppBase
 {
@@ -39,8 +40,8 @@ private:
 
 private:
     ModelLoader m_modelLoader;
+	Texture m_texture;
 
-	ComPtr<ID3D12Resource> m_texture;
 	std::vector<ComPtr<ID3D12Resource1>> m_constantBuffers;
 
     ComPtr<ID3D12DescriptorHeap> m_heapSrvCbv;
@@ -48,7 +49,6 @@ private:
 	UINT m_samplerDescriptorSize;
 
     std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_cbViews;
-	D3D12_GPU_DESCRIPTOR_HANDLE m_textureSrv;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_sampler;
 
     ComPtr<ID3DBlob> m_vs, m_ps;

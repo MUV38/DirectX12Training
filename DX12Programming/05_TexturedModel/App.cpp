@@ -4,6 +4,7 @@
 #undef max
 
 #include <stdexcept>
+#include <Texture/TextureLoader.h>
 
 App::App()
 {
@@ -152,90 +153,19 @@ void App::Prepare()
 
 	// テクスチャ読み込み
 	{
-		DirectX::TexMetadata metadata;
-		auto image = std::make_unique<DirectX::ScratchImage>();
-		HRESULT hr = DirectX::LoadFromDDSFile(
+		hr = TextureLoader::LoadDDS(
+			m_device.Get(),
 			L"../assets/textures/antique/antique_albedo.dds",
-			DirectX::DDS_FLAGS_NONE,
-			&metadata, *image
+			m_heapSrvCbv.Get(),
+			TextureSrvDescriptorBase,
+			m_srvcbvDescriptorSize,
+			m_commandAllocators[m_frameIndex].Get(),
+			m_commandQueue.Get(),
+			&m_texture
 		);
 		if (FAILED(hr))
 		{
-			throw std::runtime_error("DirectXLoadFromDDSFile faild.");
-		}
-
-		hr = DirectX::CreateTexture(m_device.Get(), metadata, &m_texture);
-		if (FAILED(hr))
-		{
-			throw std::runtime_error("CreateTexture faild.");
-		}
-
-		std::vector<D3D12_SUBRESOURCE_DATA> subresources;
-		hr = DirectX::PrepareUpload(m_device.Get(), image->GetImages(), image->GetImageCount(), metadata, subresources);
-		if (FAILED(hr))
-		{
-			throw std::runtime_error("PrepareUpload faild.");
-		}
-
-		const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_texture.Get(), 0, static_cast<unsigned int>(subresources.size()));
-
-		ComPtr<ID3D12Resource> textureUploadHeap;
-		hr = m_device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
-			D3D12_RESOURCE_STATE_GENERIC_READ,
-			nullptr,
-			IID_PPV_ARGS(textureUploadHeap.GetAddressOf())
-		);
-		if (FAILED(hr))
-		{
-			throw std::runtime_error("CreateCommittedResource faild.");
-		}
-
-		// コマンド準備
-		ComPtr<ID3D12GraphicsCommandList> command;
-		m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), nullptr, IID_PPV_ARGS(&command));
-		ComPtr<ID3D12Fence1> fence;
-		m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-
-		UpdateSubresources(command.Get(), m_texture.Get(), textureUploadHeap.Get(), 0, 0, static_cast<unsigned int>(subresources.size()), subresources.data());
-
-		auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-			m_texture.Get(),
-			D3D12_RESOURCE_STATE_COPY_DEST,
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-		);
-		command->ResourceBarrier(1, &barrier);
-
-		command->Close();
-
-		// コマンド実行
-		ID3D12CommandList* cmds[] = { command.Get() };
-		m_commandQueue->ExecuteCommandLists(_countof(cmds), cmds);
-
-		// 完了したらシグナルを立てる
-		const UINT64 expected = 1;
-		m_commandQueue->Signal(fence.Get(), expected);
-
-		// テクスチャの処理が完了するまで待つ
-		while (expected != fence->GetCompletedValue())
-		{
-			Sleep(1);
-		}
-
-		// texture srv.
-		{
-			auto srvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetCPUDescriptorHandleForHeapStart(), TextureSrvDescriptorBase, m_srvcbvDescriptorSize);
-			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-			{
-				srvDesc.Texture2D.MipLevels = metadata.mipLevels;
-				srvDesc.Format = metadata.format;
-				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-				srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-			}
-			m_device->CreateShaderResourceView(m_texture.Get(), &srvDesc, srvHandle);
-			m_textureSrv = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetGPUDescriptorHandleForHeapStart(), TextureSrvDescriptorBase, m_srvcbvDescriptorSize);
+			throw std::runtime_error("TextureLoader::LoadDDS failed");
 		}
 	}
 }
@@ -292,7 +222,7 @@ void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
 
     // DescriptorTable.
 	command->SetGraphicsRootDescriptorTable(0, m_cbViews[m_frameIndex]);
-	command->SetGraphicsRootDescriptorTable(1, m_textureSrv);
+	command->SetGraphicsRootDescriptorTable(1, m_texture.GetShaderResourceView());
 	command->SetGraphicsRootDescriptorTable(2, m_sampler);
     
     // DrawModel

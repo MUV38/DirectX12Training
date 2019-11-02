@@ -84,7 +84,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)ThirdParty\assimp\include;$(SolutionDir)packages\directxtex_desktop_win10.2019.5.31.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)source;$(SolutionDir)ThirdParty\assimp\include;$(SolutionDir)packages\directxtex_desktop_win10.2019.5.31.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -104,10 +104,11 @@
     <ClInclude Include="include\Model\Mesh.h" />
     <ClInclude Include="include\Model\ModelLoader.h" />
     <ClInclude Include="include\Model\Polygon.h" />
+    <ClInclude Include="include\Texture\Texture.h" />
+    <ClInclude Include="include\Texture\TextureLoader.h" />
     <ClInclude Include="include\ThirdParty\stb\stb_image.h" />
     <ClInclude Include="include\Util\Util.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="source\Texture\Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common.cpp" />
@@ -119,6 +120,7 @@
     <ClCompile Include="source\Model\Mesh.cpp" />
     <ClCompile Include="source\Model\ModelLoader.cpp" />
     <ClCompile Include="source\Texture\Texture.cpp" />
+    <ClCompile Include="source\Texture\TextureLoder.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

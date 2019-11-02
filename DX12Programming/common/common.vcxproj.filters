@@ -69,7 +69,10 @@
     <ClInclude Include="include\ThirdParty\stb\stb_image.h">
       <Filter>ヘッダー ファイル\ThirdParty\stb</Filter>
     </ClInclude>
-    <ClInclude Include="source\Texture\Texture.h">
+    <ClInclude Include="include\Texture\Texture.h">
+      <Filter>ヘッダー ファイル\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Texture\TextureLoader.h">
       <Filter>ヘッダー ファイル\Texture</Filter>
     </ClInclude>
   </ItemGroup>
@@ -90,6 +93,9 @@
       <Filter>ソース ファイル\Model</Filter>
     </ClCompile>
     <ClCompile Include="source\Texture\Texture.cpp">
+      <Filter>ソース ファイル\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Texture\TextureLoder.cpp">
       <Filter>ソース ファイル\Texture</Filter>
     </ClCompile>
   </ItemGroup>
