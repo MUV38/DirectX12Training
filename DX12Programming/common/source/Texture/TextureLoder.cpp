@@ -22,7 +22,7 @@ HRESULT TextureLoader::LoadDDS(
 	if (!heap) { return E_FAIL; }
 	if (!texture) { return E_FAIL; }
 
-	ID3D12Resource* resource = nullptr;
+	ComPtr<ID3D12Resource> resource = nullptr;
 	D3D12_GPU_DESCRIPTOR_HANDLE srv;
 
 	DirectX::TexMetadata metadata;
@@ -52,7 +52,7 @@ HRESULT TextureLoader::LoadDDS(
 		throw std::runtime_error("PrepareUpload faild.");
 	}
 
-	const UINT64 uploadBufferSize = GetRequiredIntermediateSize(resource, 0, static_cast<unsigned int>(subresources.size()));
+	const UINT64 uploadBufferSize = GetRequiredIntermediateSize(resource.Get(), 0, static_cast<unsigned int>(subresources.size()));
 
 	ComPtr<ID3D12Resource> textureUploadHeap;
 	hr = device->CreateCommittedResource(
@@ -74,10 +74,10 @@ HRESULT TextureLoader::LoadDDS(
 	ComPtr<ID3D12Fence1> fence;
 	device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 
-	UpdateSubresources(command.Get(), resource, textureUploadHeap.Get(), 0, 0, static_cast<unsigned int>(subresources.size()), subresources.data());
+	UpdateSubresources(command.Get(), resource.Get(), textureUploadHeap.Get(), 0, 0, static_cast<unsigned int>(subresources.size()), subresources.data());
 
 	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		resource,
+		resource.Get(),
 		D3D12_RESOURCE_STATE_COPY_DEST,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
 	);
@@ -109,13 +109,13 @@ HRESULT TextureLoader::LoadDDS(
 			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 			srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		}
-		device->CreateShaderResourceView(resource, &srvDesc, srvHandle);
+		device->CreateShaderResourceView(resource.Get(), &srvDesc, srvHandle);
 		srv = CD3DX12_GPU_DESCRIPTOR_HANDLE(heap->GetGPUDescriptorHandleForHeapStart(), offsetInDescriptors, descriptorIncrementSize);
 	}
 
 	// o—Í‚ÉŠi”[
 	{
-		texture->SetResource(resource);
+		texture->SetResource(resource.Get());
 		texture->SetShaderResourceView(srv);
 	}
 
