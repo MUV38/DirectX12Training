@@ -118,4 +118,6 @@ HRESULT TextureLoader::LoadDDS(
 		texture->SetResource(resource);
 		texture->SetShaderResourceView(srv);
 	}
+
+	return hr;
 }
