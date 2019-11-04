@@ -9,5 +9,6 @@ SamplerState samp : register(s0);
 
 float4 main(PSInput input) : SV_TARGET
 {
-	return tex.Sample(samp, input.uv);
+	float4 color = tex.Sample(samp, input.uv);
+	return color;
 }

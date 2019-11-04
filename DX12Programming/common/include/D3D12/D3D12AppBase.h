@@ -38,8 +38,8 @@ protected:
     ComPtr<ID3D12CommandQueue> m_commandQueue;
     ComPtr<IDXGISwapChain4> m_swapChain;
 
-    ComPtr<ID3D12DescriptorHeap> m_heapRtv;
-    ComPtr<ID3D12DescriptorHeap> m_heapDsv;
+    ComPtr<ID3D12DescriptorHeap> m_heapRtvBackBuffer;
+    ComPtr<ID3D12DescriptorHeap> m_heapDsvDefault;
     UINT m_rtvDescriptorSize;
     UINT m_dsvDescriptorSize;
     UINT m_srvcbvDescriptorSize;

@@ -18,19 +18,19 @@ public:
 	struct SetupParam
 	{
 		/// RenderTargetView
-		UINT numRenderTargets;						///< レンダーターゲット数
-		DXGI_FORMAT rtvFormats[8];					///< RTVフォーマット
+		UINT numRenderTargets;								///< レンダーターゲット数
+		DXGI_FORMAT rtvFormats[8];							///< RTVフォーマット
 		/// DepthStencilView
-		DXGI_FORMAT dsvFormat;						///< DSVフォーマット
+		DXGI_FORMAT dsvFormat;								///< DSVフォーマット
 		/// シェーダー
-		Microsoft::WRL::ComPtr<ID3DBlob> ps;		///< ピクセルシェーダー
-		Microsoft::WRL::ComPtr<ID3DBlob> signature;	///< シグネチャ
+		Microsoft::WRL::ComPtr<ID3DBlob> psBlob;			///< ピクセルシェーダー
+		Microsoft::WRL::ComPtr<ID3DBlob> rootSignatureBlob;	///< ルートシグネチャ
 
 		SetupParam()
 			: numRenderTargets(1)
 			, dsvFormat(DXGI_FORMAT_D32_FLOAT)
-			, ps(nullptr)
-			, signature(nullptr)
+			, psBlob(nullptr)
+			, rootSignatureBlob(nullptr)
 		{
 			for (int i = 0; i < 8; ++i)
 			{
@@ -38,6 +38,9 @@ public:
 			}
 			rtvFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		}
+
+		/// テクスチャ１枚想定のルートシグネチャをセットアップ
+		void SetupRootSignatureOneTexture(ID3D12Device* device);
 	};
 	/**
 	 * @brief セットアップ
@@ -46,6 +49,16 @@ public:
 	 * 描画するまでに１回必ず呼び出す
 	 */
 	void Setup(ID3D12Device* device, const SetupParam& param);
+
+	/**
+	 * @brief PSOを設定
+	 */
+	void SetPipelineState(ID3D12GraphicsCommandList* commandList);
+
+	/**
+	 * @brief ルートシグネチャを設定
+	 */
+	void SetGraphicsRootSignature(ID3D12GraphicsCommandList* commandList);
 
 	/**
 	 * @brief 描画

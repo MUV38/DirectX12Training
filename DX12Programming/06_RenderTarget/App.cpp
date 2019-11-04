@@ -157,8 +157,7 @@ void App::Prepare()
 	// Render Target
 	{
 		m_renderTargets.resize(RtNum);
-		m_rtvViews.resize(RtNum);
-		m_rtSRViews.resize(RtNum);
+		m_rtViews.resize(RtNum);
 		
 		// RtvGrayScale
 		{
@@ -176,7 +175,7 @@ void App::Prepare()
 				1,
 				0,
 				D3D12_TEXTURE_LAYOUT_UNKNOWN,
-				D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE
+				D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET
 			);
 			D3D12_CLEAR_VALUE clearValue;
 			{
@@ -185,7 +184,7 @@ void App::Prepare()
 				clearValue.Format = format;
 			}
 
-			m_device->CreateCommittedResource(
+			hr = m_device->CreateCommittedResource(
 				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 				D3D12_HEAP_FLAG_NONE,
 				&resDesc,
@@ -193,9 +192,14 @@ void App::Prepare()
 				&clearValue,
 				IID_PPV_ARGS(resource.GetAddressOf())
 			);
-			m_renderTargets[RtGrayScale] = resource;
+			if (FAILED(hr))
+			{
+				throw std::runtime_error("RenderTarget CreateCommittedResource failed");
+			}
+			resource->SetName(L"RenderTarget GrayScale");
+			m_renderTargets[RtTmp] = resource;
 			// RTV
-			INT rtvHandleOffset = RtvDescriptorBase + RtGrayScale;
+			INT rtvHandleOffset = RtvDescriptorBase + RtTmp;
 			D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heapRtv->GetCPUDescriptorHandleForHeapStart(), rtvHandleOffset, m_rtvDescriptorSize);
 			D3D12_RENDER_TARGET_VIEW_DESC rtViewDesc = {};
 			{
@@ -203,19 +207,18 @@ void App::Prepare()
 				rtViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 			}
 			m_device->CreateRenderTargetView(resource.Get(), &rtViewDesc, rtvCpuHandle);
-			m_rtvViews[RtGrayScale] = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapRtv->GetGPUDescriptorHandleForHeapStart(), rtvHandleOffset, m_rtvDescriptorSize);
 			// SRV
-			INT srvHandleOffset = RtSrvDescriptorBase + RtGrayScale;
+			INT srvHandleOffset = RtSrvDescriptorBase + RtTmp;
 			auto srvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetCPUDescriptorHandleForHeapStart(), srvHandleOffset, m_srvcbvDescriptorSize);
 			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 			{
-				srvDesc.Texture2D.MipLevels = 1;
+				srvDesc.Texture2D.MipLevels = resDesc.MipLevels;
 				srvDesc.Format = format;
 				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 				srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 			}
 			m_device->CreateShaderResourceView(resource.Get(), &srvDesc, srvHandle);
-			m_rtSRViews[RtGrayScale] = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetGPUDescriptorHandleForHeapStart(), srvHandleOffset, m_srvcbvDescriptorSize);
+			m_rtViews[RtTmp] = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetGPUDescriptorHandleForHeapStart(), srvHandleOffset, m_srvcbvDescriptorSize);
 		}
 	}
 
@@ -235,6 +238,15 @@ void App::Prepare()
 		{
 			throw std::runtime_error("TextureLoader::LoadDDS failed");
 		}
+	}
+
+	// フルスクリーン描画
+	{
+		FullScreenQuad::SetupParam setupParam;
+		{
+			setupParam.SetupRootSignatureOneTexture(m_device.Get());
+		}
+		m_fullScreenQuad.Setup(m_device.Get(), setupParam);
 	}
 }
 
@@ -274,6 +286,23 @@ void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
         constantBuffer->Unmap(0, nullptr);
     }
 
+	// RenderTarget(tmp)
+	{
+		INT rtvHandleOffset = RtvDescriptorBase + RtTmp;
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(
+			m_heapRtv->GetCPUDescriptorHandleForHeapStart(), 
+			rtvHandleOffset, m_rtvDescriptorSize
+		);
+		CD3DX12_CPU_DESCRIPTOR_HANDLE dsv(
+			m_heapDsvDefault->GetCPUDescriptorHandleForHeapStart()
+		);
+		// レンダーターゲットの設定
+		command->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+		// クリア
+		const float clearColor[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+		command->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+		command->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	}
     // PSO.
     command->SetPipelineState(m_pipeline.Get());
     // RootSignature.
@@ -295,6 +324,46 @@ void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
     
     // DrawModel
     m_modelLoader.Draw(command.Get());
+
+	// RenderTarget(back buffer)
+	{
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(
+			m_heapRtvBackBuffer->GetCPUDescriptorHandleForHeapStart(),
+			m_frameIndex, m_rtvDescriptorSize
+		);
+		CD3DX12_CPU_DESCRIPTOR_HANDLE dsv(
+			m_heapDsvDefault->GetCPUDescriptorHandleForHeapStart()
+		);
+		// レンダーターゲットの設定
+		m_commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+		// クリア
+		const float clearColor[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+		m_commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+		m_commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	}
+
+	// レンダーターゲット描画可能からピクセルシェーダーリソースへ
+	auto barrierToPixelShaderResource = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_renderTargets[RtTmp].Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+	);
+	command->ResourceBarrier(1, &barrierToPixelShaderResource);
+	
+	// フルスクリーン描画
+	m_fullScreenQuad.SetPipelineState(command.Get());
+	m_fullScreenQuad.SetGraphicsRootSignature(command.Get());
+	command->SetGraphicsRootDescriptorTable(0, m_rtViews[RtTmp]);
+	command->SetGraphicsRootDescriptorTable(1, m_sampler);
+	m_fullScreenQuad.Draw(command.Get());
+
+	// ピクセルシェーダーリソースからレンダーターゲット描画可能へ
+	auto barrierToRenderTarget = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_renderTargets[RtTmp].Get(),
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		D3D12_RESOURCE_STATE_RENDER_TARGET
+	);
+	command->ResourceBarrier(1, &barrierToRenderTarget);
 }
 
 App::ComPtr<ID3D12Resource1> App::CreateBuffer(UINT bufferSize, const void* initialData)

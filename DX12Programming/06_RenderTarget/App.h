@@ -3,6 +3,7 @@
 #include <D3D12/D3D12AppBase.h>
 #include <Model/ModelLoader.h>
 #include <Texture/Texture.h>
+#include <Util/FullScreenQuad.h>
 
 class App : public D3D12AppBase
 {
@@ -32,7 +33,7 @@ public:
 
 	enum
 	{
-		RtGrayScale,
+		RtTmp,
 		RtNum
 	};
 
@@ -87,11 +88,12 @@ private:
 
     std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_cbViews;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_sampler;
-	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_rtvViews;
-	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_rtSRViews;
+	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_rtViews;
 
     ComPtr<ID3DBlob> m_vs, m_ps;
 
     ComPtr<ID3D12RootSignature> m_rootSignature;
     ComPtr<ID3D12PipelineState> m_pipeline;
+
+	FullScreenQuad m_fullScreenQuad;
 };

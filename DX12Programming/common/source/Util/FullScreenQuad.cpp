@@ -4,6 +4,9 @@
 #include <stdexcept>
 #include "Util/D3D12Util.h"
 
+//-------------------------------------------------------------------------------------------------------------------
+// FullScreenQuad
+//-------------------------------------------------------------------------------------------------------------------
 FullScreenQuad::FullScreenQuad()
 {
 }
@@ -50,7 +53,7 @@ void FullScreenQuad::Setup(ID3D12Device* device, const SetupParam& param)
 			OutputDebugStringA(static_cast<const char*>(errBlob->GetBufferPointer()));
 		}
 
-		m_ps = param.ps;
+		m_ps = param.psBlob;
 		if (!m_ps)
 		{
 			hr = D3D12Util::CompileShaderFromFile(L"../assets/shader/FullScreenQuad_ps.hlsl", L"ps_6_0", m_ps, errBlob);
@@ -69,7 +72,7 @@ void FullScreenQuad::Setup(ID3D12Device* device, const SetupParam& param)
 
 	// RootSignature
 	{
-		auto signature = param.signature;
+		auto signature = param.rootSignatureBlob;
 		hr = device->CreateRootSignature(
 			0,
 			signature->GetBufferPointer(), signature->GetBufferSize(),
@@ -119,12 +122,18 @@ void FullScreenQuad::Setup(ID3D12Device* device, const SetupParam& param)
 	}
 }
 
+void FullScreenQuad::SetPipelineState(ID3D12GraphicsCommandList* commandList)
+{
+	commandList->SetPipelineState(m_pipeline.Get());
+}
+
+void FullScreenQuad::SetGraphicsRootSignature(ID3D12GraphicsCommandList* commandList)
+{
+	commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+}
+
 void FullScreenQuad::Draw(ID3D12GraphicsCommandList* commandList)
 {
-	// PSO
-	commandList->SetPipelineState(m_pipeline.Get());
-	// RootSignature
-	commandList->SetGraphicsRootSignature(m_rootSignature.Get());
 	// 頂点バッファ、インデックスバッファ
 	commandList->IASetVertexBuffers(0, 1, &m_vbView);
 	commandList->IASetIndexBuffer(&m_ibView);
@@ -132,4 +141,36 @@ void FullScreenQuad::Draw(ID3D12GraphicsCommandList* commandList)
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// 描画
 	commandList->DrawIndexedInstanced(3, 1, 0, 0, 0);
+}
+
+//-------------------------------------------------------------------------------------------------------------------
+// FullScreenQuad::SetupParam
+//-------------------------------------------------------------------------------------------------------------------
+void FullScreenQuad::SetupParam::SetupRootSignatureOneTexture(ID3D12Device* device)
+{
+	HRESULT hr;
+
+	// DescripterRange
+	CD3DX12_DESCRIPTOR_RANGE srv, sampler;
+	srv.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+	sampler.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER, 1, 0);
+
+	// RootParameter
+	CD3DX12_ROOT_PARAMETER rootParams[2];
+	rootParams[0].InitAsDescriptorTable(1, &srv, D3D12_SHADER_VISIBILITY_PIXEL);
+	rootParams[1].InitAsDescriptorTable(1, &sampler, D3D12_SHADER_VISIBILITY_PIXEL);
+
+	// RootSignature
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc{};
+	rootSigDesc.Init(
+		_countof(rootParams), rootParams,
+		0, nullptr,
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
+	);
+	ComPtr<ID3DBlob> errBlob;
+	hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootSignatureBlob, &errBlob);
+	if (FAILED(hr))
+	{
+		throw std::runtime_error("D3D12SerializeRootSignature faild.");
+	}
 }

@@ -201,11 +201,11 @@ void D3D12AppBase::Render()
     m_commandList->ResourceBarrier(1, &barrierToRT);
 
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(
-        m_heapRtv->GetCPUDescriptorHandleForHeapStart(),
+        m_heapRtvBackBuffer->GetCPUDescriptorHandleForHeapStart(),
         m_frameIndex, m_rtvDescriptorSize
     );
     CD3DX12_CPU_DESCRIPTOR_HANDLE dsv(
-        m_heapDsv->GetCPUDescriptorHandleForHeapStart()
+        m_heapDsvDefault->GetCPUDescriptorHandleForHeapStart()
     );
 
     // レンダーターゲットクリア
@@ -249,7 +249,7 @@ void D3D12AppBase::PrepareDescriptorHeaps()
         D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
         0
     };
-    hr = m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_heapRtv));
+    hr = m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_heapRtvBackBuffer));
     if (FAILED(hr))
     {
         throw std::runtime_error("Failed CreateDescriptorHeap(RTV)");
@@ -264,7 +264,7 @@ void D3D12AppBase::PrepareDescriptorHeaps()
         D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
         0
     };
-    hr = m_device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_heapDsv));
+    hr = m_device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_heapDsvDefault));
     if (FAILED(hr))
     {
         throw std::runtime_error("Failed CreateDescriptorHeap(DSv)");
@@ -274,7 +274,7 @@ void D3D12AppBase::PrepareDescriptorHeaps()
 void D3D12AppBase::PrepareRenderTargetView()
 {
     // スワップチェインイメージへのレンダーターゲットビュー生成
-    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_heapRtv->GetCPUDescriptorHandleForHeapStart());
+    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_heapRtvBackBuffer->GetCPUDescriptorHandleForHeapStart());
     for (UINT i = 0; i < FrameBufferCount; ++i)
     {
         m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_backBuffers[i]));
@@ -324,7 +324,7 @@ void D3D12AppBase::CreateDepthBuffer(int width, int height)
             0
         }
     };
-    CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_heapDsv->GetCPUDescriptorHandleForHeapStart());
+    CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_heapDsvDefault->GetCPUDescriptorHandleForHeapStart());
     m_device->CreateDepthStencilView(m_depthBuffer.Get(), &dsvDesc, dsvHandle);
 }
 
