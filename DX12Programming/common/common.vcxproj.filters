@@ -40,6 +40,9 @@
     <Filter Include="ソース ファイル\Texture">
       <UniqueIdentifier>{88bda843-6c56-4cef-afff-495fdf3ab49f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Util">
+      <UniqueIdentifier>{2d3c7754-4f54-42c5-83a8-9edb3f54ef68}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -63,9 +66,6 @@
     <ClInclude Include="include\Model\Polygon.h">
       <Filter>ヘッダー ファイル\Model</Filter>
     </ClInclude>
-    <ClInclude Include="include\Util\Util.h">
-      <Filter>ヘッダー ファイル\Util</Filter>
-    </ClInclude>
     <ClInclude Include="include\ThirdParty\stb\stb_image.h">
       <Filter>ヘッダー ファイル\ThirdParty\stb</Filter>
     </ClInclude>
@@ -74,6 +74,12 @@
     </ClInclude>
     <ClInclude Include="include\Texture\TextureLoader.h">
       <Filter>ヘッダー ファイル\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Util\FullScreenQuad.h">
+      <Filter>ヘッダー ファイル\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Util\D3D12Util.h">
+      <Filter>ヘッダー ファイル\Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -97,6 +103,12 @@
     </ClCompile>
     <ClCompile Include="source\Texture\TextureLoder.cpp">
       <Filter>ソース ファイル\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Util\FullScreenQuad.cpp">
+      <Filter>ソース ファイル\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Util\D3D12Util.cpp">
+      <Filter>ソース ファイル\Util</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

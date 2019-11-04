@@ -5,7 +5,7 @@
 class D3D12AppBase
 {
 public:
-    template <class T>
+    template <typename T>
     using ComPtr = Microsoft::WRL::ComPtr<T>;
 
     static const UINT FrameBufferCount = 2;    ///< バッファリング数

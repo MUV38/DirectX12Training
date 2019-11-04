@@ -20,11 +20,8 @@ public:
     void Draw(ID3D12GraphicsCommandList* commandList);
 
 private:
-    template <class T>
-    using ComPtr = Microsoft::WRL::ComPtr<T>;
-
-private:
-    Mesh::ComPtr<ID3D12Resource> CreateBuffer(ID3D12Device* device, size_t bufferSize, const void* initialData);
+	template <typename T>
+	using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 private:
     std::vector<Vertex> m_vertices;

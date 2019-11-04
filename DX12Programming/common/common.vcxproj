@@ -107,7 +107,8 @@
     <ClInclude Include="include\Texture\Texture.h" />
     <ClInclude Include="include\Texture\TextureLoader.h" />
     <ClInclude Include="include\ThirdParty\stb\stb_image.h" />
-    <ClInclude Include="include\Util\Util.h" />
+    <ClInclude Include="include\Util\FullScreenQuad.h" />
+    <ClInclude Include="include\Util\D3D12Util.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -121,6 +122,8 @@
     <ClCompile Include="source\Model\ModelLoader.cpp" />
     <ClCompile Include="source\Texture\Texture.cpp" />
     <ClCompile Include="source\Texture\TextureLoder.cpp" />
+    <ClCompile Include="source\Util\D3D12Util.cpp" />
+    <ClCompile Include="source\Util\FullScreenQuad.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
