@@ -8,8 +8,8 @@ public:
     template <class T>
     using ComPtr = Microsoft::WRL::ComPtr<T>;
 
-    const UINT FrameBufferCount = 2;    ///< バッファリング数
-    const UINT GpuWaitTimeout = (10 * 1000);    /// 10s
+    static const UINT FrameBufferCount = 2;    ///< バッファリング数
+    static const UINT GpuWaitTimeout = (10 * 1000);    /// 10s
 
 public:
     D3D12AppBase();
@@ -50,7 +50,7 @@ protected:
     UINT m_dsvDescriptorSize;
     UINT m_srvcbvDescriptorSize;
 
-    std::vector<ComPtr<ID3D12Resource>> m_renderTargets;
+    std::vector<ComPtr<ID3D12Resource>> m_backBuffers;
     ComPtr<ID3D12Resource1> m_depthBuffer;
 
     ComPtr<ID3D12GraphicsCommandList> m_commandList;

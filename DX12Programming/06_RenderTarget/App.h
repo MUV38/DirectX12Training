@@ -8,7 +8,7 @@ class App : public D3D12AppBase
 {
 public:
 	App();
-    ~App();
+	virtual ~App();
 
 public:
     struct ShaderParameters
@@ -18,13 +18,48 @@ public:
         DirectX::XMFLOAT4X4 mtxProj;
     };
 
-    enum
-    {
-		TextureSrvDescriptorBase = 0,
-		ConstantBufferDescriptorBase = 1,
+	enum
+	{
+		TexSrvAlbedo,
+		TexSrvNum
+	};
 
+	enum
+	{
+		CbvModel,
+		CbvNum
+	};
+
+	enum
+	{
+		RtGrayScale,
+		RtNum
+	};
+
+	enum
+	{
+		// ---CBV_SRV_UAV---
+		TexSrvDescriptorBase = 0,
+		TexSrvDescriptorEnd = TexSrvDescriptorBase + (TexSrvNum - 1),
+		
+		CbvDescriptorBase,
+		CbvDescriptorEnd = CbvDescriptorBase + (CbvNum * FrameBufferCount - 1),
+
+		RtSrvDescriptorBase,
+		RtSrvDescriptorEnd = RtSrvDescriptorBase + (RtNum - 1),
+
+		CBV_SRV_UAV_Num,
+		// ---End of CBV_SRV_UAV---
+
+		// ---Sampler---
         SamplerDescriptorBase = 0,
-    };
+		// ---End of Sampler---
+
+		// ---RTV---
+		RtvDescriptorBase = 0,
+		RtvDescriptorEnd = RtvDescriptorBase + (RtNum - 1),
+		// ---End of RTV---
+	};
 
 public:
     virtual void Prepare() override;
@@ -42,14 +77,18 @@ private:
     ModelLoader m_modelLoader;
 	Texture m_texture;
 
-	std::vector<ComPtr<ID3D12Resource1>> m_constantBuffers;
+	std::vector<ComPtr<ID3D12Resource>> m_constantBuffers;
+	std::vector<ComPtr<ID3D12Resource>> m_renderTargets;
 
     ComPtr<ID3D12DescriptorHeap> m_heapSrvCbv;
 	ComPtr<ID3D12DescriptorHeap> m_heapSampler;
+	ComPtr<ID3D12DescriptorHeap> m_heapRtv;
 	UINT m_samplerDescriptorSize;
 
     std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_cbViews;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_sampler;
+	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_rtvViews;
+	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_rtSRViews;
 
     ComPtr<ID3DBlob> m_vs, m_ps;
 

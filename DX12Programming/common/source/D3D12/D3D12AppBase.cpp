@@ -11,7 +11,7 @@ D3D12AppBase::D3D12AppBase()
     , m_dsvDescriptorSize(0)
     , m_frameIndex(0)
 {
-    m_renderTargets.resize(FrameBufferCount);
+	m_backBuffers.resize(FrameBufferCount);
     m_frameFenceValues.resize(FrameBufferCount);
 
     m_fenceWaitEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -194,7 +194,7 @@ void D3D12AppBase::Render()
 
     // スワップチェイン表示可能からレンダーターゲット描画可能へ
     auto barrierToRT = CD3DX12_RESOURCE_BARRIER::Transition(
-        m_renderTargets[m_frameIndex].Get(),
+		m_backBuffers[m_frameIndex].Get(),
         D3D12_RESOURCE_STATE_PRESENT,
         D3D12_RESOURCE_STATE_RENDER_TARGET
     );
@@ -221,7 +221,7 @@ void D3D12AppBase::Render()
 
     // レンダーターゲット描画可能からスワップチェイン表示可能へ
     auto barrierToPresent = CD3DX12_RESOURCE_BARRIER::Transition(
-        m_renderTargets[m_frameIndex].Get(),
+		m_backBuffers[m_frameIndex].Get(),
         D3D12_RESOURCE_STATE_RENDER_TARGET,
         D3D12_RESOURCE_STATE_PRESENT
     );
@@ -277,8 +277,8 @@ void D3D12AppBase::PrepareRenderTargetView()
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_heapRtv->GetCPUDescriptorHandleForHeapStart());
     for (UINT i = 0; i < FrameBufferCount; ++i)
     {
-        m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i]));
-        m_device->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, rtvHandle);
+        m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_backBuffers[i]));
+        m_device->CreateRenderTargetView(m_backBuffers[i].Get(), nullptr, rtvHandle);
 
         // 参照するディスクリプタの変更
         rtvHandle.Offset(1, m_rtvDescriptorSize);

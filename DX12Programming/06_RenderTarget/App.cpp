@@ -110,8 +110,8 @@ void App::Prepare()
     PrepareDescriptorHeapForModelApp();
 
     // ConstantBuffer/View.
-    m_constantBuffers.resize(FrameBufferCount);
-    m_cbViews.resize(FrameBufferCount);
+    m_constantBuffers.resize(CbvNum * FrameBufferCount);
+    m_cbViews.resize(CbvNum * FrameBufferCount);
     for (UINT i = 0; i < FrameBufferCount; ++i)
     {
         UINT bufferSize = sizeof(ShaderParameters) + 255 & ~255;
@@ -120,10 +120,11 @@ void App::Prepare()
         D3D12_CONSTANT_BUFFER_VIEW_DESC cbDesc{};
         cbDesc.BufferLocation = m_constantBuffers[i]->GetGPUVirtualAddress();
         cbDesc.SizeInBytes = bufferSize;
-        CD3DX12_CPU_DESCRIPTOR_HANDLE handleCBV(m_heapSrvCbv->GetCPUDescriptorHandleForHeapStart(), ConstantBufferDescriptorBase + i, m_srvcbvDescriptorSize);
-        m_device->CreateConstantBufferView(&cbDesc, handleCBV);
 
-        m_cbViews[i] = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetGPUDescriptorHandleForHeapStart(), ConstantBufferDescriptorBase + i, m_srvcbvDescriptorSize);
+		INT handleOffset = CbvDescriptorBase + CbvModel * FrameBufferCount;
+        CD3DX12_CPU_DESCRIPTOR_HANDLE handleCBV(m_heapSrvCbv->GetCPUDescriptorHandleForHeapStart(), handleOffset + i, m_srvcbvDescriptorSize);
+		m_device->CreateConstantBufferView(&cbDesc, handleCBV);
+        m_cbViews[i] = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetGPUDescriptorHandleForHeapStart(), handleOffset + i, m_srvcbvDescriptorSize);
     }
 
 	// sampler.
@@ -151,13 +152,78 @@ void App::Prepare()
 		m_sampler = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSampler->GetGPUDescriptorHandleForHeapStart(), SamplerDescriptorBase, m_samplerDescriptorSize);
 	}
 
+	// Render Target
+	{
+		m_renderTargets.resize(RtNum);
+		m_rtvViews.resize(RtNum);
+		m_rtSRViews.resize(RtNum);
+		
+		// RtvGrayScale
+		{
+			// resource
+			ComPtr<ID3D12Resource1> resource;
+			DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			CD3DX12_RESOURCE_DESC resDesc(
+				D3D12_RESOURCE_DIMENSION_TEXTURE2D,
+				0,
+				static_cast<UINT>(m_viewport.Width),
+				static_cast<UINT>(m_viewport.Height),
+				1,
+				1,
+				format,
+				1,
+				0,
+				D3D12_TEXTURE_LAYOUT_UNKNOWN,
+				D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE
+			);
+			D3D12_CLEAR_VALUE clearValue;
+			{
+				FLOAT color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+				memcpy(&clearValue.Color, color, sizeof(FLOAT) * 4);
+				clearValue.Format = format;
+			}
+
+			m_device->CreateCommittedResource(
+				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+				D3D12_HEAP_FLAG_NONE,
+				&resDesc,
+				D3D12_RESOURCE_STATE_RENDER_TARGET,
+				&clearValue,
+				IID_PPV_ARGS(resource.GetAddressOf())
+			);
+			m_renderTargets[RtGrayScale] = resource;
+			// RTV
+			INT rtvHandleOffset = RtvDescriptorBase + RtGrayScale;
+			D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heapRtv->GetCPUDescriptorHandleForHeapStart(), rtvHandleOffset, m_rtvDescriptorSize);
+			D3D12_RENDER_TARGET_VIEW_DESC rtViewDesc = {};
+			{
+				rtViewDesc.Format = format;
+				rtViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+			}
+			m_device->CreateRenderTargetView(resource.Get(), &rtViewDesc, rtvCpuHandle);
+			m_rtvViews[RtGrayScale] = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapRtv->GetGPUDescriptorHandleForHeapStart(), rtvHandleOffset, m_rtvDescriptorSize);
+			// SRV
+			INT srvHandleOffset = RtSrvDescriptorBase + RtGrayScale;
+			auto srvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetCPUDescriptorHandleForHeapStart(), srvHandleOffset, m_srvcbvDescriptorSize);
+			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+			{
+				srvDesc.Texture2D.MipLevels = 1;
+				srvDesc.Format = format;
+				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+				srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			}
+			m_device->CreateShaderResourceView(resource.Get(), &srvDesc, srvHandle);
+			m_rtSRViews[RtGrayScale] = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetGPUDescriptorHandleForHeapStart(), srvHandleOffset, m_srvcbvDescriptorSize);
+		}
+	}
+
 	// テクスチャ読み込み
 	{
 		hr = TextureLoader::LoadDDS(
 			m_device.Get(),
 			L"../assets/textures/antique/antique_albedo.dds",
 			m_heapSrvCbv.Get(),
-			TextureSrvDescriptorBase,
+			TexSrvDescriptorBase + TexSrvAlbedo,
 			m_srvcbvDescriptorSize,
 			m_commandAllocators[m_frameIndex].Get(),
 			m_commandQueue.Get(),
@@ -260,16 +326,16 @@ App::ComPtr<ID3D12Resource1> App::CreateBuffer(UINT bufferSize, const void* init
 
 void App::PrepareDescriptorHeapForModelApp()
 {
-    // ディスクリプターヒープ
-    UINT count = FrameBufferCount + 1;
-    D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{
-        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-        count,
-        D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
-        0
-    };
-    m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_heapSrvCbv));
-    m_srvcbvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	// ディスクリプターヒープ
+	UINT count = CBV_SRV_UAV_Num;
+	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{
+		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+		count,
+		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+		0
+	};
+	m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_heapSrvCbv));
+	m_srvcbvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	// ダイナミックサンプラーのディスクリプターヒープ
 	D3D12_DESCRIPTOR_HEAP_DESC samplerHeapDesc{
@@ -280,4 +346,14 @@ void App::PrepareDescriptorHeapForModelApp()
 	};
 	m_device->CreateDescriptorHeap(&samplerHeapDesc, IID_PPV_ARGS(&m_heapSampler));
 	m_samplerDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+
+	// RTVのディスクリプターヒープ
+	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{
+		D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+		RtNum,
+		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+		0
+	};
+	m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_heapRtv));
+	m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 }
