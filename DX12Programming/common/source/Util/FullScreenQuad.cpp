@@ -18,10 +18,11 @@ void FullScreenQuad::Setup(ID3D12Device* device, const SetupParam& param)
 
 	// 頂点バッファ、インデックスバッファ作成
 	{
+		// reference: https://rootllama.wordpress.com/2015/02/12/drawing-a-full-screen-quad/
 		const Vertex vertices[] = {
-			{ { -1.0f,  1.0f, 0.5f }, { -1.0f,  1.0f } },
-			{ { -1.0f, -3.0f, 0.5f }, { -1.0f, -3.0f } },
-			{ {  3.0f,  1.0f, 0.5f }, { -1.0f,  3.0f } },
+			{ { -1.0f,  1.0f, 0.5f }, { 0.0f, 0.0f } },
+			{ {  3.0f,  1.0f, 0.5f }, { 2.0f, 0.0f } },
+			{ { -1.0f, -3.0f, 0.5f }, { 0.0f, 2.0f } },
 		};
 		const size_t numVertex = _countof(vertices);
 
@@ -37,7 +38,7 @@ void FullScreenQuad::Setup(ID3D12Device* device, const SetupParam& param)
 		m_vbView.StrideInBytes = sizeof(Vertex);
 		m_ibView.BufferLocation = m_ib->GetGPUVirtualAddress();
 		m_ibView.SizeInBytes = static_cast<UINT>(sizeof(Index) * numIndex);
-		m_ibView.Format = DXGI_FORMAT_R32_UINT;
+		m_ibView.Format = DXGI_FORMAT_R16_UINT;
 	}
 
 	// シェーダー
