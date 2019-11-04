@@ -1,6 +1,11 @@
 #include "pch.h"
 #include "Util/D3D12Util.h"
 
+#include <fstream>
+#include <exception>
+#include <stdexcept>
+#include <experimental/filesystem>
+
 namespace D3D12Util {
 
 template <typename T>
@@ -32,6 +37,69 @@ ComPtr<ID3D12Resource> CreateBuffer(ID3D12Device* device, size_t bufferSize, con
 	}
 
 	return buffer;
+}
+
+/// シェーダーコンパイル
+HRESULT CompileShaderFromFile(const std::wstring& filePath, const std::wstring& profile, ComPtr<ID3DBlob>& shaderBlob, ComPtr<ID3DBlob>& errorBlob)
+{
+	using namespace std::experimental::filesystem;
+
+	path path(filePath);
+	std::ifstream infile(path);
+	std::vector <char> srcData;
+	if (!infile)
+	{
+		throw std::runtime_error("Shader not found.");
+	}
+	srcData.resize(uint32_t(infile.seekg(0, infile.end).tellg()));
+	infile.seekg(0, infile.beg).read(srcData.data(), srcData.size());
+
+	// DXCによるコンパイル
+	ComPtr<IDxcLibrary> library;
+	ComPtr<IDxcCompiler> compiler;
+	ComPtr<IDxcBlobEncoding> source;
+	ComPtr<IDxcOperationResult> dxcResult;
+
+	DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));
+	library->CreateBlobWithEncodingFromPinned(srcData.data(), UINT(srcData.size()), CP_ACP, &source);
+	DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler));
+
+	LPCWSTR compilerFlags[] = {
+#if _DEBUG
+		L"/Zi", L"/O0",
+#else 
+		L"/O2" // リリースでは最適化
+#endif
+	};
+	compiler->Compile(
+		source.Get(),
+		path.wstring().c_str(),
+		L"main",
+		profile.c_str(),
+		compilerFlags,
+		_countof(compilerFlags),
+		nullptr,
+		0,
+		nullptr,
+		&dxcResult
+	);
+
+	HRESULT hr;
+	dxcResult->GetStatus(&hr);
+	if (SUCCEEDED(hr))
+	{
+		dxcResult->GetResult(
+			reinterpret_cast<IDxcBlob * *>(shaderBlob.GetAddressOf())
+		);
+	}
+	else
+	{
+		dxcResult->GetErrorBuffer(
+			reinterpret_cast<IDxcBlobEncoding * *>(errorBlob.GetAddressOf())
+		);
+	}
+
+	return hr;
 }
 
 } // namespace D3D12Util

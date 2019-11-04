@@ -43,6 +43,9 @@
     <Filter Include="ソース ファイル\Util">
       <UniqueIdentifier>{2d3c7754-4f54-42c5-83a8-9edb3f54ef68}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{5e13fe63-f59b-433e-81f3-b953a5c5d829}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -110,5 +113,13 @@
     <ClCompile Include="source\Util\D3D12Util.cpp">
       <Filter>ソース ファイル\Util</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\assets\shader\FullScreenQuad_vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\assets\shader\FullScreenQuad_ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -104,7 +104,7 @@ HRESULT TextureLoader::LoadDDS(
 		auto srvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(heap->GetCPUDescriptorHandleForHeapStart(), offsetInDescriptors, descriptorIncrementSize);
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 		{
-			srvDesc.Texture2D.MipLevels = metadata.mipLevels;
+			srvDesc.Texture2D.MipLevels = static_cast<UINT>(metadata.mipLevels);
 			srvDesc.Format = metadata.format;
 			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 			srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;

@@ -4,6 +4,7 @@
 #undef max
 
 #include <stdexcept>
+#include <Util/D3D12Util.h>
 
 ModelApp::ModelApp()
 {
@@ -21,12 +22,12 @@ void ModelApp::Prepare()
     // シェーダーをコンパイル.
     HRESULT hr;
     ComPtr<ID3DBlob> errBlob;
-    hr = CompileShaderFromFile(L"VertexShader.hlsl", L"vs_6_0", m_vs, errBlob);
+    hr = D3D12Util::CompileShaderFromFile(L"VertexShader.hlsl", L"vs_6_0", m_vs, errBlob);
     if (FAILED(hr))
     {
         OutputDebugStringA(static_cast<const char*>(errBlob->GetBufferPointer()));
     }
-    hr = CompileShaderFromFile(L"PixelShader.hlsl", L"ps_6_0", m_ps, errBlob);
+    hr = D3D12Util::CompileShaderFromFile(L"PixelShader.hlsl", L"ps_6_0", m_ps, errBlob);
     if (FAILED(hr))
     {
         OutputDebugStringA(static_cast<const char*>(errBlob->GetBufferPointer()));

@@ -32,12 +32,6 @@ protected:
     void CreateCommandAllocators();
     void CreateFrameFences();
     void WaitPreviousFrame();
-    HRESULT CompileShaderFromFile(
-        const std::wstring& fileName, 
-        const std::wstring& profile, 
-        ComPtr<ID3DBlob>& shaderBlob, 
-        ComPtr<ID3DBlob>& errorBlob
-    );
 
 protected:
     ComPtr<ID3D12Device> m_device;
