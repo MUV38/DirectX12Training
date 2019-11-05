@@ -46,6 +46,12 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{5e13fe63-f59b-433e-81f3-b953a5c5d829}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\RenderTarget">
+      <UniqueIdentifier>{ee87b7da-233b-4e16-840a-e7baaa539f4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\RenderTarget">
+      <UniqueIdentifier>{a162575d-5a6f-43ab-9bf4-01e81728d3da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -84,6 +90,9 @@
     <ClInclude Include="include\Util\D3D12Util.h">
       <Filter>ヘッダー ファイル\Util</Filter>
     </ClInclude>
+    <ClInclude Include="include\RenderTarget\RenderTarget.h">
+      <Filter>ヘッダー ファイル\RenderTarget</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -112,6 +121,9 @@
     </ClCompile>
     <ClCompile Include="source\Util\D3D12Util.cpp">
       <Filter>ソース ファイル\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="source\RenderTarget\RenderTarget.cpp">
+      <Filter>ソース ファイル\RenderTarget</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
