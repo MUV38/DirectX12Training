@@ -343,10 +343,10 @@ void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
 		command->SetComputeRootSignature(m_computeRootSignature.Get());
 		command->SetComputeRootDescriptorTable(0, m_rtTmp.GetUnorderedAccessView());
 
-		const int THREAD_X = 16;
-		const int THREAD_Y = 16;
-		int threadGroupCountX = m_viewport.Width / THREAD_X;
-		int threadGroupCountY = m_viewport.Height / THREAD_Y;
+		const UINT THREAD_X = 16;
+		const UINT THREAD_Y = 16;
+		UINT threadGroupCountX = static_cast<UINT>(m_viewport.Width) / THREAD_X;
+		UINT threadGroupCountY = static_cast<UINT>(m_viewport.Height) / THREAD_Y;
 		command->Dispatch(threadGroupCountX, threadGroupCountY, 1);
 	}
 
@@ -378,7 +378,7 @@ void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
 	m_fullScreenQuad.Draw(command.Get());
 
 	// レンダーターゲット描画可能へ
-	m_rtTmp.SetResourceBarrier(command.Get(), RenderTarget::ResourceBarrierType::PixelShaderResource);
+	m_rtTmp.SetResourceBarrier(command.Get(), RenderTarget::ResourceBarrierType::RenderTarget);
 }
 
 App::ComPtr<ID3D12Resource1> App::CreateBuffer(UINT bufferSize, const void* initialData)

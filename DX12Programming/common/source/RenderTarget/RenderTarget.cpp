@@ -125,6 +125,8 @@ void RenderTarget::SetResourceBarrier(ID3D12GraphicsCommandList* commandList, Re
 		nextState
 	);
 	commandList->ResourceBarrier(1, &resourceBarrier);
+
+	m_resourceBarrierType = type;
 }
 
 // リソースステート取得
