@@ -4,6 +4,7 @@
 #include <Model/ModelLoader.h>
 #include <Texture/Texture.h>
 #include <Util/FullScreenQuad.h>
+#include <RenderTarget/RenderTarget.h>
 
 class App : public D3D12AppBase
 {
@@ -49,6 +50,9 @@ public:
 		RtSrvDescriptorBase,
 		RtSrvDescriptorEnd = RtSrvDescriptorBase + (RtNum - 1),
 
+		RtUavDescriptorBase,
+		RtUavDescriptorEnd = RtUavDescriptorBase + (RtNum - 1),
+
 		CBV_SRV_UAV_Num,
 		// ---End of CBV_SRV_UAV---
 
@@ -79,7 +83,6 @@ private:
 	Texture m_texture;
 
 	std::vector<ComPtr<ID3D12Resource>> m_constantBuffers;
-	std::vector<ComPtr<ID3D12Resource>> m_renderTargets;
 
     ComPtr<ID3D12DescriptorHeap> m_heapSrvCbv;
 	ComPtr<ID3D12DescriptorHeap> m_heapSampler;
@@ -88,12 +91,16 @@ private:
 
     std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_cbViews;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_sampler;
-	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_rtViews;
 
-    ComPtr<ID3DBlob> m_vs, m_ps;
+    ComPtr<ID3DBlob> m_vs, m_ps, m_cs;
 
     ComPtr<ID3D12RootSignature> m_rootSignature;
     ComPtr<ID3D12PipelineState> m_pipeline;
 
 	FullScreenQuad m_fullScreenQuad;
+
+	ComPtr<ID3D12RootSignature> m_computeRootSignature;
+	ComPtr<ID3D12PipelineState> m_computePipeline;
+
+	RenderTarget m_rtTmp;
 };

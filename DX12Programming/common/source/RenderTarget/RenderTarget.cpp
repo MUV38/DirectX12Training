@@ -18,6 +18,8 @@ void RenderTarget::Setup(ID3D12Device* device, const SetupParam& param)
 
 	// resource
 	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+	if (param.uavOffset >= 0) { flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS; }
 	CD3DX12_RESOURCE_DESC resDesc(
 		D3D12_RESOURCE_DIMENSION_TEXTURE2D,
 		0,
@@ -29,7 +31,7 @@ void RenderTarget::Setup(ID3D12Device* device, const SetupParam& param)
 		1,
 		0,
 		D3D12_TEXTURE_LAYOUT_UNKNOWN,
-		D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET
+		flags
 	);
 	D3D12_CLEAR_VALUE clearValue;
 	{
@@ -62,12 +64,14 @@ void RenderTarget::Setup(ID3D12Device* device, const SetupParam& param)
 		rtViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 	}
 	device->CreateRenderTargetView(m_resource.Get(), &rtViewDesc, rtvCpuHandle);
+
+	UINT cbvSrvUavHeapIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
 	// SRV
-	UINT srvHeapIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	auto srvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		param.srvHeap->GetCPUDescriptorHandleForHeapStart(), 
+		param.srvUavHeap->GetCPUDescriptorHandleForHeapStart(),
 		param.srvOffset, 
-		srvHeapIncrementSize
+		cbvSrvUavHeapIncrementSize
 	);
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	{
@@ -77,11 +81,33 @@ void RenderTarget::Setup(ID3D12Device* device, const SetupParam& param)
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	}
 	device->CreateShaderResourceView(m_resource.Get(), &srvDesc, srvHandle);
-	m_view = CD3DX12_GPU_DESCRIPTOR_HANDLE(
-		param.srvHeap->GetGPUDescriptorHandleForHeapStart(),
+	m_srv = CD3DX12_GPU_DESCRIPTOR_HANDLE(
+		param.srvUavHeap->GetGPUDescriptorHandleForHeapStart(),
 		param.srvOffset,
-		srvHeapIncrementSize
+		cbvSrvUavHeapIncrementSize
 	);
+	// UAV
+	if (param.uavOffset >= 0)
+	{
+		auto uavHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			param.srvUavHeap->GetCPUDescriptorHandleForHeapStart(),
+			param.uavOffset,
+			cbvSrvUavHeapIncrementSize
+		);
+		D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
+		{
+			uavDesc.Format = param.format;
+			uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+		}
+		device->CreateUnorderedAccessView(m_resource.Get(), nullptr, &uavDesc, uavHandle);
+		m_uav = CD3DX12_GPU_DESCRIPTOR_HANDLE(
+			param.srvUavHeap->GetGPUDescriptorHandleForHeapStart(),
+			param.uavOffset,
+			cbvSrvUavHeapIncrementSize
+		);
+	}
+
+	m_resourceBarrierType = ResourceBarrierType::RenderTarget;
 }
 
 // リソースバリア設置
