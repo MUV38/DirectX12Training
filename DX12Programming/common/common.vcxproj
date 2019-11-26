@@ -62,7 +62,7 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)ThirdParty\assimp\include;$(SolutionDir)packages\directxtex_desktop_win10.2019.5.31.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)ThirdParty\assimp\include;$(SolutionDir)ThirdParty\imgui;$(SolutionDir)packages\directxtex_desktop_win10.2019.5.31.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -84,7 +84,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)source;$(SolutionDir)ThirdParty\assimp\include;$(SolutionDir)packages\directxtex_desktop_win10.2019.5.31.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)ThirdParty\assimp\include;$(SolutionDir)ThirdParty\imgui;$(SolutionDir)packages\directxtex_desktop_win10.2019.5.31.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -101,6 +101,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="include\D3D12\D3D12AppBase.h" />
     <ClInclude Include="include\D3D12\d3dx12.h" />
+    <ClInclude Include="include\ImGui\ImGuiImpl.h" />
     <ClInclude Include="include\Model\Mesh.h" />
     <ClInclude Include="include\Model\ModelLoader.h" />
     <ClInclude Include="include\Model\Polygon.h" />
@@ -119,6 +120,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="source\D3D12\D3D12AppBase.cpp" />
+    <ClCompile Include="source\ImGui\ImGuiImpl.cpp" />
     <ClCompile Include="source\Model\Mesh.cpp" />
     <ClCompile Include="source\Model\ModelLoader.cpp" />
     <ClCompile Include="source\RenderTarget\RenderTarget.cpp" />

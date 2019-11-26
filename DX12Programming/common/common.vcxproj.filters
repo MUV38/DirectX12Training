@@ -52,6 +52,12 @@
     <Filter Include="ソース ファイル\RenderTarget">
       <UniqueIdentifier>{a162575d-5a6f-43ab-9bf4-01e81728d3da}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\ImGui">
+      <UniqueIdentifier>{b04bfe5a-16a2-473f-9ea7-e9882d3eb959}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\ImGui">
+      <UniqueIdentifier>{0e611858-2cd4-4ea8-ad72-adcb207b94d4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -93,6 +99,9 @@
     <ClInclude Include="include\RenderTarget\RenderTarget.h">
       <Filter>ヘッダー ファイル\RenderTarget</Filter>
     </ClInclude>
+    <ClInclude Include="include\ImGui\ImGuiImpl.h">
+      <Filter>ヘッダー ファイル\ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -124,6 +133,9 @@
     </ClCompile>
     <ClCompile Include="source\RenderTarget\RenderTarget.cpp">
       <Filter>ソース ファイル\RenderTarget</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ImGui\ImGuiImpl.cpp">
+      <Filter>ソース ファイル\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
