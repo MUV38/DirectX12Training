@@ -34,6 +34,11 @@ public:
 	 */
 	void Free(const DescriptorHandle descriptorHandle);
 
+	/**
+	 * @brief ƒq[ƒvæ“¾
+	 */
+	ID3D12DescriptorHeap* GetHeap() const { return m_heap.Get(); }
+
 private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_heap;
 	UINT m_numDescriptors;

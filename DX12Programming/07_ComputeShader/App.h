@@ -38,45 +38,10 @@ public:
 		RtNum
 	};
 
-	enum
-	{
-		// ---CBV_SRV_UAV---
-		TexSrvDescriptorBase = 0,
-		TexSrvDescriptorEnd = TexSrvDescriptorBase + (TexSrvNum - 1),
-		
-		CbvDescriptorBase,
-		CbvDescriptorEnd = CbvDescriptorBase + (CbvNum * FrameBufferCount - 1),
-
-		RtSrvDescriptorBase,
-		RtSrvDescriptorEnd = RtSrvDescriptorBase + (RtNum - 1),
-
-		RtUavDescriptorBase,
-		RtUavDescriptorEnd = RtUavDescriptorBase + (RtNum - 1),
-
-		CBV_SRV_UAV_Num,
-		// ---End of CBV_SRV_UAV---
-
-		// ---Sampler---
-        SamplerDescriptorBase = 0,
-		// ---End of Sampler---
-
-		// ---RTV---
-		RtvDescriptorBase = 0,
-		RtvDescriptorEnd = RtvDescriptorBase + (RtNum - 1),
-		// ---End of RTV---
-	};
-
 public:
     virtual void Prepare() override;
     virtual void Cleanup() override;
     virtual void MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command) override;
-
-private:
-    /// バッファの作成
-    ComPtr<ID3D12Resource1> CreateBuffer(UINT bufferSize, const void* initialData);
-
-    /// ディスクリプタヒープのセットアップ
-    void PrepareDescriptorHeapForModelApp();
 
 private:
     ModelLoader m_modelLoader;
@@ -84,13 +49,8 @@ private:
 
 	std::vector<ComPtr<ID3D12Resource>> m_constantBuffers;
 
-    ComPtr<ID3D12DescriptorHeap> m_heapSrvCbv;
-	ComPtr<ID3D12DescriptorHeap> m_heapSampler;
-	ComPtr<ID3D12DescriptorHeap> m_heapRtv;
-	UINT m_samplerDescriptorSize;
-
-    std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_cbViews;
-	D3D12_GPU_DESCRIPTOR_HANDLE m_sampler;
+    std::vector<DescriptorHandle> m_cbViews;
+	DescriptorHandle m_sampler;
 
     ComPtr<ID3DBlob> m_vs, m_ps, m_cs;
 

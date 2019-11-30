@@ -32,8 +32,11 @@ ComPtr<ID3D12Resource> CreateBuffer(ID3D12Device* device, size_t bufferSize, con
 		void* mapped;
 		CD3DX12_RANGE range(0, 0);
 		hr = buffer->Map(0, &range, &mapped);
-		memcpy(mapped, initialData, bufferSize);
-		buffer->Unmap(0, nullptr);
+		if (SUCCEEDED(hr))
+		{
+			memcpy(mapped, initialData, bufferSize);
+			buffer->Unmap(0, nullptr);
+		}
 	}
 
 	return buffer;

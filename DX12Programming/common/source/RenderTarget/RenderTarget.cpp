@@ -19,7 +19,7 @@ void RenderTarget::Setup(ID3D12Device* device, const SetupParam& param)
 	// resource
 	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-	if (param.uavOffset >= 0) { flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS; }
+	if (param.allowUav) { flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS; }
 	CD3DX12_RESOURCE_DESC resDesc(
 		D3D12_RESOURCE_DIMENSION_TEXTURE2D,
 		0,
@@ -53,26 +53,18 @@ void RenderTarget::Setup(ID3D12Device* device, const SetupParam& param)
 		throw std::runtime_error("RenderTarget CreateCommittedResource failed");
 	}
 	// RTV
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		param.rtvHeap->GetCPUDescriptorHandleForHeapStart(),
-		param.rtvOffset, 
-		device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV)
-	);
+	m_rtv = param.rtvDescriptorPool->Alloc();
 	D3D12_RENDER_TARGET_VIEW_DESC rtViewDesc = {};
 	{
 		rtViewDesc.Format = format;
 		rtViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 	}
-	device->CreateRenderTargetView(m_resource.Get(), &rtViewDesc, rtvCpuHandle);
+	device->CreateRenderTargetView(m_resource.Get(), &rtViewDesc, m_rtv.GetCPUHandle());
 
 	UINT cbvSrvUavHeapIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	// SRV
-	auto srvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		param.srvUavHeap->GetCPUDescriptorHandleForHeapStart(),
-		param.srvOffset, 
-		cbvSrvUavHeapIncrementSize
-	);
+	m_srv = param.cbvSrvUavDescriptorPool->Alloc();
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	{
 		srvDesc.Texture2D.MipLevels = resDesc.MipLevels;
@@ -80,31 +72,17 @@ void RenderTarget::Setup(ID3D12Device* device, const SetupParam& param)
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	}
-	device->CreateShaderResourceView(m_resource.Get(), &srvDesc, srvHandle);
-	m_srv = CD3DX12_GPU_DESCRIPTOR_HANDLE(
-		param.srvUavHeap->GetGPUDescriptorHandleForHeapStart(),
-		param.srvOffset,
-		cbvSrvUavHeapIncrementSize
-	);
+	device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_srv.GetCPUHandle());
 	// UAV
-	if (param.uavOffset >= 0)
+	if (param.allowUav)
 	{
-		auto uavHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-			param.srvUavHeap->GetCPUDescriptorHandleForHeapStart(),
-			param.uavOffset,
-			cbvSrvUavHeapIncrementSize
-		);
+		m_uav = param.cbvSrvUavDescriptorPool->Alloc();
 		D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
 		{
 			uavDesc.Format = param.format;
 			uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 		}
-		device->CreateUnorderedAccessView(m_resource.Get(), nullptr, &uavDesc, uavHandle);
-		m_uav = CD3DX12_GPU_DESCRIPTOR_HANDLE(
-			param.srvUavHeap->GetGPUDescriptorHandleForHeapStart(),
-			param.uavOffset,
-			cbvSrvUavHeapIncrementSize
-		);
+		device->CreateUnorderedAccessView(m_resource.Get(), nullptr, &uavDesc, m_uav.GetCPUHandle());
 	}
 
 	m_resourceBarrierType = ResourceBarrierType::RenderTarget;

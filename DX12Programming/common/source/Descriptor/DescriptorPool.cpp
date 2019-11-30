@@ -12,6 +12,7 @@ DescriptorPool::DescriptorPool()
 
 DescriptorPool::~DescriptorPool()
 {
+	Release();
 }
 
 // ‰Šú‰»

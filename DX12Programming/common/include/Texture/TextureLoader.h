@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../framework.h"
+#include "Descriptor/DescriptorPool.h"
 
 class Texture;
 
@@ -14,7 +15,7 @@ public:
 	 * @brief DDS読み込み
 	 * @param [in] device デバイス
 	 * @param [in] filePath ファイルパス
-	 * @param [in] heap デスクリプターヒープ
+	 * @param [in] descriptorPool デスクリプタープール
 	 * @param [in] offsetInDescriptors デスクリプターオフセット
 	 * @param [in] descriptorIncrementSize デスクリプターのインクリメントサイズ
 	 * @param [in] commandAllocator コマンドアロケーター
@@ -24,9 +25,7 @@ public:
 	static HRESULT LoadDDS(
 		ID3D12Device* device, 
 		const wchar_t* filePath, 
-		ID3D12DescriptorHeap* heap, 
-		INT offsetInDescriptors, 
-		UINT descriptorIncrementSize, 
+		DescriptorPool* descriptorPool,
 		ID3D12CommandAllocator* commandAlocator,
 		ID3D12CommandQueue* commandQueue,
 		Texture* texture

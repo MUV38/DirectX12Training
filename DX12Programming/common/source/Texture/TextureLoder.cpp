@@ -10,16 +10,13 @@ using namespace Microsoft::WRL;
 HRESULT TextureLoader::LoadDDS(
 	ID3D12Device* device, 
 	const wchar_t* filePath,
-	ID3D12DescriptorHeap* heap, 
-	INT offsetInDescriptors, 
-	UINT descriptorIncrementSize,
+	DescriptorPool* descriptorPool,
 	ID3D12CommandAllocator* commandAlocator,
 	ID3D12CommandQueue* commandQueue,
 	Texture* texture
 )
 {
 	if (!device) { return E_FAIL; }
-	if (!heap) { return E_FAIL; }
 	if (!texture) { return E_FAIL; }
 
 	ComPtr<ID3D12Resource> resource = nullptr;
@@ -99,25 +96,20 @@ HRESULT TextureLoader::LoadDDS(
 		Sleep(1);
 	}
 
+	// handle
+	auto srvHandle = descriptorPool->Alloc();
 	// texture srv.
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	{
-		auto srvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(heap->GetCPUDescriptorHandleForHeapStart(), offsetInDescriptors, descriptorIncrementSize);
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-		{
-			srvDesc.Texture2D.MipLevels = static_cast<UINT>(metadata.mipLevels);
-			srvDesc.Format = metadata.format;
-			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-			srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		}
-		device->CreateShaderResourceView(resource.Get(), &srvDesc, srvHandle);
-		srv = CD3DX12_GPU_DESCRIPTOR_HANDLE(heap->GetGPUDescriptorHandleForHeapStart(), offsetInDescriptors, descriptorIncrementSize);
+		srvDesc.Texture2D.MipLevels = static_cast<UINT>(metadata.mipLevels);
+		srvDesc.Format = metadata.format;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	}
+	device->CreateShaderResourceView(resource.Get(), &srvDesc, srvHandle.GetCPUHandle());
 
-	// 出力に格納
-	{
-		texture->SetResource(resource.Get());
-		texture->SetShaderResourceView(srv);
-	}
+	// テクスチャ初期化
+	texture->Init(resource.Get(), descriptorPool, srvHandle);
 
 	return hr;
 }

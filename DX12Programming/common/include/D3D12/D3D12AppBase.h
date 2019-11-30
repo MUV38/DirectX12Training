@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../framework.h"
+#include "Descriptor/DescriptorManager.h"
 
 class D3D12AppBase
 {
@@ -38,14 +39,8 @@ protected:
     ComPtr<ID3D12CommandQueue> m_commandQueue;
     ComPtr<IDXGISwapChain4> m_swapChain;
 
-    ComPtr<ID3D12DescriptorHeap> m_heapRtvBackBuffer;
-    ComPtr<ID3D12DescriptorHeap> m_heapDsvDefault;
-    UINT m_rtvDescriptorSize;
-    UINT m_dsvDescriptorSize;
-    UINT m_srvcbvDescriptorSize;
-
-    std::vector<ComPtr<ID3D12Resource>> m_backBuffers;
-    ComPtr<ID3D12Resource1> m_depthBuffer;
+    std::vector<ComPtr<ID3D12Resource>> m_backBufferRenderTargets;
+	ComPtr<ID3D12Resource> m_depthBuffer;
 
     ComPtr<ID3D12GraphicsCommandList> m_commandList;
     std::vector<ComPtr<ID3D12CommandAllocator>> m_commandAllocators;
@@ -58,4 +53,8 @@ protected:
 
     CD3DX12_VIEWPORT  m_viewport;
     CD3DX12_RECT m_scissorRect;
+
+	DescriptorManager m_descriptorManager;
+	DescriptorHandle m_backBufferRtvDescriptorHandle[FrameBufferCount];
+	DescriptorHandle m_backBufferDsvDescriptorHandle;
 };

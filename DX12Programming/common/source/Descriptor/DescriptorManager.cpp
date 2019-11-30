@@ -67,7 +67,7 @@ bool DescriptorManager::Init(ID3D12Device* device, UINT numCbvSrvUavPool, UINT n
 		}
 	}
 
-	return false;
+	return true;
 }
 
 // ‰ð•ú

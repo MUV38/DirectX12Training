@@ -46,6 +46,11 @@ public:
 	 */
 	void Free(DescriptorPoolType type, const DescriptorHandle& handle);
 
+	/**
+	 * @brief デスクリプタープール取得
+	 */
+	DescriptorPool* GetDescriptorPool(DescriptorPoolType type) { return &m_descriptorPool[static_cast<int>(type)]; }
+
 private:
 	DescriptorPool m_descriptorPool[NumDescriptorPoolType];
 };

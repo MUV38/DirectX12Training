@@ -18,12 +18,11 @@ public:
         DirectX::XMFLOAT4X4 mtxProj;
     };
 
-    enum
-    {
-        ConstantBufferDescriptorBase = 0,
-
-        SamplerDescriptorBase = 0,
-    };
+	enum
+	{
+		CbvModel,
+		CbvNum
+	};
 
 public:
     virtual void Prepare() override;
@@ -31,20 +30,10 @@ public:
     virtual void MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command) override;
 
 private:
-    /// バッファの作成
-    ComPtr<ID3D12Resource1> CreateBuffer(UINT bufferSize, const void* initialData);
-
-    /// ディスクリプタヒープのセットアップ
-    void PrepareDescriptorHeapForModelApp();
-
-private:
     ModelLoader m_modelLoader;
 
-    ComPtr<ID3D12DescriptorHeap> m_heapSrvCbv;
-    UINT m_samplerDescriptorSize;
-
-    std::vector<ComPtr<ID3D12Resource1>> m_constantBuffers;
-    std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> m_cbViews;
+    std::vector<ComPtr<ID3D12Resource>> m_constantBuffers;
+    std::vector<DescriptorHandle> m_cbViews;
 
     ComPtr<ID3DBlob> m_vs, m_ps;
 

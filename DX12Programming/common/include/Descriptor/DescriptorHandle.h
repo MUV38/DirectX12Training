@@ -20,11 +20,11 @@ public:
 	/**
 	 * @brief CPUハンドル取得
 	 */
-	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle() const { return m_cpuHandle; }
+	const D3D12_CPU_DESCRIPTOR_HANDLE& GetCPUHandle() const { return m_cpuHandle; }
 	/**
 	 * @brief GPUハンドル取得
 	 */
-	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle() const { return m_gpuHandle; }
+	const D3D12_GPU_DESCRIPTOR_HANDLE& GetGPUHandle() const { return m_gpuHandle; }
 
 	/**
 	 * @brief ヒープ取得

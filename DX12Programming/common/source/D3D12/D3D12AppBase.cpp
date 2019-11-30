@@ -7,11 +7,9 @@
 #include "Util/D3D12Util.h"
 
 D3D12AppBase::D3D12AppBase()
-    : m_rtvDescriptorSize(0)
-    , m_dsvDescriptorSize(0)
-    , m_frameIndex(0)
+    : m_frameIndex(0)
 {
-	m_backBuffers.resize(FrameBufferCount);
+	m_backBufferRenderTargets.resize(FrameBufferCount);
     m_frameFenceValues.resize(FrameBufferCount);
 
     m_fenceWaitEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -194,19 +192,14 @@ void D3D12AppBase::Render()
 
     // スワップチェイン表示可能からレンダーターゲット描画可能へ
     auto barrierToRT = CD3DX12_RESOURCE_BARRIER::Transition(
-		m_backBuffers[m_frameIndex].Get(),
+		m_backBufferRenderTargets[m_frameIndex].Get(),
         D3D12_RESOURCE_STATE_PRESENT,
         D3D12_RESOURCE_STATE_RENDER_TARGET
     );
     m_commandList->ResourceBarrier(1, &barrierToRT);
 
-    CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(
-        m_heapRtvBackBuffer->GetCPUDescriptorHandleForHeapStart(),
-        m_frameIndex, m_rtvDescriptorSize
-    );
-    CD3DX12_CPU_DESCRIPTOR_HANDLE dsv(
-        m_heapDsvDefault->GetCPUDescriptorHandleForHeapStart()
-    );
+	const D3D12_CPU_DESCRIPTOR_HANDLE rtv = m_backBufferRtvDescriptorHandle[m_frameIndex].GetCPUHandle();
+	const D3D12_CPU_DESCRIPTOR_HANDLE dsv = m_backBufferDsvDescriptorHandle.GetCPUHandle();
 
     // レンダーターゲットクリア
     const float clearColor[] = { 0.3f, 0.3f, 0.3f, 0.0f };
@@ -221,7 +214,7 @@ void D3D12AppBase::Render()
 
     // レンダーターゲット描画可能からスワップチェイン表示可能へ
     auto barrierToPresent = CD3DX12_RESOURCE_BARRIER::Transition(
-		m_backBuffers[m_frameIndex].Get(),
+		m_backBufferRenderTargets[m_frameIndex].Get(),
         D3D12_RESOURCE_STATE_RENDER_TARGET,
         D3D12_RESOURCE_STATE_PRESENT
     );
@@ -240,48 +233,29 @@ void D3D12AppBase::Render()
 
 void D3D12AppBase::PrepareDescriptorHeaps()
 {
-    // RTVのディスクリプタヒープ
-    HRESULT hr;
-    D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc
-    {
-        D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
-        FrameBufferCount,
-        D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-        0
-    };
-    hr = m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_heapRtvBackBuffer));
-    if (FAILED(hr))
-    {
-        throw std::runtime_error("Failed CreateDescriptorHeap(RTV)");
-    }
-    m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	// デスクリプターマネージャ初期化
+	if (!m_descriptorManager.Init(m_device.Get(), 5000, 100, 100, 100))
+	{
+		throw std::runtime_error("Failed DescriptorManager::Init");
+	}
 
-    // DSVのディスクリプタヒープ
-    D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc
-    {
-        D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
-        1,
-        D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-        0
-    };
-    hr = m_device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_heapDsvDefault));
-    if (FAILED(hr))
-    {
-        throw std::runtime_error("Failed CreateDescriptorHeap(DSv)");
-    }
+	for (int i=0 ; i<FrameBufferCount ; ++i)
+	{
+		// RTV
+		m_backBufferRtvDescriptorHandle[i] = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::Rtv);
+	}
+
+	// DSV
+	m_backBufferDsvDescriptorHandle = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::Dsv);
 }
 
 void D3D12AppBase::PrepareRenderTargetView()
 {
     // スワップチェインイメージへのレンダーターゲットビュー生成
-    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_heapRtvBackBuffer->GetCPUDescriptorHandleForHeapStart());
     for (UINT i = 0; i < FrameBufferCount; ++i)
     {
-        m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_backBuffers[i]));
-        m_device->CreateRenderTargetView(m_backBuffers[i].Get(), nullptr, rtvHandle);
-
-        // 参照するディスクリプタの変更
-        rtvHandle.Offset(1, m_rtvDescriptorSize);
+        m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_backBufferRenderTargets[i]));
+        m_device->CreateRenderTargetView(m_backBufferRenderTargets[i].Get(), nullptr, m_backBufferRtvDescriptorHandle[i].GetCPUHandle());
     }
 }
 
@@ -324,8 +298,7 @@ void D3D12AppBase::CreateDepthBuffer(int width, int height)
             0
         }
     };
-    CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle(m_heapDsvDefault->GetCPUDescriptorHandleForHeapStart());
-    m_device->CreateDepthStencilView(m_depthBuffer.Get(), &dsvDesc, dsvHandle);
+    m_device->CreateDepthStencilView(m_depthBuffer.Get(), &dsvDesc, m_backBufferDsvDescriptorHandle.GetCPUHandle());
 }
 
 void D3D12AppBase::CreateCommandAllocators()

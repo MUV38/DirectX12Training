@@ -109,28 +109,31 @@ void App::Prepare()
         throw std::runtime_error("CreateGraphicsPipelineState failed");
     }
 
-    PrepareDescriptorHeapForModelApp();
-
     // ConstantBuffer/View.
     m_constantBuffers.resize(CbvNum * FrameBufferCount);
     m_cbViews.resize(CbvNum * FrameBufferCount);
-    for (UINT i = 0; i < FrameBufferCount; ++i)
-    {
-        UINT bufferSize = sizeof(ShaderParameters) + 255 & ~255;
-        m_constantBuffers[i] = CreateBuffer(bufferSize, nullptr);
+	for (UINT i = 0; i < CbvNum; ++i)
+	{
+		for (UINT j = 0; j < FrameBufferCount; ++j)
+		{
+			int index = i * FrameBufferCount + j;
 
-        D3D12_CONSTANT_BUFFER_VIEW_DESC cbDesc{};
-        cbDesc.BufferLocation = m_constantBuffers[i]->GetGPUVirtualAddress();
-        cbDesc.SizeInBytes = bufferSize;
+			UINT bufferSize = sizeof(ShaderParameters) + 255 & ~255;
+			m_constantBuffers[index] = D3D12Util::CreateBuffer(m_device.Get(), bufferSize, nullptr);
 
-		INT handleOffset = CbvDescriptorBase + CbvModel * FrameBufferCount;
-        CD3DX12_CPU_DESCRIPTOR_HANDLE handleCBV(m_heapSrvCbv->GetCPUDescriptorHandleForHeapStart(), handleOffset + i, m_srvcbvDescriptorSize);
-		m_device->CreateConstantBufferView(&cbDesc, handleCBV);
-        m_cbViews[i] = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetGPUDescriptorHandleForHeapStart(), handleOffset + i, m_srvcbvDescriptorSize);
-    }
+			m_cbViews[index] = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+
+			D3D12_CONSTANT_BUFFER_VIEW_DESC cbDesc{};
+			cbDesc.BufferLocation = m_constantBuffers[index]->GetGPUVirtualAddress();
+			cbDesc.SizeInBytes = bufferSize;
+			m_device->CreateConstantBufferView(&cbDesc, m_cbViews[index].GetCPUHandle());
+		}
+	}
 
 	// sampler.
 	{
+		m_sampler = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::Sampler);
+
 		// sampler desc.
 		D3D12_SAMPLER_DESC samplerDesc{};
 		{
@@ -147,17 +150,14 @@ void App::Prepare()
 			samplerDesc.MinLOD = -FLT_MAX;
 			samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 		}
-
-		// DescriptorHeap.
-		auto descriptorSampler = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heapSampler->GetCPUDescriptorHandleForHeapStart(), SamplerDescriptorBase, m_samplerDescriptorSize);
-		m_device->CreateSampler(&samplerDesc, descriptorSampler);
-		m_sampler = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSampler->GetGPUDescriptorHandleForHeapStart(), SamplerDescriptorBase, m_samplerDescriptorSize);
+		m_device->CreateSampler(&samplerDesc, m_sampler.GetCPUHandle());
 	}
 
 	// Render Target
 	{
 		m_renderTargets.resize(RtNum);
-		m_rtViews.resize(RtNum);
+		m_rtSrvs.resize(RtNum);
+		m_rtvs.resize(RtNum);
 		
 		// RtvGrayScale
 		{
@@ -196,20 +196,19 @@ void App::Prepare()
 			{
 				throw std::runtime_error("RenderTarget CreateCommittedResource failed");
 			}
-			resource->SetName(L"RenderTarget GrayScale");
 			m_renderTargets[RtTmp] = resource;
+
 			// RTV
-			INT rtvHandleOffset = RtvDescriptorBase + RtTmp;
-			D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heapRtv->GetCPUDescriptorHandleForHeapStart(), rtvHandleOffset, m_rtvDescriptorSize);
+			m_rtvs[RtTmp] = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::Rtv);
+			m_rtSrvs[RtTmp] = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+
 			D3D12_RENDER_TARGET_VIEW_DESC rtViewDesc = {};
 			{
 				rtViewDesc.Format = format;
 				rtViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 			}
-			m_device->CreateRenderTargetView(resource.Get(), &rtViewDesc, rtvCpuHandle);
+			m_device->CreateRenderTargetView(resource.Get(), &rtViewDesc, m_rtvs[RtTmp].GetCPUHandle());
 			// SRV
-			INT srvHandleOffset = RtSrvDescriptorBase + RtTmp;
-			auto srvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetCPUDescriptorHandleForHeapStart(), srvHandleOffset, m_srvcbvDescriptorSize);
 			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 			{
 				srvDesc.Texture2D.MipLevels = resDesc.MipLevels;
@@ -217,8 +216,7 @@ void App::Prepare()
 				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 				srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 			}
-			m_device->CreateShaderResourceView(resource.Get(), &srvDesc, srvHandle);
-			m_rtViews[RtTmp] = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetGPUDescriptorHandleForHeapStart(), srvHandleOffset, m_srvcbvDescriptorSize);
+			m_device->CreateShaderResourceView(resource.Get(), &srvDesc, m_rtSrvs[RtTmp].GetCPUHandle());
 		}
 	}
 
@@ -227,9 +225,7 @@ void App::Prepare()
 		hr = TextureLoader::LoadDDS(
 			m_device.Get(),
 			L"../assets/textures/antique/antique_albedo.dds",
-			m_heapSrvCbv.Get(),
-			TexSrvDescriptorBase + TexSrvAlbedo,
-			m_srvcbvDescriptorSize,
+			m_descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav),
 			m_commandAllocators[m_frameIndex].Get(),
 			m_commandQueue.Get(),
 			&m_texture
@@ -288,14 +284,9 @@ void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
 
 	// RenderTarget(tmp)
 	{
-		INT rtvHandleOffset = RtvDescriptorBase + RtTmp;
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(
-			m_heapRtv->GetCPUDescriptorHandleForHeapStart(), 
-			rtvHandleOffset, m_rtvDescriptorSize
-		);
-		CD3DX12_CPU_DESCRIPTOR_HANDLE dsv(
-			m_heapDsvDefault->GetCPUDescriptorHandleForHeapStart()
-		);
+		INT rtvHandleOffset = RtTmp;
+		D3D12_CPU_DESCRIPTOR_HANDLE rtv = m_rtvs[rtvHandleOffset].GetCPUHandle();
+		D3D12_CPU_DESCRIPTOR_HANDLE dsv = m_backBufferDsvDescriptorHandle.GetCPUHandle();
 		// レンダーターゲットの設定
 		command->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
 		// クリア
@@ -312,28 +303,26 @@ void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
     command->RSSetScissorRects(1, &m_scissorRect);
 
     // DescriptorHeap.
-    ID3D12DescriptorHeap* heaps[] = {
-        m_heapSrvCbv.Get(), m_heapSampler.Get()
+	DescriptorPool* srvCbvUavHeap = m_descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+	DescriptorPool* samplerHeap = m_descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::Sampler);
+	ID3D12DescriptorHeap* heaps[] = {
+		srvCbvUavHeap->GetHeap(), samplerHeap->GetHeap()
     };
     command->SetDescriptorHeaps(_countof(heaps), heaps);
 
     // DescriptorTable.
-	command->SetGraphicsRootDescriptorTable(0, m_cbViews[m_frameIndex]);
+	int cbvModelIndex = CbvModel * FrameBufferCount + m_frameIndex;
+	command->SetGraphicsRootDescriptorTable(0, m_cbViews[cbvModelIndex].GetGPUHandle());
 	command->SetGraphicsRootDescriptorTable(1, m_texture.GetShaderResourceView());
-	command->SetGraphicsRootDescriptorTable(2, m_sampler);
+	command->SetGraphicsRootDescriptorTable(2, m_sampler.GetGPUHandle());
     
     // DrawModel
     m_modelLoader.Draw(command.Get());
 
 	// RenderTarget(back buffer)
 	{
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(
-			m_heapRtvBackBuffer->GetCPUDescriptorHandleForHeapStart(),
-			m_frameIndex, m_rtvDescriptorSize
-		);
-		CD3DX12_CPU_DESCRIPTOR_HANDLE dsv(
-			m_heapDsvDefault->GetCPUDescriptorHandleForHeapStart()
-		);
+		D3D12_CPU_DESCRIPTOR_HANDLE rtv = m_backBufferRtvDescriptorHandle[m_frameIndex].GetCPUHandle();
+		D3D12_CPU_DESCRIPTOR_HANDLE dsv = m_backBufferDsvDescriptorHandle.GetCPUHandle();
 		// レンダーターゲットの設定
 		m_commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
 		// クリア
@@ -353,8 +342,8 @@ void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
 	// フルスクリーン描画
 	m_fullScreenQuad.SetPipelineState(command.Get());
 	m_fullScreenQuad.SetGraphicsRootSignature(command.Get());
-	command->SetGraphicsRootDescriptorTable(0, m_rtViews[RtTmp]);
-	command->SetGraphicsRootDescriptorTable(1, m_sampler);
+	command->SetGraphicsRootDescriptorTable(0, m_rtSrvs[RtTmp].GetGPUHandle());
+	command->SetGraphicsRootDescriptorTable(1, m_sampler.GetGPUHandle());
 	m_fullScreenQuad.Draw(command.Get());
 
 	// ピクセルシェーダーリソースからレンダーターゲット描画可能へ
@@ -364,67 +353,4 @@ void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
 		D3D12_RESOURCE_STATE_RENDER_TARGET
 	);
 	command->ResourceBarrier(1, &barrierToRenderTarget);
-}
-
-App::ComPtr<ID3D12Resource1> App::CreateBuffer(UINT bufferSize, const void* initialData)
-{
-    HRESULT hr;
-    ComPtr<ID3D12Resource1> buffer;
-    hr = m_device->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-        D3D12_HEAP_FLAG_NONE,
-        &CD3DX12_RESOURCE_DESC::Buffer(bufferSize),
-        D3D12_RESOURCE_STATE_GENERIC_READ,
-        nullptr,
-        IID_PPV_ARGS(&buffer)
-    );
-
-    // 初期データがあればコピー.
-    if (SUCCEEDED(hr) && initialData)
-    {
-        void* mapped;
-        CD3DX12_RANGE range(0, 0);
-        hr = buffer->Map(0, &range, &mapped);
-        if (SUCCEEDED(hr))
-        {
-            memcpy(mapped, initialData, bufferSize);
-            buffer->Unmap(0, nullptr);
-        }
-    }
-
-    return buffer;
-}
-
-void App::PrepareDescriptorHeapForModelApp()
-{
-	// ディスクリプターヒープ
-	UINT count = CBV_SRV_UAV_Num;
-	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{
-		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-		count,
-		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
-		0
-	};
-	m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_heapSrvCbv));
-	m_srvcbvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-	// ダイナミックサンプラーのディスクリプターヒープ
-	D3D12_DESCRIPTOR_HEAP_DESC samplerHeapDesc{
-		D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
-		1,
-		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
-		0
-	};
-	m_device->CreateDescriptorHeap(&samplerHeapDesc, IID_PPV_ARGS(&m_heapSampler));
-	m_samplerDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-
-	// RTVのディスクリプターヒープ
-	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{
-		D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
-		RtNum,
-		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-		0
-	};
-	m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_heapRtv));
-	m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 }

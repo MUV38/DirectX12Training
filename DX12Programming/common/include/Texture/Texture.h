@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../framework.h"
+#include "Descriptor/DescriptorPool.h"
+#include "Descriptor/DescriptorHandle.h"
 
 /**
  * @brief テクスチャクラス
@@ -12,26 +14,27 @@ public:
 	~Texture();
 
 	/**
-	 * @brief リソース設定
-	 * @param [in] resource リソース
+	 * @brief 初期化
 	 */
-	void SetResource(ID3D12Resource* resource) { m_resource = resource; }
+	void Init(ID3D12Resource* resource, DescriptorPool* descriptorPool, DescriptorHandle descriptorHandle);
+
+	/**
+	 * @brief 解放
+	 */
+	void Release();
+
 	/**
 	 * @brief リソース取得
 	 */
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetResource() const { return m_resource; }
 	
 	/**
-	 * @biref シェーダーリソースビュー設定
-	 * @param [in] srv シェーダーリソースビュー
-	 */
-	void SetShaderResourceView(D3D12_GPU_DESCRIPTOR_HANDLE srv) { m_srv = srv; }
-	/**
 	 * @brief シェーダーリソースビュー取得
 	 */
-	D3D12_GPU_DESCRIPTOR_HANDLE GetShaderResourceView() const { return m_srv; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetShaderResourceView() const { return m_descriptorHandle.GetGPUHandle(); }
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_resource;
-	D3D12_GPU_DESCRIPTOR_HANDLE m_srv;
+	DescriptorPool* m_descriptorPool;
+	DescriptorHandle m_descriptorHandle;
 };

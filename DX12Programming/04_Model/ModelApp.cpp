@@ -103,26 +103,26 @@ void ModelApp::Prepare()
         throw std::runtime_error("CreateGraphicsPipelineState failed");
     }
 
-    PrepareDescriptorHeapForModelApp();
-
     // ConstantBuffer/View.
-    m_constantBuffers.resize(FrameBufferCount);
-    m_cbViews.resize(FrameBufferCount);
-    for (UINT i = 0; i < FrameBufferCount; ++i)
-    {
-        UINT bufferSize = sizeof(ShaderParameters) + 255 & ~255;
-        m_constantBuffers[i] = CreateBuffer(bufferSize, nullptr);
+    m_constantBuffers.resize(CbvNum * FrameBufferCount);
+    m_cbViews.resize(CbvNum * FrameBufferCount);
+	for (UINT i = 0; i < CbvNum; ++i)
+	{
+		for (UINT j = 0; j < FrameBufferCount; ++j)
+		{
+			int index = i * FrameBufferCount + j;
 
-        D3D12_CONSTANT_BUFFER_VIEW_DESC cbDesc{};
-        cbDesc.BufferLocation = m_constantBuffers[i]->GetGPUVirtualAddress();
-        cbDesc.SizeInBytes = bufferSize;
-        CD3DX12_CPU_DESCRIPTOR_HANDLE handleCBV(m_heapSrvCbv->GetCPUDescriptorHandleForHeapStart(), ConstantBufferDescriptorBase + i, m_srvcbvDescriptorSize);
-        m_device->CreateConstantBufferView(&cbDesc, handleCBV);
+			UINT bufferSize = sizeof(ShaderParameters) + 255 & ~255;
+			m_constantBuffers[index] = D3D12Util::CreateBuffer(m_device.Get(), bufferSize, nullptr);
 
-        m_cbViews[i] = CD3DX12_GPU_DESCRIPTOR_HANDLE(m_heapSrvCbv->GetGPUDescriptorHandleForHeapStart(), ConstantBufferDescriptorBase + i, m_srvcbvDescriptorSize);
-    }
+			m_cbViews[index] = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
 
-
+			D3D12_CONSTANT_BUFFER_VIEW_DESC cbDesc{};
+			cbDesc.BufferLocation = m_constantBuffers[index]->GetGPUVirtualAddress();
+			cbDesc.SizeInBytes = bufferSize;
+			m_device->CreateConstantBufferView(&cbDesc, m_cbViews[index].GetCPUHandle());
+		}
+	}
 }
 
 void ModelApp::Cleanup()
@@ -170,57 +170,16 @@ void ModelApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
     command->RSSetScissorRects(1, &m_scissorRect);
 
     // DescriptorHeap.
+	DescriptorPool* cbvSrvUavDescriptorPool = m_descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav);
     ID3D12DescriptorHeap* heaps[] = {
-        m_heapSrvCbv.Get()
+		cbvSrvUavDescriptorPool->GetHeap()
     };
     command->SetDescriptorHeaps(_countof(heaps), heaps);
 
     // DescriptorTable.
-    command->SetGraphicsRootDescriptorTable(0, m_cbViews[m_frameIndex]);
+	int cbvModelIndex = CbvModel * m_frameIndex + m_frameIndex;
+    command->SetGraphicsRootDescriptorTable(0, m_cbViews[cbvModelIndex].GetGPUHandle());
     
     // DrawModel
     m_modelLoader.Draw(command.Get());
-}
-
-ModelApp::ComPtr<ID3D12Resource1> ModelApp::CreateBuffer(UINT bufferSize, const void* initialData)
-{
-    HRESULT hr;
-    ComPtr<ID3D12Resource1> buffer;
-    hr = m_device->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-        D3D12_HEAP_FLAG_NONE,
-        &CD3DX12_RESOURCE_DESC::Buffer(bufferSize),
-        D3D12_RESOURCE_STATE_GENERIC_READ,
-        nullptr,
-        IID_PPV_ARGS(&buffer)
-    );
-
-    // 初期データがあればコピー.
-    if (SUCCEEDED(hr) && initialData)
-    {
-        void* mapped;
-        CD3DX12_RANGE range(0, 0);
-        hr = buffer->Map(0, &range, &mapped);
-        if (SUCCEEDED(hr))
-        {
-            memcpy(mapped, initialData, bufferSize);
-            buffer->Unmap(0, nullptr);
-        }
-    }
-
-    return buffer;
-}
-
-void ModelApp::PrepareDescriptorHeapForModelApp()
-{
-    // ディスクリプターヒープ
-    UINT count = FrameBufferCount + 1;
-    D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{
-        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-        count,
-        D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
-        0
-    };
-    m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_heapSrvCbv));
-    m_srvcbvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }

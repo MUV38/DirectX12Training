@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../framework.h"
+#include "Descriptor/DescriptorPool.h"
 
 /**
  * @brief レンダーターゲットクラス
@@ -20,22 +21,18 @@ public:
 		UINT width, height;
 		DXGI_FORMAT format;
 
-		ID3D12DescriptorHeap* rtvHeap;
-		INT rtvOffset;
+		DescriptorPool* rtvDescriptorPool;
+		DescriptorPool* cbvSrvUavDescriptorPool;
 
-		ID3D12DescriptorHeap* srvUavHeap;
-		INT srvOffset;
-		INT uavOffset;
-
+		bool allowUav;
+		
 		SetupParam()
 			: width(1)
 			, height(1)
 			, format(DXGI_FORMAT_R8G8B8A8_UNORM)
-			, rtvHeap(nullptr)
-			, rtvOffset(-1)
-			, srvUavHeap(nullptr)
-			, srvOffset(-1)
-			, uavOffset(-1)
+			, rtvDescriptorPool(nullptr)
+			, cbvSrvUavDescriptorPool(nullptr)
+			, allowUav(false)
 		{}
 	};
 	/**
@@ -68,16 +65,22 @@ public:
 	ID3D12Resource* GetResource() const { return m_resource.Get(); }
 
 	/**
+	 * @brief RTVデスクリプターハンドル取得
+	 * @return RTVデスクリプターハンドル
+	 */
+	const DescriptorHandle& GetRtvDescriptorHandle() const { return m_rtv; }
+
+	/**
 	 * @brief ShaderResourceView取得
 	 * @return ShaderResourceView
 	 */
-	const D3D12_GPU_DESCRIPTOR_HANDLE& GetShaderResourceView() const { return m_srv; }
+	const D3D12_GPU_DESCRIPTOR_HANDLE& GetShaderResourceView() const { return m_srv.GetGPUHandle(); }
 
 	/**
 	 * @brief UnorderedAccessView取得
 	 * @return UnorderedAccessView
 	 */
-	const D3D12_GPU_DESCRIPTOR_HANDLE& GetUnorderedAccessView() const { return m_uav; }
+	const D3D12_GPU_DESCRIPTOR_HANDLE& GetUnorderedAccessView() const { return m_uav.GetGPUHandle(); }
 
 private:
 	/// リソースステート取得
@@ -85,8 +88,9 @@ private:
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_resource;
-	D3D12_GPU_DESCRIPTOR_HANDLE m_srv;
-	D3D12_GPU_DESCRIPTOR_HANDLE m_uav;
+	DescriptorHandle m_rtv;
+	DescriptorHandle m_srv;
+	DescriptorHandle m_uav;
 	
 	ResourceBarrierType m_resourceBarrierType;
 };
