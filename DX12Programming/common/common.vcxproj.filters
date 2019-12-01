@@ -64,6 +64,12 @@
     <Filter Include="ヘッダー ファイル\Descriptor">
       <UniqueIdentifier>{573e2e30-249a-4067-b29a-5452f26c1ee8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\ImGui\ImGuiImpl">
+      <UniqueIdentifier>{51dc5460-120e-48f9-a4ee-d7b96db1f41c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\ImGui\ImGuiImpl">
+      <UniqueIdentifier>{86a99454-0fce-426d-a783-306c0779815e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -105,9 +111,6 @@
     <ClInclude Include="include\RenderTarget\RenderTarget.h">
       <Filter>ヘッダー ファイル\RenderTarget</Filter>
     </ClInclude>
-    <ClInclude Include="include\ImGui\ImGuiImpl.h">
-      <Filter>ヘッダー ファイル\ImGui</Filter>
-    </ClInclude>
     <ClInclude Include="include\Descriptor\DescriptorHandle.h">
       <Filter>ヘッダー ファイル\Descriptor</Filter>
     </ClInclude>
@@ -118,6 +121,30 @@
       <Filter>ヘッダー ファイル\Descriptor</Filter>
     </ClInclude>
     <ClInclude Include="include\Util\Assert.h">
+      <Filter>ヘッダー ファイル\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ImGui\ImGuiDx12.h">
+      <Filter>ヘッダー ファイル\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\imgui\imconfig.h">
+      <Filter>ヘッダー ファイル\ImGui\ImGuiImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\imgui\imgui.h">
+      <Filter>ヘッダー ファイル\ImGui\ImGuiImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\imgui\imgui_internal.h">
+      <Filter>ヘッダー ファイル\ImGui\ImGuiImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\imgui\imstb_rectpack.h">
+      <Filter>ヘッダー ファイル\ImGui\ImGuiImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\imgui\imstb_textedit.h">
+      <Filter>ヘッダー ファイル\ImGui\ImGuiImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\imgui\imstb_truetype.h">
+      <Filter>ヘッダー ファイル\ImGui\ImGuiImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetUtil.h">
       <Filter>ヘッダー ファイル\Util</Filter>
     </ClInclude>
   </ItemGroup>
@@ -152,9 +179,6 @@
     <ClCompile Include="source\RenderTarget\RenderTarget.cpp">
       <Filter>ソース ファイル\RenderTarget</Filter>
     </ClCompile>
-    <ClCompile Include="source\ImGui\ImGuiImpl.cpp">
-      <Filter>ソース ファイル\ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="source\Descriptor\DescriptorHandle.cpp">
       <Filter>ソース ファイル\Descriptor</Filter>
     </ClCompile>
@@ -163,6 +187,18 @@
     </ClCompile>
     <ClCompile Include="source\Descriptor\DescriptorManager.cpp">
       <Filter>ソース ファイル\Descriptor</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ImGui\ImGuiDx12.cpp">
+      <Filter>ソース ファイル\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\imgui\imgui.cpp">
+      <Filter>ソース ファイル\ImGui\ImGuiImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\imgui\imgui_draw.cpp">
+      <Filter>ソース ファイル\ImGui\ImGuiImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\imgui\imgui_widgets.cpp">
+      <Filter>ソース ファイル\ImGui\ImGuiImpl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

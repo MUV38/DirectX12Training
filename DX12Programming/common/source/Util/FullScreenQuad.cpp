@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Util/FullScreenQuad.h"
 
 #include <stdexcept>

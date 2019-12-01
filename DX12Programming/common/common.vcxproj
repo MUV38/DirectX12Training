@@ -63,13 +63,14 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)ThirdParty\assimp\include;$(SolutionDir)ThirdParty\imgui;$(SolutionDir)packages\directxtex_desktop_win10.2019.5.31.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>runtimeobject.lib;D3DCompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(SolutionDir)ThirdParty\assimp\lib\$(ConfigurationName);$(SolutionDir)packages\directxtex_desktop_win10.2019.5.31.1\lib\$(PlatformName)\$(ConfigurationName)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
@@ -85,6 +86,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)ThirdParty\assimp\include;$(SolutionDir)ThirdParty\imgui;$(SolutionDir)packages\directxtex_desktop_win10.2019.5.31.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>pch.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -93,18 +95,25 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>runtimeobject.lib;D3DCompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(SolutionDir)ThirdParty\assimp\lib\$(ConfigurationName);$(SolutionDir)packages\directxtex_desktop_win10.2019.5.31.1\lib\$(PlatformName)\$(ConfigurationName)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\ThirdParty\imgui\imconfig.h" />
+    <ClInclude Include="..\ThirdParty\imgui\imgui.h" />
+    <ClInclude Include="..\ThirdParty\imgui\imgui_internal.h" />
+    <ClInclude Include="..\ThirdParty\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\ThirdParty\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\ThirdParty\imgui\imstb_truetype.h" />
+    <ClInclude Include="AssetUtil.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="include\D3D12\D3D12AppBase.h" />
     <ClInclude Include="include\D3D12\d3dx12.h" />
     <ClInclude Include="include\Descriptor\DescriptorHandle.h" />
     <ClInclude Include="include\Descriptor\DescriptorManager.h" />
     <ClInclude Include="include\Descriptor\DescriptorPool.h" />
-    <ClInclude Include="include\ImGui\ImGuiImpl.h" />
+    <ClInclude Include="include\ImGui\ImGuiDx12.h" />
     <ClInclude Include="include\Model\Mesh.h" />
     <ClInclude Include="include\Model\ModelLoader.h" />
     <ClInclude Include="include\Model\Polygon.h" />
@@ -118,6 +127,9 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\ThirdParty\imgui\imgui.cpp" />
+    <ClCompile Include="..\ThirdParty\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\ThirdParty\imgui\imgui_widgets.cpp" />
     <ClCompile Include="common.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -127,7 +139,7 @@
     <ClCompile Include="source\Descriptor\DescriptorHandle.cpp" />
     <ClCompile Include="source\Descriptor\DescriptorManager.cpp" />
     <ClCompile Include="source\Descriptor\DescriptorPool.cpp" />
-    <ClCompile Include="source\ImGui\ImGuiImpl.cpp" />
+    <ClCompile Include="source\ImGui\ImGuiDx12.cpp" />
     <ClCompile Include="source\Model\Mesh.cpp" />
     <ClCompile Include="source\Model\ModelLoader.cpp" />
     <ClCompile Include="source\RenderTarget\RenderTarget.cpp" />

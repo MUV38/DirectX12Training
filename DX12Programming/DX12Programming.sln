@@ -40,6 +40,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "07_ComputeShader", "07_Comp
 		{E97A8A7B-EA03-4211-899E-AB5242486BC9} = {E97A8A7B-EA03-4211-899E-AB5242486BC9}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "08_ImGui", "08_ImGui\ImGui.vcxproj", "{96E52342-89A7-4185-BEF8-8B71B7D4F197}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E97A8A7B-EA03-4211-899E-AB5242486BC9} = {E97A8A7B-EA03-4211-899E-AB5242486BC9}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -102,6 +107,12 @@ Global
 		{406C6CFA-6E35-4B67-959B-269E1E1576DA}.Release|x64.Build.0 = Release|x64
 		{406C6CFA-6E35-4B67-959B-269E1E1576DA}.Release|x86.ActiveCfg = Release|Win32
 		{406C6CFA-6E35-4B67-959B-269E1E1576DA}.Release|x86.Build.0 = Release|Win32
+		{96E52342-89A7-4185-BEF8-8B71B7D4F197}.Debug|x64.ActiveCfg = Debug|x64
+		{96E52342-89A7-4185-BEF8-8B71B7D4F197}.Debug|x64.Build.0 = Debug|x64
+		{96E52342-89A7-4185-BEF8-8B71B7D4F197}.Debug|x86.ActiveCfg = Debug|x64
+		{96E52342-89A7-4185-BEF8-8B71B7D4F197}.Release|x64.ActiveCfg = Release|x64
+		{96E52342-89A7-4185-BEF8-8B71B7D4F197}.Release|x64.Build.0 = Release|x64
+		{96E52342-89A7-4185-BEF8-8B71B7D4F197}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

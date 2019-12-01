@@ -2,6 +2,7 @@
 
 #include "../framework.h"
 #include "Descriptor/DescriptorManager.h"
+#include "ImGui/ImGuiDx12.h"
 
 class D3D12AppBase
 {
@@ -19,6 +20,7 @@ public:
     void Initialize(HWND hWnd);
     void Terminate();
 
+	virtual void Update();
     virtual void Render();
 
     /// override in subclass
@@ -57,4 +59,7 @@ protected:
 	DescriptorManager m_descriptorManager;
 	DescriptorHandle m_backBufferRtvDescriptorHandle[FrameBufferCount];
 	DescriptorHandle m_backBufferDsvDescriptorHandle;
+
+	ImGuiDx12 m_imgui;
+	DescriptorHandle m_imguiSrvDescriptorHandle;
 };

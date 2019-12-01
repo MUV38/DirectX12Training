@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Descriptor/DescriptorHandle.h"
 
 #include "D3D12/d3dx12.h"

@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Descriptor/DescriptorManager.h"
 
 #include "Util/Assert.h"

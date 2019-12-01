@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Texture/TextureLoader.h"
 
 #include <stdexcept>

@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Model/Mesh.h"
 #include "D3D12/d3dx12.h"
 #include "Util/D3D12Util.h"

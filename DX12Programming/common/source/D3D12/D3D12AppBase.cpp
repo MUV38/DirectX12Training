@@ -1,4 +1,3 @@
-#include "pch.h"
 #include <fstream>
 #include <exception>
 #include <stdexcept>
@@ -175,12 +174,33 @@ void D3D12AppBase::Initialize(HWND hWnd)
     m_viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, float(width), float(height));
     m_scissorRect = CD3DX12_RECT(0, 0, LONG(width), LONG(height));
 
+	// imgui
+	{
+		m_imguiSrvDescriptorHandle = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+		m_imgui.Init(
+			&hWnd,
+			m_device.Get(),
+			FrameBufferCount,
+			DXGI_FORMAT_R8G8B8A8_UNORM,
+			m_imguiSrvDescriptorHandle.GetHeap(),
+			m_imguiSrvDescriptorHandle.GetCPUHandle(),
+			m_imguiSrvDescriptorHandle.GetGPUHandle()
+		);
+	}
+
     Prepare();
 }
 
 void D3D12AppBase::Terminate()
 {
     Cleanup();
+
+	m_imgui.Shutdown();
+}
+
+void D3D12AppBase::Update()
+{
+	m_imgui.NewFrame();
 }
 
 void D3D12AppBase::Render()
@@ -211,6 +231,12 @@ void D3D12AppBase::Render()
     m_commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
 
     MakeCommand(m_commandList);
+	
+	// imgui
+	{
+		m_commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+		m_imgui.Render(m_commandList.Get());
+	}
 
     // レンダーターゲット描画可能からスワップチェイン表示可能へ
     auto barrierToPresent = CD3DX12_RESOURCE_BARRIER::Transition(

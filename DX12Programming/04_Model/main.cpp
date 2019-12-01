@@ -66,7 +66,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             }
-            theApp.Render();
+			theApp.Update();
+			theApp.Render();
         }
 
         theApp.Terminate();
