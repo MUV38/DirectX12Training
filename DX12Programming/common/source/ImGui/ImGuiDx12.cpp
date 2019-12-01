@@ -18,13 +18,17 @@
 /// フォントデータのルート
 #define IMGUI_FONT_ROOT "../ThirdParty/imgui/misc/fonts"
 
+static bool g_HasGamepad = false;
+static bool g_WantUpdateHasGamepad = true;
+
+bool ImGuiDx12_UpdateMouseCursor();
+void ImGuiDx12_UpdateGamepads();
+
 ImGuiDx12::ImGuiDx12()
 	: m_hWnd(0)
 	, m_time(0)
 	, m_ticksPerSecond(0)
 	, m_lastMouseCursor(ImGuiMouseCursor_COUNT)
-	, m_hasGamepad(false)
-	, m_wantUpdateHasGamepad(true)
 	, m_d3dDevice(nullptr)
 	, m_vertexShaderBlob(nullptr)
 	, m_pixelShaderBlob(nullptr)
@@ -259,11 +263,11 @@ void ImGuiDx12::NewFrameWin32()
 	if (m_lastMouseCursor != mouse_cursor)
 	{
 		m_lastMouseCursor = mouse_cursor;
-		UpdateMouseCursor();
+		ImGuiDx12_UpdateMouseCursor();
 	}
 
 	// Update game controllers (if enabled and available)
-	UpdateGamepads();
+	ImGuiDx12_UpdateGamepads();
 }
 void ImGuiDx12::NewFrameDx12()
 {
@@ -725,7 +729,7 @@ void ImGuiDx12::SetupRenderState(ImDrawData* draw_data, ID3D12GraphicsCommandLis
 	ctx->OMSetBlendFactor(blend_factor);
 }
 
-bool ImGuiDx12::UpdateMouseCursor()
+bool ImGuiDx12_UpdateMouseCursor()
 {
 	ImGuiIO& io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange)
@@ -780,7 +784,7 @@ void ImGuiDx12::UpdateMousePos()
 
 }
 
-void ImGuiDx12::UpdateGamepads()
+void ImGuiDx12_UpdateGamepads()
 {
 	ImGuiIO& io = ImGui::GetIO();
 	memset(io.NavInputs, 0, sizeof(io.NavInputs));
@@ -789,16 +793,16 @@ void ImGuiDx12::UpdateGamepads()
 
 	// Calling XInputGetState() every frame on disconnected gamepads is unfortunately too slow.
 	// Instead we refresh gamepad availability by calling XInputGetCapabilities() _only_ after receiving WM_DEVICECHANGE.
-	if (m_wantUpdateHasGamepad)
+	if (g_WantUpdateHasGamepad)
 	{
 		XINPUT_CAPABILITIES caps;
-		m_hasGamepad = (XInputGetCapabilities(0, XINPUT_FLAG_GAMEPAD, &caps) == ERROR_SUCCESS);
-		m_wantUpdateHasGamepad = false;
+		g_HasGamepad = (XInputGetCapabilities(0, XINPUT_FLAG_GAMEPAD, &caps) == ERROR_SUCCESS);
+		g_WantUpdateHasGamepad = false;
 	}
 
 	XINPUT_STATE xinput_state;
 	io.BackendFlags &= ~ImGuiBackendFlags_HasGamepad;
-	if (m_hasGamepad && XInputGetState(0, &xinput_state) == ERROR_SUCCESS)
+	if (g_HasGamepad && XInputGetState(0, &xinput_state) == ERROR_SUCCESS)
 	{
 		const XINPUT_GAMEPAD& gamepad = xinput_state.Gamepad;
 		io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
@@ -954,4 +958,75 @@ void ImGuiDx12::RenderDrawData(ImDrawData* draw_data, ID3D12GraphicsCommandList*
 		global_idx_offset += cmd_list->IdxBuffer.Size;
 		global_vtx_offset += cmd_list->VtxBuffer.Size;
 	}
+}
+
+// メッセージ処理
+IMGUI_IMPL_API LRESULT ImGuiDx12_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (ImGui::GetCurrentContext() == NULL)
+		return 0;
+
+	ImGuiIO& io = ImGui::GetIO();
+	switch (msg)
+	{
+	case WM_LBUTTONDOWN: case WM_LBUTTONDBLCLK:
+	case WM_RBUTTONDOWN: case WM_RBUTTONDBLCLK:
+	case WM_MBUTTONDOWN: case WM_MBUTTONDBLCLK:
+	case WM_XBUTTONDOWN: case WM_XBUTTONDBLCLK:
+	{
+		int button = 0;
+		if (msg == WM_LBUTTONDOWN || msg == WM_LBUTTONDBLCLK) { button = 0; }
+		if (msg == WM_RBUTTONDOWN || msg == WM_RBUTTONDBLCLK) { button = 1; }
+		if (msg == WM_MBUTTONDOWN || msg == WM_MBUTTONDBLCLK) { button = 2; }
+		if (msg == WM_XBUTTONDOWN || msg == WM_XBUTTONDBLCLK) { button = (GET_XBUTTON_WPARAM(wParam) == XBUTTON1) ? 3 : 4; }
+		if (!ImGui::IsAnyMouseDown() && ::GetCapture() == NULL)
+			::SetCapture(hwnd);
+		io.MouseDown[button] = true;
+		return 0;
+	}
+	case WM_LBUTTONUP:
+	case WM_RBUTTONUP:
+	case WM_MBUTTONUP:
+	case WM_XBUTTONUP:
+	{
+		int button = 0;
+		if (msg == WM_LBUTTONUP) { button = 0; }
+		if (msg == WM_RBUTTONUP) { button = 1; }
+		if (msg == WM_MBUTTONUP) { button = 2; }
+		if (msg == WM_XBUTTONUP) { button = (GET_XBUTTON_WPARAM(wParam) == XBUTTON1) ? 3 : 4; }
+		io.MouseDown[button] = false;
+		if (!ImGui::IsAnyMouseDown() && ::GetCapture() == hwnd)
+			::ReleaseCapture();
+		return 0;
+	}
+	case WM_MOUSEWHEEL:
+		io.MouseWheel += (float)GET_WHEEL_DELTA_WPARAM(wParam) / (float)WHEEL_DELTA;
+		return 0;
+	case WM_MOUSEHWHEEL:
+		io.MouseWheelH += (float)GET_WHEEL_DELTA_WPARAM(wParam) / (float)WHEEL_DELTA;
+		return 0;
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+		if (wParam < 256)
+			io.KeysDown[wParam] = 1;
+		return 0;
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+		if (wParam < 256)
+			io.KeysDown[wParam] = 0;
+		return 0;
+	case WM_CHAR:
+		// You can also use ToAscii()+GetKeyboardState() to retrieve characters.
+		io.AddInputCharacter((unsigned int)wParam);
+		return 0;
+	case WM_SETCURSOR:
+		if (LOWORD(lParam) == HTCLIENT && ImGuiDx12_UpdateMouseCursor())
+			return 1;
+		return 0;
+	case WM_DEVICECHANGE:
+		if ((UINT)wParam == DBT_DEVNODES_CHANGED)
+			g_WantUpdateHasGamepad = true;
+		return 0;
+	}
+	return 0;
 }

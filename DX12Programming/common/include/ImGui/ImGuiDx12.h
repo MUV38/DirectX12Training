@@ -84,9 +84,7 @@ private:
 	void CreateFontsTexture();
 	void SetupRenderState(ImDrawData* draw_data, ID3D12GraphicsCommandList* ctx, FrameResources* fr);
 
-	bool UpdateMouseCursor();
 	void UpdateMousePos();
-	void UpdateGamepads();
 	
 	/// ï`âÊÉfÅ[É^Çï`âÊ
 	void RenderDrawData(ImDrawData* draw_data, ID3D12GraphicsCommandList* graphics_command_list);
@@ -97,8 +95,6 @@ private:
 	INT64 m_time;
 	INT64 m_ticksPerSecond;
 	ImGuiMouseCursor m_lastMouseCursor;
-	bool m_hasGamepad;
-	bool m_wantUpdateHasGamepad;
 
 	// dx12
 	ID3D12Device* m_d3dDevice;

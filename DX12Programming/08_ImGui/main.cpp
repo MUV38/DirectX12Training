@@ -9,8 +9,17 @@ const wchar_t* APP_NAME = L"08_ImGui";
 const int WINDOW_WIDTH = 1280; 
 const int WINDOW_HEIGHT = 720;
 
+// ImGuiDx12のメッセージ処理
+extern LRESULT ImGuiDx12_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
+	// ImGuiDx12のメッセージ処理
+	if (ImGuiDx12_WndProcHandler(hWnd, msg, wp, lp))
+	{
+		return true;
+	}
+
     PAINTSTRUCT ps;
     HDC hdc;
     switch (msg)
