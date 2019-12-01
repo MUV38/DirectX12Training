@@ -5,6 +5,7 @@
 
 #ifdef _MSC_VER
 #pragma comment(lib, "xinput")
+#pragma comment(lib, "d3dcompiler")
 #endif // _MSC_VER
 
 // Allow compilation with old Windows SDK. MinGW doesn't have default _WIN32_WINNT/WINVER versions.
@@ -114,10 +115,10 @@ bool ImGuiDx12::InitCommon()
 
 	// Load Fonts
 	io.Fonts->AddFontDefault();
-	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
+	//io.Fonts->AddFontFromFileTTF(IMGUI_FONT_ROOT"/Roboto-Medium.ttf", 16.0f);
+	//io.Fonts->AddFontFromFileTTF(IMGUI_FONT_ROOT"/Cousine-Regular.ttf", 15.0f);
+	//io.Fonts->AddFontFromFileTTF(IMGUI_FONT_ROOT"/DroidSans.ttf", 16.0f);
+	//io.Fonts->AddFontFromFileTTF(IMGUI_FONT_ROOT"/ProggyTiny.ttf", 10.0f);
 	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 	//IM_ASSERT(font != NULL);
 
