@@ -4,3 +4,9 @@
 [submodule "DX12Programming/ThirdParty/imgui"]
 	path = DX12Programming/ThirdParty/imgui
 	url = https://github.com/ocornut/imgui
+[submodule "DX12Programming/ThirdParty/vectormath"]
+	path = DX12Programming/ThirdParty/vectormath
+	url = https://github.com/glampert/vectormath
+[submodule "DX12Programming/ThirdParty/EASTL"]
+	path = DX12Programming/ThirdParty/EASTL
+	url = https://github.com/electronicarts/EASTL
