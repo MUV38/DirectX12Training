@@ -45,6 +45,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "08_ImGui", "08_ImGui\ImGui.
 		{E97A8A7B-EA03-4211-899E-AB5242486BC9} = {E97A8A7B-EA03-4211-899E-AB5242486BC9}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "09_HelloDXR", "09_HelloDXR\HelloDXR.vcxproj", "{60C1E921-43FB-43ED-BFE4-F8E764782750}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E97A8A7B-EA03-4211-899E-AB5242486BC9} = {E97A8A7B-EA03-4211-899E-AB5242486BC9}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -113,6 +118,12 @@ Global
 		{96E52342-89A7-4185-BEF8-8B71B7D4F197}.Release|x64.ActiveCfg = Release|x64
 		{96E52342-89A7-4185-BEF8-8B71B7D4F197}.Release|x64.Build.0 = Release|x64
 		{96E52342-89A7-4185-BEF8-8B71B7D4F197}.Release|x86.ActiveCfg = Release|x64
+		{60C1E921-43FB-43ED-BFE4-F8E764782750}.Debug|x64.ActiveCfg = Debug|x64
+		{60C1E921-43FB-43ED-BFE4-F8E764782750}.Debug|x64.Build.0 = Debug|x64
+		{60C1E921-43FB-43ED-BFE4-F8E764782750}.Debug|x86.ActiveCfg = Debug|x64
+		{60C1E921-43FB-43ED-BFE4-F8E764782750}.Release|x64.ActiveCfg = Release|x64
+		{60C1E921-43FB-43ED-BFE4-F8E764782750}.Release|x64.Build.0 = Release|x64
+		{60C1E921-43FB-43ED-BFE4-F8E764782750}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
