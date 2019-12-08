@@ -37,6 +37,7 @@ protected:
     void WaitPreviousFrame();
 
 protected:
+	ComPtr<IDXGIAdapter1> m_adapter;
     ComPtr<ID3D12Device> m_device;
     ComPtr<ID3D12CommandQueue> m_commandQueue;
     ComPtr<IDXGISwapChain4> m_swapChain;

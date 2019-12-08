@@ -66,7 +66,6 @@ void D3D12AppBase::Initialize(HWND hWnd)
     }
 
     // ハードウェアアダプタの検索
-    ComPtr<IDXGIAdapter1> useAdapter;
     {
         UINT adapterIndex = 0;
         ComPtr<IDXGIAdapter1> adapter;
@@ -93,11 +92,11 @@ void D3D12AppBase::Initialize(HWND hWnd)
                 break;
             }
         }
-        adapter.As(&useAdapter);
+        adapter.As(&m_adapter);
     }
 
     // Device
-    hr = D3D12CreateDevice(useAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_device));
+    hr = D3D12CreateDevice(m_adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_device));
     if (FAILED(hr))
     {
         throw std::runtime_error("D3D12CreateDevice failed.");

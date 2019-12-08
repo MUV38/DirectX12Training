@@ -9,9 +9,30 @@ namespace D3D12Util {
  * @param [in] device デバイス
  * @param [in] bufferSize バッファサイズ
  * @param [in] initialData 初期化データ
+ * @param [in] resourceName リソース名
  * @return リソース
  */
-Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(ID3D12Device* device, size_t bufferSize, const void* initialData);
+Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(
+	ID3D12Device* device, 
+	size_t bufferSize, 
+	const void* initialData,
+	const wchar_t* resourceName = nullptr
+);
+
+/**
+ * @brief UAVバッファ作成
+ * @param [in] device デバイス
+ * @param [in] bufferSize バッファサイズ
+ * @param [in] initialResourceState 初期リソースステート
+ * @param [in] resourceName リソース名
+ * @return リソース
+ */
+Microsoft::WRL::ComPtr<ID3D12Resource> CreateUAVBuffer(
+	ID3D12Device* device, 
+	size_t bufferSize, 
+	D3D12_RESOURCE_STATES initialResourceState = D3D12_RESOURCE_STATE_COMMON,
+	const wchar_t* resourceName = nullptr
+);
 
 /**
  * @brief シェーダーコンパイル

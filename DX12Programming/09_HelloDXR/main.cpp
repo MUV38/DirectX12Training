@@ -4,7 +4,7 @@
 
 #include "App.h"
 
-const wchar_t* APP_NAME = L"08_ImGui";
+const wchar_t* APP_NAME = L"09_HelloDXR";
 
 const int WINDOW_WIDTH = 1280; 
 const int WINDOW_HEIGHT = 720;

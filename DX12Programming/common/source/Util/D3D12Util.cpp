@@ -11,7 +11,12 @@ template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 /// バッファ作成
-ComPtr<ID3D12Resource> CreateBuffer(ID3D12Device* device, size_t bufferSize, const void* initialData)
+ComPtr<ID3D12Resource> CreateBuffer(
+	ID3D12Device* device, 
+	size_t bufferSize, 
+	const void* initialData,
+	const wchar_t* resourceName/* = nullptr*/
+)
 {
 	HRESULT hr;
 
@@ -37,6 +42,48 @@ ComPtr<ID3D12Resource> CreateBuffer(ID3D12Device* device, size_t bufferSize, con
 			buffer->Unmap(0, nullptr);
 		}
 	}
+
+#if defined(_DEBUG)
+	if (resourceName)
+	{
+		buffer->SetName(resourceName);
+	}
+#endif // defined(_DEBUG)
+
+	return buffer;
+}
+
+// UAVバッファ作成
+Microsoft::WRL::ComPtr<ID3D12Resource> CreateUAVBuffer(
+	ID3D12Device* device, 
+	size_t bufferSize, 
+	D3D12_RESOURCE_STATES initialResourceState/* = D3D12_RESOURCE_STATE_COMMON*/, 
+	const wchar_t* resourceName/* = nullptr*/
+)
+{
+	ComPtr<ID3D12Resource> buffer;
+
+	auto uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+	auto bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+	HRESULT hr = device->CreateCommittedResource(
+		&uploadHeapProperties,
+		D3D12_HEAP_FLAG_NONE,
+		&bufferDesc,
+		initialResourceState,
+		nullptr,
+		IID_PPV_ARGS(&buffer)
+	);
+	if (FAILED(hr))
+	{
+		throw std::runtime_error("CreateUAVBuffer() is failed.\n");
+	}
+
+#if defined(_DEBUG)
+	if (resourceName)
+	{
+		buffer->SetName(resourceName);
+	}
+#endif // defined(_DEBUG)
 
 	return buffer;
 }

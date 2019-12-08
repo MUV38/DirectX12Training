@@ -7,4 +7,7 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Raytracing.hlsl" />
+  </ItemGroup>
 </Project>
