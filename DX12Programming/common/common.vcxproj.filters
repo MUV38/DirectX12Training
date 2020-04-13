@@ -70,6 +70,12 @@
     <Filter Include="ソース ファイル\ImGui\ImGuiImpl">
       <UniqueIdentifier>{86a99454-0fce-426d-a783-306c0779815e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Window">
+      <UniqueIdentifier>{728bc9f8-5d0e-48ed-bf50-31b11611f235}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Window">
+      <UniqueIdentifier>{4aa80089-16b0-4722-8696-abf0e9306301}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -147,6 +153,9 @@
     <ClInclude Include="AssetUtil.h">
       <Filter>ヘッダー ファイル\Util</Filter>
     </ClInclude>
+    <ClInclude Include="include\Window\Window.h">
+      <Filter>ヘッダー ファイル\Window</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -199,6 +208,9 @@
     </ClCompile>
     <ClCompile Include="..\ThirdParty\imgui\imgui_widgets.cpp">
       <Filter>ソース ファイル\ImGui\ImGuiImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Window\Window.cpp">
+      <Filter>ソース ファイル\Window</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

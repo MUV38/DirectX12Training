@@ -19,6 +19,43 @@ D3D12AppBase::~D3D12AppBase()
 {
 }
 
+// 実行
+int D3D12AppBase::Run(HWND hWnd)
+{
+    // 初期化
+    Initialize(hWnd);
+
+    try
+    {
+        MSG msg{};
+        while (msg.message != WM_QUIT)
+        {
+            if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+            {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+            // 更新
+            Update();
+            // 描画
+            Render();
+        }
+
+        // 終了処理
+        Finalize();
+
+        return static_cast<int>(msg.wParam);
+    }
+    catch (std::runtime_error e)
+    {
+        DebugBreak();
+        OutputDebugStringA(e.what());
+        OutputDebugStringA("\n");
+    }
+
+    return 0;
+}
+
 // 初期化
 void D3D12AppBase::Initialize(HWND hWnd)
 {

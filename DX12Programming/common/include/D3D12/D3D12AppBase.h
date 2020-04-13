@@ -17,6 +17,17 @@ public:
     D3D12AppBase();
     virtual ~D3D12AppBase();
 
+    //! @brief é¿çs
+    int Run(HWND hWnd);
+
+protected:
+    /// override in subclass
+    virtual void OnInitialize() {}
+    virtual void OnFinalize() {}
+    virtual void OnUpdate() {}
+    virtual void OnRender(ComPtr<ID3D12GraphicsCommandList>& command) {}
+
+protected:
     //! @brief èâä˙âª
     void Initialize(HWND hWnd);
     //! @brief èIóπ
@@ -26,13 +37,6 @@ public:
     //! @brief ï`âÊ
     void Render();
 
-    /// override in subclass
-    virtual void OnInitialize() {}
-    virtual void OnFinalize() {}
-    virtual void OnUpdate() {}
-    virtual void OnRender(ComPtr<ID3D12GraphicsCommandList>& command) {}
-
-protected:
     //! @brief GPUë“Çø
     void WaitForGPU();
 

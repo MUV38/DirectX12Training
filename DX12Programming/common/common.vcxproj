@@ -124,6 +124,7 @@
     <ClInclude Include="include\Util\Assert.h" />
     <ClInclude Include="include\Util\FullScreenQuad.h" />
     <ClInclude Include="include\Util\D3D12Util.h" />
+    <ClInclude Include="include\Window\Window.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +148,7 @@
     <ClCompile Include="source\Texture\TextureLoder.cpp" />
     <ClCompile Include="source\Util\D3D12Util.cpp" />
     <ClCompile Include="source\Util\FullScreenQuad.cpp" />
+    <ClCompile Include="source\Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\assets\shader\FullScreenQuad_ps.hlsl">
