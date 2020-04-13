@@ -1,216 +1,212 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="ソース ファイル">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="ヘッダー ファイル">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="リソース ファイル">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\D3D12">
-      <UniqueIdentifier>{fc6a917b-577e-463b-b736-5329656f87aa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Model">
-      <UniqueIdentifier>{2fe9c3d5-7ae3-429a-a61f-3fbbb8843584}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Util">
-      <UniqueIdentifier>{3013030f-c1c0-4233-93a1-6283615f9ef4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\ThirdParty">
-      <UniqueIdentifier>{5d044a2c-9a55-4331-a009-937fbff3267c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\ThirdParty\stb">
-      <UniqueIdentifier>{9b1df5c8-9ff1-44ec-9af2-3113137d0d11}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\D3D12">
-      <UniqueIdentifier>{c8d18ea6-93d7-42ad-bea3-518dc9e4d3f9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Model">
-      <UniqueIdentifier>{2888d87f-7d39-408b-b219-c0bacdb3d6fc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Texture">
-      <UniqueIdentifier>{7a240881-a3ab-4797-8606-90d33d63a4e3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Texture">
-      <UniqueIdentifier>{88bda843-6c56-4cef-afff-495fdf3ab49f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Util">
-      <UniqueIdentifier>{2d3c7754-4f54-42c5-83a8-9edb3f54ef68}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{5e13fe63-f59b-433e-81f3-b953a5c5d829}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\RenderTarget">
-      <UniqueIdentifier>{ee87b7da-233b-4e16-840a-e7baaa539f4c}</UniqueIdentifier>
+    <Filter Include="SourceFiles">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="ソース ファイル\RenderTarget">
+    <Filter Include="SourceFiles\D3D12">
+      <UniqueIdentifier>{c8d18ea6-93d7-42ad-bea3-518dc9e4d3f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SourceFiles\Model">
+      <UniqueIdentifier>{2888d87f-7d39-408b-b219-c0bacdb3d6fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SourceFiles\Texture">
+      <UniqueIdentifier>{88bda843-6c56-4cef-afff-495fdf3ab49f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SourceFiles\Util">
+      <UniqueIdentifier>{2d3c7754-4f54-42c5-83a8-9edb3f54ef68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SourceFiles\RenderTarget">
       <UniqueIdentifier>{a162575d-5a6f-43ab-9bf4-01e81728d3da}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\ImGui">
+    <Filter Include="SourceFiles\ImGui">
       <UniqueIdentifier>{b04bfe5a-16a2-473f-9ea7-e9882d3eb959}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\ImGui">
-      <UniqueIdentifier>{0e611858-2cd4-4ea8-ad72-adcb207b94d4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Descriptor">
-      <UniqueIdentifier>{f29e46cb-bd11-480f-813a-d2e5708e038a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Descriptor">
-      <UniqueIdentifier>{573e2e30-249a-4067-b29a-5452f26c1ee8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\ImGui\ImGuiImpl">
-      <UniqueIdentifier>{51dc5460-120e-48f9-a4ee-d7b96db1f41c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\ImGui\ImGuiImpl">
+    <Filter Include="SourceFiles\ImGui\ImGuiImpl">
       <UniqueIdentifier>{86a99454-0fce-426d-a783-306c0779815e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Window">
+    <Filter Include="SourceFiles\Descriptor">
+      <UniqueIdentifier>{f29e46cb-bd11-480f-813a-d2e5708e038a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SourceFiles\Window">
       <UniqueIdentifier>{728bc9f8-5d0e-48ed-bf50-31b11611f235}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Window">
+    <Filter Include="HeaderFiles">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="HeaderFiles\D3D12">
+      <UniqueIdentifier>{fc6a917b-577e-463b-b736-5329656f87aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\Model">
+      <UniqueIdentifier>{2fe9c3d5-7ae3-429a-a61f-3fbbb8843584}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\Util">
+      <UniqueIdentifier>{3013030f-c1c0-4233-93a1-6283615f9ef4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\ThirdParty">
+      <UniqueIdentifier>{5d044a2c-9a55-4331-a009-937fbff3267c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\ThirdParty\stb">
+      <UniqueIdentifier>{9b1df5c8-9ff1-44ec-9af2-3113137d0d11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\Texture">
+      <UniqueIdentifier>{7a240881-a3ab-4797-8606-90d33d63a4e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\RenderTarget">
+      <UniqueIdentifier>{ee87b7da-233b-4e16-840a-e7baaa539f4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\ImGui">
+      <UniqueIdentifier>{0e611858-2cd4-4ea8-ad72-adcb207b94d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\ImGui\ImGuiImpl">
+      <UniqueIdentifier>{51dc5460-120e-48f9-a4ee-d7b96db1f41c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\Descriptor">
+      <UniqueIdentifier>{573e2e30-249a-4067-b29a-5452f26c1ee8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\Window">
       <UniqueIdentifier>{4aa80089-16b0-4722-8696-abf0e9306301}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>HeaderFiles</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>HeaderFiles</Filter>
     </ClInclude>
     <ClInclude Include="include\D3D12\D3D12AppBase.h">
-      <Filter>ヘッダー ファイル\D3D12</Filter>
+      <Filter>HeaderFiles\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="include\D3D12\d3dx12.h">
-      <Filter>ヘッダー ファイル\D3D12</Filter>
+      <Filter>HeaderFiles\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="include\Model\Mesh.h">
-      <Filter>ヘッダー ファイル\Model</Filter>
+      <Filter>HeaderFiles\Model</Filter>
     </ClInclude>
     <ClInclude Include="include\Model\ModelLoader.h">
-      <Filter>ヘッダー ファイル\Model</Filter>
+      <Filter>HeaderFiles\Model</Filter>
     </ClInclude>
     <ClInclude Include="include\Model\Polygon.h">
-      <Filter>ヘッダー ファイル\Model</Filter>
+      <Filter>HeaderFiles\Model</Filter>
     </ClInclude>
     <ClInclude Include="include\ThirdParty\stb\stb_image.h">
-      <Filter>ヘッダー ファイル\ThirdParty\stb</Filter>
+      <Filter>HeaderFiles\ThirdParty\stb</Filter>
     </ClInclude>
     <ClInclude Include="include\Texture\Texture.h">
-      <Filter>ヘッダー ファイル\Texture</Filter>
+      <Filter>HeaderFiles\Texture</Filter>
     </ClInclude>
     <ClInclude Include="include\Texture\TextureLoader.h">
-      <Filter>ヘッダー ファイル\Texture</Filter>
+      <Filter>HeaderFiles\Texture</Filter>
     </ClInclude>
     <ClInclude Include="include\Util\FullScreenQuad.h">
-      <Filter>ヘッダー ファイル\Util</Filter>
+      <Filter>HeaderFiles\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\Util\D3D12Util.h">
-      <Filter>ヘッダー ファイル\Util</Filter>
+      <Filter>HeaderFiles\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\RenderTarget\RenderTarget.h">
-      <Filter>ヘッダー ファイル\RenderTarget</Filter>
+      <Filter>HeaderFiles\RenderTarget</Filter>
     </ClInclude>
     <ClInclude Include="include\Descriptor\DescriptorHandle.h">
-      <Filter>ヘッダー ファイル\Descriptor</Filter>
+      <Filter>HeaderFiles\Descriptor</Filter>
     </ClInclude>
     <ClInclude Include="include\Descriptor\DescriptorPool.h">
-      <Filter>ヘッダー ファイル\Descriptor</Filter>
+      <Filter>HeaderFiles\Descriptor</Filter>
     </ClInclude>
     <ClInclude Include="include\Descriptor\DescriptorManager.h">
-      <Filter>ヘッダー ファイル\Descriptor</Filter>
+      <Filter>HeaderFiles\Descriptor</Filter>
     </ClInclude>
     <ClInclude Include="include\Util\Assert.h">
-      <Filter>ヘッダー ファイル\Util</Filter>
+      <Filter>HeaderFiles\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\ImGui\ImGuiDx12.h">
-      <Filter>ヘッダー ファイル\ImGui</Filter>
+      <Filter>HeaderFiles\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\ThirdParty\imgui\imconfig.h">
-      <Filter>ヘッダー ファイル\ImGui\ImGuiImpl</Filter>
+      <Filter>HeaderFiles\ImGui\ImGuiImpl</Filter>
     </ClInclude>
     <ClInclude Include="..\ThirdParty\imgui\imgui.h">
-      <Filter>ヘッダー ファイル\ImGui\ImGuiImpl</Filter>
+      <Filter>HeaderFiles\ImGui\ImGuiImpl</Filter>
     </ClInclude>
     <ClInclude Include="..\ThirdParty\imgui\imgui_internal.h">
-      <Filter>ヘッダー ファイル\ImGui\ImGuiImpl</Filter>
+      <Filter>HeaderFiles\ImGui\ImGuiImpl</Filter>
     </ClInclude>
     <ClInclude Include="..\ThirdParty\imgui\imstb_rectpack.h">
-      <Filter>ヘッダー ファイル\ImGui\ImGuiImpl</Filter>
+      <Filter>HeaderFiles\ImGui\ImGuiImpl</Filter>
     </ClInclude>
     <ClInclude Include="..\ThirdParty\imgui\imstb_textedit.h">
-      <Filter>ヘッダー ファイル\ImGui\ImGuiImpl</Filter>
+      <Filter>HeaderFiles\ImGui\ImGuiImpl</Filter>
     </ClInclude>
     <ClInclude Include="..\ThirdParty\imgui\imstb_truetype.h">
-      <Filter>ヘッダー ファイル\ImGui\ImGuiImpl</Filter>
+      <Filter>HeaderFiles\ImGui\ImGuiImpl</Filter>
     </ClInclude>
     <ClInclude Include="AssetUtil.h">
-      <Filter>ヘッダー ファイル\Util</Filter>
+      <Filter>HeaderFiles\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\Window\Window.h">
-      <Filter>ヘッダー ファイル\Window</Filter>
+      <Filter>HeaderFiles\Window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>SourceFiles</Filter>
     </ClCompile>
     <ClCompile Include="common.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>SourceFiles</Filter>
     </ClCompile>
     <ClCompile Include="source\D3D12\D3D12AppBase.cpp">
-      <Filter>ソース ファイル\D3D12</Filter>
+      <Filter>SourceFiles\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="source\Model\Mesh.cpp">
-      <Filter>ソース ファイル\Model</Filter>
+      <Filter>SourceFiles\Model</Filter>
     </ClCompile>
     <ClCompile Include="source\Model\ModelLoader.cpp">
-      <Filter>ソース ファイル\Model</Filter>
+      <Filter>SourceFiles\Model</Filter>
     </ClCompile>
     <ClCompile Include="source\Texture\Texture.cpp">
-      <Filter>ソース ファイル\Texture</Filter>
+      <Filter>SourceFiles\Texture</Filter>
     </ClCompile>
     <ClCompile Include="source\Texture\TextureLoder.cpp">
-      <Filter>ソース ファイル\Texture</Filter>
+      <Filter>SourceFiles\Texture</Filter>
     </ClCompile>
     <ClCompile Include="source\Util\FullScreenQuad.cpp">
-      <Filter>ソース ファイル\Util</Filter>
+      <Filter>SourceFiles\Util</Filter>
     </ClCompile>
     <ClCompile Include="source\Util\D3D12Util.cpp">
-      <Filter>ソース ファイル\Util</Filter>
+      <Filter>SourceFiles\Util</Filter>
     </ClCompile>
     <ClCompile Include="source\RenderTarget\RenderTarget.cpp">
-      <Filter>ソース ファイル\RenderTarget</Filter>
+      <Filter>SourceFiles\RenderTarget</Filter>
     </ClCompile>
     <ClCompile Include="source\Descriptor\DescriptorHandle.cpp">
-      <Filter>ソース ファイル\Descriptor</Filter>
+      <Filter>SourceFiles\Descriptor</Filter>
     </ClCompile>
     <ClCompile Include="source\Descriptor\DescriptorPool.cpp">
-      <Filter>ソース ファイル\Descriptor</Filter>
+      <Filter>SourceFiles\Descriptor</Filter>
     </ClCompile>
     <ClCompile Include="source\Descriptor\DescriptorManager.cpp">
-      <Filter>ソース ファイル\Descriptor</Filter>
+      <Filter>SourceFiles\Descriptor</Filter>
     </ClCompile>
     <ClCompile Include="source\ImGui\ImGuiDx12.cpp">
-      <Filter>ソース ファイル\ImGui</Filter>
+      <Filter>SourceFiles\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="..\ThirdParty\imgui\imgui.cpp">
-      <Filter>ソース ファイル\ImGui\ImGuiImpl</Filter>
+      <Filter>SourceFiles\ImGui\ImGuiImpl</Filter>
     </ClCompile>
     <ClCompile Include="..\ThirdParty\imgui\imgui_draw.cpp">
-      <Filter>ソース ファイル\ImGui\ImGuiImpl</Filter>
+      <Filter>SourceFiles\ImGui\ImGuiImpl</Filter>
     </ClCompile>
     <ClCompile Include="..\ThirdParty\imgui\imgui_widgets.cpp">
-      <Filter>ソース ファイル\ImGui\ImGuiImpl</Filter>
+      <Filter>SourceFiles\ImGui\ImGuiImpl</Filter>
     </ClCompile>
     <ClCompile Include="source\Window\Window.cpp">
-      <Filter>ソース ファイル\Window</Filter>
+      <Filter>SourceFiles\Window</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
