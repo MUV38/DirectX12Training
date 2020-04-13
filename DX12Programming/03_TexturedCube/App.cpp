@@ -1,18 +1,18 @@
-#include "CubeApp.h"
+#include "App.h"
 #include <stdexcept>
 #define STB_IMAGE_IMPLEMENTATION
 #include <ThirdParty/stb/stb_image.h>
 #include <Util/D3D12Util.h>
 
-CubeApp::CubeApp()
+App::App()
 {
 }
 
-CubeApp::~CubeApp()
+App::~App()
 {
 }
 
-void CubeApp::OnInitialize()
+void App::OnInitialize()
 {
 	auto* device = GetDevice().Get();
 	auto& descriptorManager = GetDescriptorManager();
@@ -227,7 +227,7 @@ void CubeApp::OnInitialize()
 	}
 }
 
-void CubeApp::OnFinalize()
+void App::OnFinalize()
 {
 	WaitForGPU();
 
@@ -241,7 +241,7 @@ void CubeApp::OnFinalize()
 #endif
 }
 
-void CubeApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
+void App::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
 {
     using namespace DirectX;
 
@@ -302,7 +302,7 @@ void CubeApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
     command->DrawIndexedInstanced(m_indexCount, 1, 0, 0, 0);
 }
 
-CubeApp::ComPtr<ID3D12Resource1> CubeApp::CreateTexture(const std::string& fileName)
+App::ComPtr<ID3D12Resource1> App::CreateTexture(const std::string& fileName)
 {
 	auto* device = GetDevice().Get();
 	auto* commandAllocator = GetCommandAllocator().Get();

@@ -3,11 +3,11 @@
 #include <D3D12/D3D12AppBase.h>
 #include <DirectXMath.h>
 
-class CubeApp : public D3D12AppBase
+class App : public D3D12AppBase
 {
 public:
-    CubeApp();
-    virtual ~CubeApp();
+    App();
+    virtual ~App();
 
 public:
     struct Vertex

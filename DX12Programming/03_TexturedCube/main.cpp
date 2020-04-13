@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 #include "Window/Window.h"
-#include "CubeApp.h"
+#include "App.h"
 
 const wchar_t* APP_NAME = L"03_TexturedCube";
 
@@ -13,7 +13,7 @@ const int WINDOW_HEIGHT = 720;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
     Window window;
-    CubeApp app;
+    App app;
 
     window.create(
         hInstance,
