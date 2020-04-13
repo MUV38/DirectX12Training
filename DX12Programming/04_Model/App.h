@@ -4,11 +4,11 @@
 #include <Model/ModelLoader.h>
 //#include "assimp/types.h"
 
-class ModelApp : public D3D12AppBase
+class App : public D3D12AppBase
 {
 public:
-    ModelApp();
-    ~ModelApp();
+    App();
+    ~App();
 
 public:
     struct ShaderParameters
@@ -25,9 +25,9 @@ public:
 	};
 
 public:
-    virtual void Prepare() override;
-    virtual void Cleanup() override;
-    virtual void MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command) override;
+    virtual void OnInitialize() override;
+    virtual void OnFinalize() override;
+    virtual void OnRender(ComPtr<ID3D12GraphicsCommandList>& command) override;
 
 private:
     ModelLoader m_modelLoader;

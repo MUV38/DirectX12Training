@@ -31,9 +31,9 @@ public:
 	};
 
 public:
-    virtual void Prepare() override;
-    virtual void Cleanup() override;
-    virtual void MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command) override;
+    virtual void OnInitialize() override;
+    virtual void OnFinalize() override;
+    virtual void OnRender(ComPtr<ID3D12GraphicsCommandList>& command) override;
 
 private:
     /// テクスチャの作成

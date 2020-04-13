@@ -1,17 +1,19 @@
-#include "TriangleApp.h"
+#include "App.h"
 #include <stdexcept>
 #include <Util/D3D12Util.h>
 
-TriangleApp::TriangleApp()
+App::App()
 {
 }
 
-TriangleApp::~TriangleApp()
+App::~App()
 {
 }
 
-void TriangleApp::Prepare()
+void App::OnInitialize()
 {
+    auto* device = GetDevice().Get();
+
     Vertex triangleVertices[] = {
         { {  0.0f, 0.25f, 0.5f }, { 1.0f, 0.0f,0.0f,1.0f} },
         { { 0.25f,-0.25f, 0.5f }, { 0.0f, 1.0f,0.0f,1.0f} },
@@ -60,7 +62,7 @@ void TriangleApp::Prepare()
         throw std::runtime_error("D3D12SerializeRootSignature faild.");
     }
     // RootSignature‚Ì¶¬.
-    hr = m_device->CreateRootSignature(
+    hr = device->CreateRootSignature(
         0,
         signature->GetBufferPointer(), signature->GetBufferSize(),
         IID_PPV_ARGS(&m_rootSignature)
@@ -100,32 +102,39 @@ void TriangleApp::Prepare()
         psoDesc.SampleDesc = { 1, 0 };
         psoDesc.SampleMask = UINT_MAX; // ‚±‚ê‚ð–Y‚ê‚é‚ÆŠG‚ªo‚È‚¢&Œx‚ào‚È‚¢.
     }
-    hr = m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipeline));
+    hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipeline));
     if (FAILED(hr))
     {
         throw std::runtime_error("CreateGraphicsPipelineState failed");
     }
 }
 
-void TriangleApp::Cleanup()
+void App::OnFinalize()
 {
+    WaitForGPU();
+
+#if 0
     auto index = m_swapChain->GetCurrentBackBufferIndex();
     auto fence = m_frameFences[index];
     auto value = ++m_frameFenceValues[index];
     m_commandQueue->Signal(fence.Get(), value);
     fence->SetEventOnCompletion(value, m_fenceWaitEvent);
     WaitForSingleObject(m_fenceWaitEvent, GpuWaitTimeout);
+#endif
 }
 
-void TriangleApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
+void App::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
 {
+    const auto& viewport = GetViewport();
+    const auto& scissorRect = GetScissorRect();
+
     // PSO.
     command->SetPipelineState(m_pipeline.Get());
     // RootSignature.
     command->SetGraphicsRootSignature(m_rootSignature.Get());
     // Viewport, Scissor.
-    command->RSSetViewports(1, &m_viewport);
-    command->RSSetScissorRects(1, &m_scissorRect);
+    command->RSSetViewports(1, &viewport);
+    command->RSSetScissorRects(1, &scissorRect);
 
     // PrimitiveType, Vertex, Index.
     command->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -136,12 +145,13 @@ void TriangleApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
     command->DrawIndexedInstanced(m_indexCount, 1, 0, 0, 0);
 }
 
-TriangleApp::ComPtr<ID3D12Resource1> TriangleApp::CreateBuffer(UINT bufferSize, const void* initialData)
+App::ComPtr<ID3D12Resource1> App::CreateBuffer(UINT bufferSize, const void* initialData)
 {
+    auto* device = GetDevice().Get();
 
     HRESULT hr;
     ComPtr<ID3D12Resource1> buffer;
-    hr = m_device->CreateCommittedResource(
+    hr = device->CreateCommittedResource(
         &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
         D3D12_HEAP_FLAG_NONE,
         &CD3DX12_RESOURCE_DESC::Buffer(bufferSize),

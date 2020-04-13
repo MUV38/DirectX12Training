@@ -3,11 +3,11 @@
 #include <D3D12/D3D12AppBase.h>
 #include <DirectXMath.h>
 
-class TriangleApp : public D3D12AppBase
+class App : public D3D12AppBase
 {
 public:
-    TriangleApp();
-    virtual ~TriangleApp();
+    App();
+    virtual ~App();
 
 public:
     struct Vertex
@@ -17,9 +17,9 @@ public:
     };
 
 public:
-    virtual void Prepare() override;
-    virtual void Cleanup() override;
-    virtual void MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command) override;
+    virtual void OnInitialize() override;
+    virtual void OnFinalize() override;
+    virtual void OnRender(ComPtr<ID3D12GraphicsCommandList>& command) override;
 
 private:
     /// バッファの作成

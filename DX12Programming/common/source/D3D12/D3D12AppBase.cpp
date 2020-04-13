@@ -4,6 +4,7 @@
 #include <experimental/filesystem>
 #include "D3D12/D3D12AppBase.h"
 #include "Util/D3D12Util.h"
+#include "Util/Assert.h"
 
 D3D12AppBase::D3D12AppBase()
     : m_frameIndex(0)
@@ -18,23 +19,24 @@ D3D12AppBase::~D3D12AppBase()
 {
 }
 
+// 初期化
 void D3D12AppBase::Initialize(HWND hWnd)
 {
     HRESULT hr;
 
-	// DirectXTexのための初期化
+    // DirectXTexのための初期化
 #if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
-	Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
-	if (FAILED(initialize))
-	{
-		throw std::runtime_error("RoInitializeWrapper failed.");
-	}
+    Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
+    if (FAILED(initialize))
+    {
+        throw std::runtime_error("RoInitializeWrapper failed.");
+    }
 #else // (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
-	HRESULT hr = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
-	if (FAILED(initialize))
-	{
-		throw std::runtime_error("CoInitializeEx() failed.");
-	}
+    HRESULT hr = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
+    if (FAILED(initialize))
+    {
+        throw std::runtime_error("CoInitializeEx() failed.");
+    }
 #endif //  (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
 
     // デバッグ
@@ -173,52 +175,47 @@ void D3D12AppBase::Initialize(HWND hWnd)
     m_viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, float(width), float(height));
     m_scissorRect = CD3DX12_RECT(0, 0, LONG(width), LONG(height));
 
-	// imgui
-	{
-		m_imguiSrvDescriptorHandle = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
-		m_imgui.Init(
-			&hWnd,
-			m_device.Get(),
-			FrameBufferCount,
-			DXGI_FORMAT_R8G8B8A8_UNORM,
-			m_imguiSrvDescriptorHandle.GetHeap(),
-			m_imguiSrvDescriptorHandle.GetCPUHandle(),
-			m_imguiSrvDescriptorHandle.GetGPUHandle()
-		);
-	}
+    // imgui
+    {
+        m_imguiSrvDescriptorHandle = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+        m_imgui.Init(
+            &hWnd,
+            m_device.Get(),
+            FrameBufferCount,
+            DXGI_FORMAT_R8G8B8A8_UNORM,
+            m_imguiSrvDescriptorHandle.GetHeap(),
+            m_imguiSrvDescriptorHandle.GetCPUHandle(),
+            m_imguiSrvDescriptorHandle.GetGPUHandle()
+        );
+    }
 
-    Prepare();
+    OnInitialize();
 }
 
-void D3D12AppBase::Terminate()
+// 終了
+void D3D12AppBase::Finalize()
 {
-    Cleanup();
+    OnFinalize();
 
-	m_imgui.Shutdown();
+    m_imgui.Shutdown();
 }
 
+// 更新
 void D3D12AppBase::Update()
 {
-	m_imgui.NewFrame();
+    m_imgui.NewFrame();
+
+    OnUpdate();
 }
 
+// 描画
 void D3D12AppBase::Render()
 {
-    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+    // 描画開始
+    BeginRender();
 
-    m_commandAllocators[m_frameIndex]->Reset();
-    m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr);
-
-    // スワップチェイン表示可能からレンダーターゲット描画可能へ
-    auto barrierToRT = CD3DX12_RESOURCE_BARRIER::Transition(
-		m_backBufferRenderTargets[m_frameIndex].Get(),
-        D3D12_RESOURCE_STATE_PRESENT,
-        D3D12_RESOURCE_STATE_RENDER_TARGET
-    );
-    m_commandList->ResourceBarrier(1, &barrierToRT);
-
-	const D3D12_CPU_DESCRIPTOR_HANDLE rtv = m_backBufferRtvDescriptorHandle[m_frameIndex].GetCPUHandle();
-	const D3D12_CPU_DESCRIPTOR_HANDLE dsv = m_backBufferDsvDescriptorHandle.GetCPUHandle();
+    const D3D12_CPU_DESCRIPTOR_HANDLE rtv = m_backBufferRtvDescriptorHandle[m_frameIndex].GetCPUHandle();
+    const D3D12_CPU_DESCRIPTOR_HANDLE dsv = m_backBufferDsvDescriptorHandle.GetCPUHandle();
 
     // レンダーターゲットクリア
     const float clearColor[] = { 0.3f, 0.3f, 0.3f, 0.0f };
@@ -229,31 +226,15 @@ void D3D12AppBase::Render()
     // 描画対象の設定
     m_commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
 
-    MakeCommand(m_commandList);
-	
-	// imgui
-	{
-		m_commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
-		m_imgui.Render(m_commandList.Get());
-	}
+    OnRender(m_commandList);
 
-    // レンダーターゲット描画可能からスワップチェイン表示可能へ
-    auto barrierToPresent = CD3DX12_RESOURCE_BARRIER::Transition(
-		m_backBufferRenderTargets[m_frameIndex].Get(),
-        D3D12_RESOURCE_STATE_RENDER_TARGET,
-        D3D12_RESOURCE_STATE_PRESENT
-    );
-    m_commandList->ResourceBarrier(1, &barrierToPresent);
+    // imgui
+    {
+        m_commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+        m_imgui.Render(m_commandList.Get());
+    }
 
-    m_commandList->Close();
-
-    // コマンドリスト実行
-    ID3D12CommandList* lists[] = { m_commandList.Get() };
-    m_commandQueue->ExecuteCommandLists(static_cast<UINT>(_countof(lists)), lists);
-
-    m_swapChain->Present(1, 0);
-
-    WaitPreviousFrame();
+    EndRender();
 }
 
 void D3D12AppBase::PrepareDescriptorHeaps()
@@ -361,7 +342,8 @@ void D3D12AppBase::CreateFrameFences()
     }
 }
 
-void D3D12AppBase::WaitPreviousFrame()
+// GPU待ち
+void D3D12AppBase::WaitForGPU()
 {
     // GPUが設定する値を設定
     auto& fence = m_frameFences[m_frameIndex];
@@ -378,4 +360,139 @@ void D3D12AppBase::WaitPreviousFrame()
         m_frameFences[nextIndex]->SetEventOnCompletion(finishExpected, m_fenceWaitEvent);
         WaitForSingleObject(m_fenceWaitEvent, GpuWaitTimeout);
     }
+}
+
+// アダプター
+D3D12AppBase::ComPtr<IDXGIAdapter1>& D3D12AppBase::GetAdapter()
+{
+    return m_adapter;
+}
+
+// デバイス
+D3D12AppBase::ComPtr<ID3D12Device>& D3D12AppBase::GetDevice()
+{
+    return m_device;
+}
+
+// コマンドキュー
+D3D12AppBase::ComPtr<ID3D12CommandQueue>& D3D12AppBase::GetCommandQueue()
+{
+    return m_commandQueue;
+}
+
+// スワップチェイン
+D3D12AppBase::ComPtr<IDXGISwapChain4>& D3D12AppBase::GetSwapChain()
+{
+    return m_swapChain;
+}
+
+// バックバッファのレンダーターゲット取得
+D3D12AppBase::ComPtr<ID3D12Resource>& D3D12AppBase::GetBackBufferRenderTarget()
+{
+    return m_backBufferRenderTargets[m_frameIndex];
+}
+D3D12AppBase::ComPtr<ID3D12Resource>& D3D12AppBase::GetBackBufferRenderTarget(uint32_t index)
+{
+    ASSERT(index < m_backBufferRenderTargets.size());
+
+    return m_backBufferRenderTargets[index];
+}
+
+// コマンドリスト
+D3D12AppBase::ComPtr<ID3D12GraphicsCommandList>& D3D12AppBase::GetCommandList()
+{
+    return m_commandList;
+}
+
+// コマンドアロケータ
+D3D12AppBase::ComPtr<ID3D12CommandAllocator>& D3D12AppBase::GetCommandAllocator()
+{
+    return m_commandAllocators[m_frameIndex];
+}
+D3D12AppBase::ComPtr<ID3D12CommandAllocator>& D3D12AppBase::GetCommandAllocator(uint32_t index)
+{
+    ASSERT(index < m_commandAllocators.size());
+
+    return m_commandAllocators[index];
+}
+
+// フレームインデックス
+UINT D3D12AppBase::GetFrameIndex() const
+{
+    return m_frameIndex;
+}
+
+// ビューポート
+const CD3DX12_VIEWPORT& D3D12AppBase::GetViewport() const
+{
+    return m_viewport;
+}
+
+// シザー矩形
+const CD3DX12_RECT& D3D12AppBase::GetScissorRect() const
+{
+    return m_scissorRect;
+}
+
+// デスクリプターマネージャー
+DescriptorManager& D3D12AppBase::GetDescriptorManager()
+{
+    return m_descriptorManager;
+}
+
+// バックバッファのRTVハンドル
+const DescriptorHandle& D3D12AppBase::GetBackBufferRtvDescriptorHandle() const
+{
+    return m_backBufferRtvDescriptorHandle[m_frameIndex];
+}
+const DescriptorHandle& D3D12AppBase::GetBackBufferRtvDescriptorHandle(uint32_t index) const
+{
+    ASSERT(index < FrameBufferCount);
+
+    return m_backBufferRtvDescriptorHandle[index];
+}
+
+// バックバッファのDSVハンドル
+const DescriptorHandle& D3D12AppBase::GetBackBufferDsvDescriptorHandle() const
+{
+    return m_backBufferDsvDescriptorHandle;
+}
+
+// 描画開始
+void D3D12AppBase::BeginRender()
+{
+    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+    m_commandAllocators[m_frameIndex]->Reset();
+    m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), nullptr);
+
+    // スワップチェイン表示可能からレンダーターゲット描画可能へ
+    auto barrierToRT = CD3DX12_RESOURCE_BARRIER::Transition(
+        m_backBufferRenderTargets[m_frameIndex].Get(),
+        D3D12_RESOURCE_STATE_PRESENT,
+        D3D12_RESOURCE_STATE_RENDER_TARGET
+    );
+    m_commandList->ResourceBarrier(1, &barrierToRT);
+}
+
+// 描画終了
+void D3D12AppBase::EndRender()
+{
+    // レンダーターゲット描画可能からスワップチェイン表示可能へ
+    auto barrierToPresent = CD3DX12_RESOURCE_BARRIER::Transition(
+        m_backBufferRenderTargets[m_frameIndex].Get(),
+        D3D12_RESOURCE_STATE_RENDER_TARGET,
+        D3D12_RESOURCE_STATE_PRESENT
+    );
+    m_commandList->ResourceBarrier(1, &barrierToPresent);
+
+    m_commandList->Close();
+
+    // コマンドリスト実行
+    ID3D12CommandList* lists[] = { m_commandList.Get() };
+    m_commandQueue->ExecuteCommandLists(static_cast<UINT>(_countof(lists)), lists);
+
+    m_swapChain->Present(1, 0);
+
+    WaitForGPU();
 }

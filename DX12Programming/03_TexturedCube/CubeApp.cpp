@@ -12,8 +12,11 @@ CubeApp::~CubeApp()
 {
 }
 
-void CubeApp::Prepare()
+void CubeApp::OnInitialize()
 {
+	auto* device = GetDevice().Get();
+	auto& descriptorManager = GetDescriptorManager();
+
 	const float k = 1.0f;
 	const DirectX::XMFLOAT4 red(1.f, 0.f, 0.f, 1.f);
 	const DirectX::XMFLOAT4 green(0.f, 1.f, 0.f, 1.f);
@@ -65,8 +68,8 @@ void CubeApp::Prepare()
 	};
 
 	// 頂点バッファとインデックスバッファの生成.
-	m_vertexBuffer = D3D12Util::CreateBuffer(m_device.Get(), sizeof(cubeVertices), cubeVertices);
-	m_indexBuffer = D3D12Util::CreateBuffer(m_device.Get(), sizeof(indices), indices);
+	m_vertexBuffer = D3D12Util::CreateBuffer(device, sizeof(cubeVertices), cubeVertices);
+	m_indexBuffer = D3D12Util::CreateBuffer(device, sizeof(indices), indices);
 	m_indexCount = _countof(indices);
 
 	// 各バッファのビューを生成.
@@ -116,7 +119,7 @@ void CubeApp::Prepare()
 	{
 		throw std::runtime_error("D3D12SerializeRootSignature faild.");
 	}
-	hr = m_device->CreateRootSignature(
+	hr = device->CreateRootSignature(
 		0,
 		signature->GetBufferPointer(), signature->GetBufferSize(),
 		IID_PPV_ARGS(&m_rootSignature)
@@ -159,7 +162,7 @@ void CubeApp::Prepare()
 		psoDesc.SampleDesc = { 1, 0 };
 		psoDesc.SampleMask = UINT_MAX; // これを忘れると絵が出ない&警告も出ない.
 	}
-	hr = m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipeline));
+	hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipeline));
 	if (FAILED(hr))
 	{
 		throw std::runtime_error("CreateGraphicsPipelineState failed");
@@ -175,14 +178,14 @@ void CubeApp::Prepare()
 			int index = i * FrameBufferCount + j;
 
 			UINT bufferSize = sizeof(ShaderParameters) + 255 & ~255;
-			m_constantBuffers[index] = D3D12Util::CreateBuffer(m_device.Get(), bufferSize, nullptr);
+			m_constantBuffers[index] = D3D12Util::CreateBuffer(device, bufferSize, nullptr);
 
-			m_cbViews[index] = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+			m_cbViews[index] = descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
 
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbDesc{};
 			cbDesc.BufferLocation = m_constantBuffers[index]->GetGPUVirtualAddress();
 			cbDesc.SizeInBytes = bufferSize;
-			m_device->CreateConstantBufferView(&cbDesc, m_cbViews[index].GetCPUHandle());
+			device->CreateConstantBufferView(&cbDesc, m_cbViews[index].GetCPUHandle());
 		}
 	}
 
@@ -191,7 +194,7 @@ void CubeApp::Prepare()
 
 	// sampler.
 	{
-		m_sampler = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::Sampler);
+		m_sampler = descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::Sampler);
 
 		D3D12_SAMPLER_DESC samplerDesc{};
 		samplerDesc.Filter = D3D12_ENCODE_BASIC_FILTER(
@@ -208,35 +211,44 @@ void CubeApp::Prepare()
 		samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 
 		// DescriptorHeap.
-		m_device->CreateSampler(&samplerDesc, m_sampler.GetCPUHandle());
+		device->CreateSampler(&samplerDesc, m_sampler.GetCPUHandle());
 	}
 
 	// CreateShaderResourceView from texture.
 	{
-		m_srv = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+		m_srv = descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 		srvDesc.Texture2D.MipLevels = 1;
 		srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		m_device->CreateShaderResourceView(m_texture.Get(), &srvDesc, m_srv.GetCPUHandle());
+		device->CreateShaderResourceView(m_texture.Get(), &srvDesc, m_srv.GetCPUHandle());
 	}
 }
 
-void CubeApp::Cleanup()
+void CubeApp::OnFinalize()
 {
+	WaitForGPU();
+
+#if 0
     auto index = m_swapChain->GetCurrentBackBufferIndex();
     auto fence = m_frameFences[index];
     auto value = ++m_frameFenceValues[index];
     m_commandQueue->Signal(fence.Get(), value);
     fence->SetEventOnCompletion(value, m_fenceWaitEvent);
     WaitForSingleObject(m_fenceWaitEvent, GpuWaitTimeout);
+#endif
 }
 
-void CubeApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
+void CubeApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
 {
     using namespace DirectX;
+
+	auto frameIndex = GetFrameIndex();
+	const auto& viewport = GetViewport();
+	const auto& scissorRect = GetScissorRect();
+	auto& descriptorManager = GetDescriptorManager();
 
     // Matrix.
     ShaderParameters shaderParams;
@@ -246,12 +258,12 @@ void CubeApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
         XMVectorSet(0.f, 0.f,  0.f, 0.f),
         XMVectorSet(0.f, 1.f,  0.f, 0.f)
     );
-    auto mtxProj = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.f), m_viewport.Width / m_viewport.Height, 0.1f, 100.0f);
+    auto mtxProj = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.f), viewport.Width / viewport.Height, 0.1f, 100.0f);
     XMStoreFloat4x4(&shaderParams.mtxView, XMMatrixTranspose(mtxView));
     XMStoreFloat4x4(&shaderParams.mtxProj, XMMatrixTranspose(mtxProj));
 
     // Update constant buffer.
-    auto& constantBuffer = m_constantBuffers[m_frameIndex];
+    auto& constantBuffer = m_constantBuffers[frameIndex];
     {
         void* p;
         D3D12_RANGE range{ 0, 0 };
@@ -265,12 +277,12 @@ void CubeApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
     // RootSignature.
     command->SetGraphicsRootSignature(m_rootSignature.Get());
     // Viewport, Scissor.
-    command->RSSetViewports(1, &m_viewport);
-    command->RSSetScissorRects(1, &m_scissorRect);
+    command->RSSetViewports(1, &viewport);
+    command->RSSetScissorRects(1, &scissorRect);
 
     // DescriptorHeap.
-	DescriptorPool* cbvSrvUavDescriptorPool = m_descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav);
-	DescriptorPool* samplerDescriptorPool = m_descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::Sampler);
+	DescriptorPool* cbvSrvUavDescriptorPool = descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+	DescriptorPool* samplerDescriptorPool = descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::Sampler);
     ID3D12DescriptorHeap* heaps[] = {
 		cbvSrvUavDescriptorPool->GetHeap(), samplerDescriptorPool->GetHeap()
     };
@@ -281,7 +293,7 @@ void CubeApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
     command->IASetVertexBuffers(0, 1, &m_vertexBufferView);
     command->IASetIndexBuffer(&m_indexBufferView);
 
-	int cbvModelIndex = CbvModel * FrameBufferCount + m_frameIndex;
+	int cbvModelIndex = CbvModel * FrameBufferCount + frameIndex;
     command->SetGraphicsRootDescriptorTable(0, m_cbViews[cbvModelIndex].GetGPUHandle());
     command->SetGraphicsRootDescriptorTable(1, m_srv.GetGPUHandle());
     command->SetGraphicsRootDescriptorTable(2, m_sampler.GetGPUHandle());
@@ -292,6 +304,10 @@ void CubeApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
 
 CubeApp::ComPtr<ID3D12Resource1> CubeApp::CreateTexture(const std::string& fileName)
 {
+	auto* device = GetDevice().Get();
+	auto* commandAllocator = GetCommandAllocator().Get();
+	auto* commandQueue = GetCommandQueue().Get();
+
     ComPtr<ID3D12Resource1> texture;
     int texWidth = 0, texHeight = 0, channels = 0;
     auto* pImage = stbi_load(fileName.c_str(), &texWidth, &texHeight, &channels, 0);
@@ -306,7 +322,7 @@ CubeApp::ComPtr<ID3D12Resource1> CubeApp::CreateTexture(const std::string& fileN
     );
 
     // テクスチャ生成
-    m_device->CreateCommittedResource(
+	device->CreateCommittedResource(
         &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
         D3D12_HEAP_FLAG_NONE,
         &texDesc,
@@ -319,8 +335,8 @@ CubeApp::ComPtr<ID3D12Resource1> CubeApp::CreateTexture(const std::string& fileN
     D3D12_PLACED_SUBRESOURCE_FOOTPRINT layouts;
     UINT numRows;
     UINT64 rowSizeBytes, totalBytes;
-    m_device->GetCopyableFootprints(&texDesc, 0, 1, 0, &layouts, &numRows, &rowSizeBytes, &totalBytes);
-    ComPtr<ID3D12Resource> stagingBuffer = D3D12Util::CreateBuffer(m_device.Get(), static_cast<UINT>(totalBytes), nullptr);
+	device->GetCopyableFootprints(&texDesc, 0, 1, 0, &layouts, &numRows, &rowSizeBytes, &totalBytes);
+    ComPtr<ID3D12Resource> stagingBuffer = D3D12Util::CreateBuffer(device, static_cast<UINT>(totalBytes), nullptr);
     
     // ステージングバッファに画像をコピー
     {
@@ -338,9 +354,9 @@ CubeApp::ComPtr<ID3D12Resource1> CubeApp::CreateTexture(const std::string& fileN
 
     // コマンド準備
     ComPtr<ID3D12GraphicsCommandList> command;
-    m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocators[m_frameIndex].Get(), nullptr, IID_PPV_ARGS(&command));
+	device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator, nullptr, IID_PPV_ARGS(&command));
     ComPtr<ID3D12Fence1> fence;
-    m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+	device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 
     // 転送コマンド
     D3D12_TEXTURE_COPY_LOCATION src{}, dst{};
@@ -365,10 +381,10 @@ CubeApp::ComPtr<ID3D12Resource1> CubeApp::CreateTexture(const std::string& fileN
 
     // コマンド実行
     ID3D12CommandList* cmds[] = { command.Get() };
-    m_commandQueue->ExecuteCommandLists(_countof(cmds), cmds);
+	commandQueue->ExecuteCommandLists(_countof(cmds), cmds);
     // 完了したらシグナルを立てる
     const UINT64 expected = 1;
-    m_commandQueue->Signal(fence.Get(), expected);
+	commandQueue->Signal(fence.Get(), expected);
 
     // テクスチャの処理が完了するまで待つ
     while (expected != fence->GetCompletedValue())

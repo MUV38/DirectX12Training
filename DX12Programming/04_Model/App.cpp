@@ -1,4 +1,4 @@
-#include "ModelApp.h"
+#include "App.h"
 
 #undef min
 #undef max
@@ -6,18 +6,21 @@
 #include <stdexcept>
 #include <Util/D3D12Util.h>
 
-ModelApp::ModelApp()
+App::App()
 {
 }
 
-ModelApp::~ModelApp()
+App::~App()
 {
 }
 
-void ModelApp::Prepare()
+void App::OnInitialize()
 {
+    auto* device = GetDevice().Get();
+    auto& descriptorManager = GetDescriptorManager();
+
     // モデル読み込み
-    m_modelLoader.Load(m_device.Get(), "../assets/shaderball/shaderBall.fbx");
+    m_modelLoader.Load(device, "../assets/shaderball/shaderBall.fbx");
 
     // シェーダーをコンパイル.
     HRESULT hr;
@@ -54,7 +57,7 @@ void ModelApp::Prepare()
     {
         throw std::runtime_error("D3D12SerializeRootSignature faild.");
     }
-    hr = m_device->CreateRootSignature(
+    hr = device->CreateRootSignature(
         0,
         signature->GetBufferPointer(), signature->GetBufferSize(),
         IID_PPV_ARGS(&m_rootSignature)
@@ -97,7 +100,7 @@ void ModelApp::Prepare()
         psoDesc.SampleDesc = { 1, 0 };
         psoDesc.SampleMask = UINT_MAX; // これを忘れると絵が出ない&警告も出ない.
     }
-    hr = m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipeline));
+    hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipeline));
     if (FAILED(hr))
     {
         throw std::runtime_error("CreateGraphicsPipelineState failed");
@@ -113,31 +116,40 @@ void ModelApp::Prepare()
 			int index = i * FrameBufferCount + j;
 
 			UINT bufferSize = sizeof(ShaderParameters) + 255 & ~255;
-			m_constantBuffers[index] = D3D12Util::CreateBuffer(m_device.Get(), bufferSize, nullptr);
+			m_constantBuffers[index] = D3D12Util::CreateBuffer(device, bufferSize, nullptr);
 
-			m_cbViews[index] = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+			m_cbViews[index] = descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
 
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbDesc{};
 			cbDesc.BufferLocation = m_constantBuffers[index]->GetGPUVirtualAddress();
 			cbDesc.SizeInBytes = bufferSize;
-			m_device->CreateConstantBufferView(&cbDesc, m_cbViews[index].GetCPUHandle());
+			device->CreateConstantBufferView(&cbDesc, m_cbViews[index].GetCPUHandle());
 		}
 	}
 }
 
-void ModelApp::Cleanup()
+void App::OnFinalize()
 {
+    WaitForGPU();
+
+#if 0
     auto index = m_swapChain->GetCurrentBackBufferIndex();
     auto fence = m_frameFences[index];
     auto value = ++m_frameFenceValues[index];
     m_commandQueue->Signal(fence.Get(), value);
     fence->SetEventOnCompletion(value, m_fenceWaitEvent);
     WaitForSingleObject(m_fenceWaitEvent, GpuWaitTimeout);
+#endif
 }
 
-void ModelApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
+void App::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
 {
     using namespace DirectX;
+
+    const auto& viewport = GetViewport();
+    const auto& scissorRect = GetScissorRect();
+    const auto frameIndex = GetFrameIndex();
+    auto& descriptorManager = GetDescriptorManager();
 
     // Matrix.
     ShaderParameters shaderParams;
@@ -147,12 +159,12 @@ void ModelApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
         XMVectorSet(0.f, 1.5f, 0.f, 0.f),
         XMVectorSet(0.f, 1.f, 0.f, 0.f)
     );
-    auto mtxProj = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.f), m_viewport.Width / m_viewport.Height, 0.1f, 100.0f);
+    auto mtxProj = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.f), viewport.Width / viewport.Height, 0.1f, 100.0f);
     XMStoreFloat4x4(&shaderParams.mtxView, XMMatrixTranspose(mtxView));
     XMStoreFloat4x4(&shaderParams.mtxProj, XMMatrixTranspose(mtxProj));
 
     // Update constant buffer.
-    auto& constantBuffer = m_constantBuffers[m_frameIndex];
+    auto& constantBuffer = m_constantBuffers[frameIndex];
     {
         void* p;
         D3D12_RANGE range{ 0, 0 };
@@ -166,18 +178,18 @@ void ModelApp::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
     // RootSignature.
     command->SetGraphicsRootSignature(m_rootSignature.Get());
     // Viewport, Scissor.
-    command->RSSetViewports(1, &m_viewport);
-    command->RSSetScissorRects(1, &m_scissorRect);
+    command->RSSetViewports(1, &viewport);
+    command->RSSetScissorRects(1, &scissorRect);
 
     // DescriptorHeap.
-	DescriptorPool* cbvSrvUavDescriptorPool = m_descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+	DescriptorPool* cbvSrvUavDescriptorPool = descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav);
     ID3D12DescriptorHeap* heaps[] = {
 		cbvSrvUavDescriptorPool->GetHeap()
     };
     command->SetDescriptorHeaps(_countof(heaps), heaps);
 
     // DescriptorTable.
-	int cbvModelIndex = CbvModel * m_frameIndex + m_frameIndex;
+	int cbvModelIndex = CbvModel * frameIndex + frameIndex;
     command->SetGraphicsRootDescriptorTable(0, m_cbViews[cbvModelIndex].GetGPUHandle());
     
     // DrawModel

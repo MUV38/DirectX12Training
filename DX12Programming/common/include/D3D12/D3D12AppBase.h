@@ -17,26 +17,68 @@ public:
     D3D12AppBase();
     virtual ~D3D12AppBase();
 
+    //! @brief 初期化
     void Initialize(HWND hWnd);
-    void Terminate();
-
-	virtual void Update();
-    virtual void Render();
+    //! @brief 終了
+    void Finalize();
+    //! @brief 更新
+    void Update();
+    //! @brief 描画
+    void Render();
 
     /// override in subclass
-    virtual void Prepare() {}
-    virtual void Cleanup() {}
-    virtual void MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command) {}
+    virtual void OnInitialize() {}
+    virtual void OnFinalize() {}
+    virtual void OnUpdate() {}
+    virtual void OnRender(ComPtr<ID3D12GraphicsCommandList>& command) {}
 
 protected:
-    virtual void PrepareDescriptorHeaps();
+    //! @brief GPU待ち
+    void WaitForGPU();
+
+    //! @brief アダプター
+    ComPtr<IDXGIAdapter1>& GetAdapter();
+    //! @brief デバイス
+    ComPtr<ID3D12Device>& GetDevice();
+    //! @brief コマンドキュー
+    ComPtr<ID3D12CommandQueue>& GetCommandQueue();
+    //! @brief スワップチェイン
+    ComPtr<IDXGISwapChain4>& GetSwapChain();
+    //! @brief バックバッファのレンダーターゲット
+    ComPtr<ID3D12Resource>& GetBackBufferRenderTarget();
+    ComPtr<ID3D12Resource>& GetBackBufferRenderTarget(uint32_t index);
+    //! @brief コマンドリスト
+    ComPtr<ID3D12GraphicsCommandList>& GetCommandList();
+    //! @brief コマンドアロケータ
+    ComPtr<ID3D12CommandAllocator>& GetCommandAllocator();
+    ComPtr<ID3D12CommandAllocator>& GetCommandAllocator(uint32_t index);
+    //! @brief フレームインデックス
+    UINT GetFrameIndex() const;
+    //! @brief ビューポート
+    const CD3DX12_VIEWPORT& GetViewport() const;
+    //! @brief シザー矩形
+    const CD3DX12_RECT& GetScissorRect() const;
+    //! @brief デスクリプターマネージャー
+    DescriptorManager& GetDescriptorManager();
+    //! @brief バックバッファのRTVハンドル
+    const DescriptorHandle& GetBackBufferRtvDescriptorHandle() const;
+    const DescriptorHandle& GetBackBufferRtvDescriptorHandle(uint32_t index) const;
+    //! @brief バックバッファのDSVハンドル
+    const DescriptorHandle& GetBackBufferDsvDescriptorHandle() const;
+
+private:
+    void PrepareDescriptorHeaps();
     void PrepareRenderTargetView();
     void CreateDepthBuffer(int width, int height);
     void CreateCommandAllocators();
     void CreateFrameFences();
-    void WaitPreviousFrame();
 
-protected:
+    //! @brief 描画開始
+    void BeginRender();
+    //! @brief 描画終了
+    void EndRender();
+
+private:
 	ComPtr<IDXGIAdapter1> m_adapter;
     ComPtr<ID3D12Device> m_device;
     ComPtr<ID3D12CommandQueue> m_commandQueue;

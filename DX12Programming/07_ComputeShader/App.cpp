@@ -16,10 +16,16 @@ App::~App()
 {
 }
 
-void App::Prepare()
+void App::OnInitialize()
 {
+	const auto& viewport = GetViewport();
+	auto& descriptorManager = GetDescriptorManager();
+	auto* device = GetDevice().Get();
+	auto* commandAllocator = GetCommandAllocator().Get();
+	auto* commandQueue = GetCommandQueue().Get();
+
 	// モデル読み込み
-	m_modelLoader.Load(m_device.Get(), "../assets/shaderball/shaderBall.fbx");
+	m_modelLoader.Load(device, "../assets/shaderball/shaderBall.fbx");
 
 	// シェーダーをコンパイル.
 	HRESULT hr;
@@ -66,7 +72,7 @@ void App::Prepare()
 		{
 			throw std::runtime_error("D3D12SerializeRootSignature faild.");
 		}
-		hr = m_device->CreateRootSignature(
+		hr = device->CreateRootSignature(
 			0,
 			signature->GetBufferPointer(), signature->GetBufferSize(),
 			IID_PPV_ARGS(&m_rootSignature)
@@ -111,7 +117,7 @@ void App::Prepare()
 			psoDesc.SampleDesc = { 1, 0 };
 			psoDesc.SampleMask = UINT_MAX; // これを忘れると絵が出ない&警告も出ない.
 		}
-		hr = m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipeline));
+		hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipeline));
 		if (FAILED(hr))
 		{
 			throw std::runtime_error("CreateGraphicsPipelineState failed");
@@ -128,20 +134,20 @@ void App::Prepare()
 			int index = i * FrameBufferCount + j;
 
 			UINT bufferSize = sizeof(ShaderParameters) + 255 & ~255;
-			m_constantBuffers[index] = D3D12Util::CreateBuffer(m_device.Get(), bufferSize, nullptr);
+			m_constantBuffers[index] = D3D12Util::CreateBuffer(device, bufferSize, nullptr);
 
-			m_cbViews[index] = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+			m_cbViews[index] = descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
 
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbDesc{};
 			cbDesc.BufferLocation = m_constantBuffers[index]->GetGPUVirtualAddress();
 			cbDesc.SizeInBytes = bufferSize;
-			m_device->CreateConstantBufferView(&cbDesc, m_cbViews[index].GetCPUHandle());
+			device->CreateConstantBufferView(&cbDesc, m_cbViews[index].GetCPUHandle());
 		}
 	}
 
 	// sampler.
 	{
-		m_sampler = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::Sampler);
+		m_sampler = descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::Sampler);
 
 		// sampler desc.
 		D3D12_SAMPLER_DESC samplerDesc{};
@@ -159,33 +165,33 @@ void App::Prepare()
 			samplerDesc.MinLOD = -FLT_MAX;
 			samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 		}
-		m_device->CreateSampler(&samplerDesc, m_sampler.GetCPUHandle());
+		device->CreateSampler(&samplerDesc, m_sampler.GetCPUHandle());
 	}
 
 	// Render Target
 	{
 		RenderTarget::SetupParam setupParam;
 		{
-			setupParam.width = static_cast<UINT>(m_viewport.Width);
-			setupParam.height = static_cast<UINT>(m_viewport.Height);
+			setupParam.width = static_cast<UINT>(viewport.Width);
+			setupParam.height = static_cast<UINT>(viewport.Height);
 			setupParam.format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-			setupParam.rtvDescriptorPool = m_descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::Rtv);
-			setupParam.cbvSrvUavDescriptorPool = m_descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+			setupParam.rtvDescriptorPool = descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::Rtv);
+			setupParam.cbvSrvUavDescriptorPool = descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav);
 		
 			setupParam.allowUav = true;
 		}
-		m_rtTmp.Setup(m_device.Get(), setupParam);
+		m_rtTmp.Setup(device, setupParam);
 	}
 
 	// テクスチャ読み込み
 	{
 		hr = TextureLoader::LoadDDS(
-			m_device.Get(),
+			device,
 			L"../assets/textures/antique/antique_albedo.dds",
-			m_descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav),
-			m_commandAllocators[m_frameIndex].Get(),
-			m_commandQueue.Get(),
+			descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav),
+			commandAllocator,
+			commandQueue,
 			&m_texture
 		);
 		if (FAILED(hr))
@@ -198,9 +204,9 @@ void App::Prepare()
 	{
 		FullScreenQuad::SetupParam setupParam;
 		{
-			setupParam.SetupRootSignatureOneTexture(m_device.Get());
+			setupParam.SetupRootSignatureOneTexture(device);
 		}
-		m_fullScreenQuad.Setup(m_device.Get(), setupParam);
+		m_fullScreenQuad.Setup(device, setupParam);
 	}
 
 	// RootSignature(compute)
@@ -226,7 +232,7 @@ void App::Prepare()
 		{
 			throw std::runtime_error("D3D12SerializeRootSignature faild.");
 		}
-		hr = m_device->CreateRootSignature(
+		hr = device->CreateRootSignature(
 			0,
 			signature->GetBufferPointer(), signature->GetBufferSize(),
 			IID_PPV_ARGS(&m_computeRootSignature)
@@ -245,7 +251,7 @@ void App::Prepare()
 			psoDesc.NodeMask = 0;
 			psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 		}
-		hr = m_device->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&m_computePipeline));
+		hr = device->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&m_computePipeline));
 		if (FAILED(hr))
 		{
 			throw std::runtime_error("CreateComputePipelineState failed");
@@ -254,19 +260,29 @@ void App::Prepare()
 	}
 }
 
-void App::Cleanup()
+void App::OnFinalize()
 {
+	WaitForGPU();
+
+#if 0
     auto index = m_swapChain->GetCurrentBackBufferIndex();
     auto fence = m_frameFences[index];
     auto value = ++m_frameFenceValues[index];
     m_commandQueue->Signal(fence.Get(), value);
     fence->SetEventOnCompletion(value, m_fenceWaitEvent);
     WaitForSingleObject(m_fenceWaitEvent, GpuWaitTimeout);
+#endif
 }
 
-void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
+void App::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
 {
     using namespace DirectX;
+
+	const auto& viewport = GetViewport();
+	const auto& scissorRect = GetScissorRect();
+	const auto frameIndex = GetFrameIndex();
+	auto& descriptorManager = GetDescriptorManager();
+	auto* commandList = GetCommandList().Get();
 
     // Matrix.
     ShaderParameters shaderParams;
@@ -276,12 +292,12 @@ void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
         XMVectorSet(0.f, 1.5f, 0.f, 0.f),
         XMVectorSet(0.f, 1.f, 0.f, 0.f)
     );
-    auto mtxProj = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.f), m_viewport.Width / m_viewport.Height, 0.1f, 100.0f);
+    auto mtxProj = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.f), viewport.Width / viewport.Height, 0.1f, 100.0f);
     XMStoreFloat4x4(&shaderParams.mtxView, XMMatrixTranspose(mtxView));
     XMStoreFloat4x4(&shaderParams.mtxProj, XMMatrixTranspose(mtxProj));
 
     // Update constant buffer.
-    auto& constantBuffer = m_constantBuffers[m_frameIndex];
+    auto& constantBuffer = m_constantBuffers[frameIndex];
     {
         void* p;
         D3D12_RANGE range{ 0, 0 };
@@ -293,7 +309,7 @@ void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
 	// RenderTarget(tmp)
 	{
 		D3D12_CPU_DESCRIPTOR_HANDLE rtv = m_rtTmp.GetRtvDescriptorHandle().GetCPUHandle();
-		D3D12_CPU_DESCRIPTOR_HANDLE dsv = m_backBufferDsvDescriptorHandle.GetCPUHandle();
+		D3D12_CPU_DESCRIPTOR_HANDLE dsv = GetBackBufferDsvDescriptorHandle().GetCPUHandle();
 		// レンダーターゲットの設定
 		command->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
 		// クリア
@@ -306,19 +322,19 @@ void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
     // RootSignature.
     command->SetGraphicsRootSignature(m_rootSignature.Get());
     // Viewport, Scissor.
-    command->RSSetViewports(1, &m_viewport);
-    command->RSSetScissorRects(1, &m_scissorRect);
+    command->RSSetViewports(1, &viewport);
+    command->RSSetScissorRects(1, &scissorRect);
 
     // DescriptorHeap.
-	DescriptorPool* cbvSrvUavDescriptorPool = m_descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav);
-	DescriptorPool* samplerDescriptorPool = m_descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::Sampler);
+	DescriptorPool* cbvSrvUavDescriptorPool = descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+	DescriptorPool* samplerDescriptorPool = descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::Sampler);
 	ID3D12DescriptorHeap* heaps[] = {
 		cbvSrvUavDescriptorPool->GetHeap(), samplerDescriptorPool->GetHeap()
     };
     command->SetDescriptorHeaps(_countof(heaps), heaps);
 
     // DescriptorTable.
-	int cbvModelIndex = CbvModel * FrameBufferCount + m_frameIndex;
+	int cbvModelIndex = CbvModel * FrameBufferCount + frameIndex;
 	command->SetGraphicsRootDescriptorTable(0, m_cbViews[cbvModelIndex].GetGPUHandle());
 	command->SetGraphicsRootDescriptorTable(1, m_texture.GetShaderResourceView());
 	command->SetGraphicsRootDescriptorTable(2, m_sampler.GetGPUHandle());
@@ -337,21 +353,21 @@ void App::MakeCommand(ComPtr<ID3D12GraphicsCommandList>& command)
 
 		const UINT THREAD_X = 16;
 		const UINT THREAD_Y = 16;
-		UINT threadGroupCountX = static_cast<UINT>(m_viewport.Width) / THREAD_X;
-		UINT threadGroupCountY = static_cast<UINT>(m_viewport.Height) / THREAD_Y;
+		UINT threadGroupCountX = static_cast<UINT>(viewport.Width) / THREAD_X;
+		UINT threadGroupCountY = static_cast<UINT>(viewport.Height) / THREAD_Y;
 		command->Dispatch(threadGroupCountX, threadGroupCountY, 1);
 	}
 
 	// RenderTarget(back buffer)
 	{
-		D3D12_CPU_DESCRIPTOR_HANDLE rtv = m_backBufferRtvDescriptorHandle[m_frameIndex].GetCPUHandle();
-		D3D12_CPU_DESCRIPTOR_HANDLE dsv = m_backBufferDsvDescriptorHandle.GetCPUHandle();
+		D3D12_CPU_DESCRIPTOR_HANDLE rtv = GetBackBufferRtvDescriptorHandle().GetCPUHandle();
+		D3D12_CPU_DESCRIPTOR_HANDLE dsv = GetBackBufferDsvDescriptorHandle().GetCPUHandle();
 		// レンダーターゲットの設定
-		m_commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+		commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
 		// クリア
 		const float clearColor[] = { 0.3f, 0.3f, 0.3f, 1.0f };
-		m_commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
-		m_commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+		commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+		commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	}
 
 	// ピクセルシェーダーリソースへ

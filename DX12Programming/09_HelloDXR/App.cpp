@@ -194,39 +194,13 @@ App::~App()
 {
 }
 
-void App::Update()
+void App::OnInitialize()
 {
-	D3D12AppBase::Update();
-	
-	static bool show_demo_window = true;
-	static bool show_another_window = true;
-	static int counter = 0;
-	static float f = 0.0f;
-	static float clear_color[3] = { 0, 0, 0 };
+	auto& adapter = GetAdapter();
+	auto& descriptorManager = GetDescriptorManager();
 
-	ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-	{
-		ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-		ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-		ImGui::Checkbox("Another Window", &show_another_window);
-
-		ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-		ImGui::ColorEdit3("clear color", (float*)& clear_color); // Edit 3 floats representing a color
-
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-			counter++;
-		ImGui::SameLine();
-		ImGui::Text("counter = %d", counter);
-
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-	}
-	ImGui::End();
-}
-
-void App::Prepare()
-{
 	// DXRサポートかチェック
-	if (!IsDirectXRaytracingSuppoted(m_adapter.Get()))
+	if (!IsDirectXRaytracingSuppoted(GetAdapter().Get()))
 	{
 		throw std::runtime_error("DirectXRaytracing is not suppoted.");
 	}
@@ -241,7 +215,7 @@ void App::Prepare()
 	CreateRaytracingPipelineStateObject();
 
 	// デスクリプター
-	m_uavDescriptorHandle = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+	m_uavDescriptorHandle = descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
 
 	// ジオメトリ構築
 	BuildGeometry();
@@ -256,14 +230,42 @@ void App::Prepare()
 	CreateRaytracingOutputResource();
 }
 
-void App::Cleanup()
+void App::OnFinalize()
 {
 
 }
 
-void App::MakeCommand(App::ComPtr<ID3D12GraphicsCommandList>& command)
+void App::OnUpdate()
 {
-	auto commandList = command;
+	static bool show_demo_window = true;
+	static bool show_another_window = true;
+	static int counter = 0;
+	static float f = 0.0f;
+	static float clear_color[3] = { 0, 0, 0 };
+
+	ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+	{
+		ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+		ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+		ImGui::Checkbox("Another Window", &show_another_window);
+
+		ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+		ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+			counter++;
+		ImGui::SameLine();
+		ImGui::Text("counter = %d", counter);
+
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	}
+	ImGui::End();
+}
+
+void App::OnRender(App::ComPtr<ID3D12GraphicsCommandList>& command)
+{
+	auto& commandList = command;
+	const auto& viewport = GetViewport();
 
 	// レイトレーシング実行
 	{
@@ -278,8 +280,8 @@ void App::MakeCommand(App::ComPtr<ID3D12GraphicsCommandList>& command)
 			dispatchDesc->MissShaderTable.StrideInBytes = dispatchDesc->MissShaderTable.SizeInBytes;
 			dispatchDesc->RayGenerationShaderRecord.StartAddress = m_rayGenShaderTable->GetGPUVirtualAddress();
 			dispatchDesc->RayGenerationShaderRecord.SizeInBytes = m_rayGenShaderTable->GetDesc().Width;
-			dispatchDesc->Width = static_cast<UINT>(m_viewport.Width);
-			dispatchDesc->Height = static_cast<UINT>(m_viewport.Height);
+			dispatchDesc->Width = static_cast<UINT>(viewport.Width);
+			dispatchDesc->Height = static_cast<UINT>(viewport.Height);
 			dispatchDesc->Depth = 1;
 			commandList->SetPipelineState1(stateObject);
 			commandList->DispatchRays(dispatchDesc);
@@ -298,7 +300,7 @@ void App::MakeCommand(App::ComPtr<ID3D12GraphicsCommandList>& command)
 
 	// バックバッファにコピー
 	{
-		auto renderTarget = m_backBufferRenderTargets[m_frameIndex].Get();
+		auto renderTarget = GetBackBufferRenderTarget().Get();
 
 		D3D12_RESOURCE_BARRIER preCopyBarriers[2];
 		preCopyBarriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(renderTarget, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
@@ -330,13 +332,15 @@ bool App::IsDirectXRaytracingSuppoted(IDXGIAdapter* adapter) const
 void App::CreateRaytracingInterfaces()
 {
 	HRESULT hr;
+	auto& device = GetDevice();
+	auto& commandList = GetCommandList();
 
-	hr = m_device->QueryInterface(IID_PPV_ARGS(&m_dxrDevice));
+	hr = device->QueryInterface(IID_PPV_ARGS(&m_dxrDevice));
 	if (FAILED(hr))
 	{
 		throw std::runtime_error("Couldn't get DirectX Raytracing interface for the device.\n");
 	}
-	hr = m_commandList->QueryInterface(IID_PPV_ARGS(&m_dxrCommandList));
+	hr = commandList->QueryInterface(IID_PPV_ARGS(&m_dxrCommandList));
 	if (FAILED(hr))
 	{
 		throw std::runtime_error("Couldn't get DirectX Raytracing interface for the command list.");
@@ -370,11 +374,12 @@ void App::CreateRootSignatures()
 
 	// m_rayGenCB更新
 	{
+		const auto& viewport = GetViewport();
 		m_rayGenCB.viewport = { -1.0f, -1.0f, 1.0f, 1.0f };
 
 		float border = 0.1f;
-		float width = m_viewport.Width;
-		float height = m_viewport.Height;
+		float width = viewport.Width;
+		float height = viewport.Height;
 		float aspectRatio = width / height;
 		if (width <= height)
 		{
@@ -445,7 +450,7 @@ void App::CreateRaytracingPipelineStateObject()
 /// ジオメトリ構築
 void App::BuildGeometry()
 {
-	auto device = m_device.Get();
+	auto* device = GetDevice().Get();
 	Index indices[] =
 	{
 		0, 1, 2
@@ -470,10 +475,10 @@ void App::BuildGeometry()
 /// AccelerationStructure構築
 void App::BuildAccelerationStructures()
 {
-	auto device = m_device.Get();
-	auto commandList = m_commandList.Get();
-	auto commandQueue = m_commandQueue.Get();
-	auto commandAllocator = m_commandAllocators[0].Get();
+	auto* device = GetDevice().Get();
+	auto* commandList = GetCommandList().Get();
+	auto& commandQueue = GetCommandQueue();
+	auto* commandAllocator = GetCommandAllocator(0).Get();
 	HRESULT hr;
 
 	// Reset the command list for the acceleration structure construction.
@@ -587,7 +592,7 @@ void App::BuildAccelerationStructures()
 /// シェーダーテーブル構築
 void App::BuildShaderTables()
 {
-	auto device = m_device.Get();
+	auto* device = GetDevice().Get();
 	HRESULT hr;
 
 	void* rayGenShaderIdentifier;
@@ -650,12 +655,13 @@ void App::BuildShaderTables()
 /// レイトレーシング出力リソース作成
 void App::CreateRaytracingOutputResource()
 {
-	auto device = m_device.Get();
+	auto* device = GetDevice().Get();
 	auto backbufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+	const auto& viewport = GetViewport();
 	HRESULT hr;
 
 	// Create the output resource. The dimensions and format should match the swap-chain.
-	auto uavDesc = CD3DX12_RESOURCE_DESC::Tex2D(backbufferFormat, static_cast<UINT>(m_viewport.Width), static_cast<UINT>(m_viewport.Height), 1, 1, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+	auto uavDesc = CD3DX12_RESOURCE_DESC::Tex2D(backbufferFormat, static_cast<UINT>(viewport.Width), static_cast<UINT>(viewport.Height), 1, 1, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 
 	auto defaultHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 	hr = device->CreateCommittedResource(
@@ -674,7 +680,7 @@ void App::CreateRaytracingOutputResource()
 /// RootSignatureのシリアライズと作成
 void App::SerializeAndCreateRaytracingRootSignature(D3D12_ROOT_SIGNATURE_DESC& desc, ComPtr<ID3D12RootSignature>* rootSig)
 {
-	auto device = m_device;
+	auto& device = GetDevice();
 	ComPtr<ID3DBlob> blob;
 	ComPtr<ID3DBlob> error;
 	HRESULT hr;
