@@ -19,7 +19,6 @@ HRESULT TextureLoader::LoadDDS(
 	if (!texture) { return E_FAIL; }
 
 	ComPtr<ID3D12Resource> resource = nullptr;
-	D3D12_GPU_DESCRIPTOR_HANDLE srv;
 
 	DirectX::TexMetadata metadata;
 	auto image = std::make_unique<DirectX::ScratchImage>();

@@ -55,7 +55,7 @@ void Window::create(HINSTANCE hInstance, int nCmdShow, const wchar_t* appName, c
     RegisterClassEx(&wc);
 
     DWORD dwStyle = WS_OVERLAPPEDWINDOW & ~WS_SIZEBOX;
-    RECT rect = { 0,0, width, height };
+    RECT rect = { 0,0, static_cast<LONG>(width), static_cast<LONG>(height) };
     AdjustWindowRect(&rect, dwStyle, FALSE);
 
     HWND hwnd = CreateWindow(wc.lpszClassName, appName,
