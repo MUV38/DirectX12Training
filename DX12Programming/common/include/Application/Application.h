@@ -3,6 +3,7 @@
 #include "../framework.h"
 #include "Descriptor/DescriptorManager.h"
 #include "ImGui/ImGuiDx12.h"
+#include "Util/FrameResource.h"
 
 class Application
 {
@@ -10,8 +11,8 @@ public:
     template <typename T>
     using ComPtr = Microsoft::WRL::ComPtr<T>;
 
-    static const UINT FrameBufferCount = 2;    ///< バッファリング数
-    static const UINT GpuWaitTimeout = (10 * 1000);    /// 10s
+    static const uint32_t FrameBufferCount = FrameResource::FrameBufferCount;
+    static const uint32_t GpuWaitTimeout = (10 * 1000); /// 10s
 
 public:
     Application();
