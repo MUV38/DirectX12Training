@@ -5,6 +5,7 @@
 #include <Texture/Texture.h>
 #include <Util/FullScreenQuad.h>
 #include <RenderTarget/RenderTarget.h>
+#include <ConstantBuffer/ConstantBuffer.h>
 
 class MyApp : public Application
 {
@@ -22,14 +23,14 @@ public:
 
 	enum
 	{
-		TexSrvAlbedo,
-		TexSrvNum
+		TexAlbedo,
+		TexNum
 	};
 
 	enum
 	{
-		CbvModel,
-		CbvNum
+		CbModel,
+		CbNum
 	};
 
 	enum
@@ -45,11 +46,10 @@ public:
 
 private:
     ModelLoader m_modelLoader;
-	Texture m_texture;
+	Texture m_texture[TexNum];
 
-	std::vector<ComPtr<ID3D12Resource>> m_constantBuffers;
+	ConstantBuffer m_constantBuffers[CbNum];
 
-    std::vector<DescriptorHandle> m_cbViews;
 	DescriptorHandle m_sampler;
 
     ComPtr<ID3DBlob> m_vs, m_ps, m_cs;
@@ -62,5 +62,5 @@ private:
 	ComPtr<ID3D12RootSignature> m_computeRootSignature;
 	ComPtr<ID3D12PipelineState> m_computePipeline;
 
-	RenderTarget m_rtTmp;
+	RenderTarget m_rt[RtNum];
 };

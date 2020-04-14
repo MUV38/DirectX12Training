@@ -116,24 +116,8 @@ void MyApp::OnInitialize()
     }
 
     // ConstantBuffer/View.
-    m_constantBuffers.resize(CbvNum * FrameBufferCount);
-    m_cbViews.resize(CbvNum * FrameBufferCount);
-	for (UINT i = 0; i < CbvNum; ++i)
 	{
-		for (UINT j = 0; j < FrameBufferCount; ++j)
-		{
-			int index = i * FrameBufferCount + j;
-
-			UINT bufferSize = sizeof(ShaderParameters) + 255 & ~255;
-			m_constantBuffers[index] = D3D12Util::CreateBuffer(device, bufferSize, nullptr);
-
-			m_cbViews[index] = descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
-
-			D3D12_CONSTANT_BUFFER_VIEW_DESC cbDesc{};
-			cbDesc.BufferLocation = m_constantBuffers[index]->GetGPUVirtualAddress();
-			cbDesc.SizeInBytes = bufferSize;
-			device->CreateConstantBufferView(&cbDesc, m_cbViews[index].GetCPUHandle());
-		}
+		m_constantBuffers[CbModel].Create(device, &descriptorManager, sizeof(ShaderParameters));
 	}
 
 	// sampler.
@@ -161,68 +145,19 @@ void MyApp::OnInitialize()
 
 	// Render Target
 	{
-		m_renderTargets.resize(RtNum);
-		m_rtSrvs.resize(RtNum);
-		m_rtvs.resize(RtNum);
-		
-		// RtvGrayScale
 		{
-			// resource
-			ComPtr<ID3D12Resource1> resource;
-			DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			CD3DX12_RESOURCE_DESC resDesc(
-				D3D12_RESOURCE_DIMENSION_TEXTURE2D,
-				0,
-				static_cast<UINT>(viewport.Width),
-				static_cast<UINT>(viewport.Height),
-				1,
-				1,
-				format,
-				1,
-				0,
-				D3D12_TEXTURE_LAYOUT_UNKNOWN,
-				D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET
-			);
-			D3D12_CLEAR_VALUE clearValue;
+			RenderTarget::SetupParam setupParam;
 			{
-				FLOAT color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-				memcpy(&clearValue.Color, color, sizeof(FLOAT) * 4);
-				clearValue.Format = format;
-			}
+				setupParam.width = static_cast<UINT>(viewport.Width);
+				setupParam.height = static_cast<UINT>(viewport.Height);
+				setupParam.format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-			hr = device->CreateCommittedResource(
-				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-				D3D12_HEAP_FLAG_NONE,
-				&resDesc,
-				D3D12_RESOURCE_STATE_RENDER_TARGET,
-				&clearValue,
-				IID_PPV_ARGS(resource.GetAddressOf())
-			);
-			if (FAILED(hr))
-			{
-				throw std::runtime_error("RenderTarget CreateCommittedResource failed");
-			}
-			m_renderTargets[RtTmp] = resource;
+				setupParam.rtvDescriptorPool = descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::Rtv);
+				setupParam.cbvSrvUavDescriptorPool = descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav);
 
-			// RTV
-			m_rtvs[RtTmp] = descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::Rtv);
-			m_rtSrvs[RtTmp] = descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
-
-			D3D12_RENDER_TARGET_VIEW_DESC rtViewDesc = {};
-			{
-				rtViewDesc.Format = format;
-				rtViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+				setupParam.allowUav = false;
 			}
-			device->CreateRenderTargetView(resource.Get(), &rtViewDesc, m_rtvs[RtTmp].GetCPUHandle());
-			// SRV
-			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-			{
-				srvDesc.Texture2D.MipLevels = resDesc.MipLevels;
-				srvDesc.Format = format;
-				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-				srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-			}
-			device->CreateShaderResourceView(resource.Get(), &srvDesc, m_rtSrvs[RtTmp].GetCPUHandle());
+			m_rt[RtTmp].Setup(device, setupParam);
 		}
 	}
 
@@ -234,7 +169,7 @@ void MyApp::OnInitialize()
 			descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav),
 			commandAllocator,
 			commandQueue,
-			&m_texture
+			&m_texture[TexAlbedo]
 		);
 		if (FAILED(hr))
 		{
@@ -267,6 +202,8 @@ void MyApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
 	auto& descriptorManager = GetDescriptorManager();
 	auto* commandList = GetCommandList().Get();
 
+	auto& cbModel = m_constantBuffers[CbModel];
+
     // Matrix.
     ShaderParameters shaderParams;
     XMStoreFloat4x4(&shaderParams.mtxWorld, XMMatrixScaling(0.01f, 0.01f, 0.01f));
@@ -280,19 +217,17 @@ void MyApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
     XMStoreFloat4x4(&shaderParams.mtxProj, XMMatrixTranspose(mtxProj));
 
     // Update constant buffer.
-    auto& constantBuffer = m_constantBuffers[frameIndex];
-    {
-        void* p;
-        D3D12_RANGE range{ 0, 0 };
-        constantBuffer->Map(0, &range, &p);
-        memcpy(p, &shaderParams, sizeof(shaderParams));
-        constantBuffer->Unmap(0, nullptr);
-    }
+	{
+		void* p = nullptr;
+		cbModel.Map(frameIndex, &p);
+		memcpy(p, &shaderParams, sizeof(shaderParams));
+		cbModel.Unmap(frameIndex);
+	}
 
 	// RenderTarget(tmp)
 	{
 		INT rtvHandleOffset = RtTmp;
-		D3D12_CPU_DESCRIPTOR_HANDLE rtv = m_rtvs[rtvHandleOffset].GetCPUHandle();
+		D3D12_CPU_DESCRIPTOR_HANDLE rtv = m_rt[RtTmp].GetRtvDescriptorHandle().GetCPUHandle();
 		D3D12_CPU_DESCRIPTOR_HANDLE dsv = GetBackBufferDsvDescriptorHandle().GetCPUHandle();
 		// レンダーターゲットの設定
 		command->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
@@ -318,10 +253,11 @@ void MyApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
     command->SetDescriptorHeaps(_countof(heaps), heaps);
 
     // DescriptorTable.
-	int cbvModelIndex = CbvModel * FrameBufferCount + frameIndex;
-	command->SetGraphicsRootDescriptorTable(0, m_cbViews[cbvModelIndex].GetGPUHandle());
-	command->SetGraphicsRootDescriptorTable(1, m_texture.GetShaderResourceView());
-	command->SetGraphicsRootDescriptorTable(2, m_sampler.GetGPUHandle());
+	{
+		command->SetGraphicsRootDescriptorTable(0, cbModel.getView(frameIndex));
+		command->SetGraphicsRootDescriptorTable(1, m_texture[TexAlbedo].GetShaderResourceView());
+		command->SetGraphicsRootDescriptorTable(2, m_sampler.GetGPUHandle());
+	}
     
     // DrawModel
     m_modelLoader.Draw(command.Get());
@@ -339,25 +275,15 @@ void MyApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
 	}
 
 	// レンダーターゲット描画可能からピクセルシェーダーリソースへ
-	auto barrierToPixelShaderResource = CD3DX12_RESOURCE_BARRIER::Transition(
-		m_renderTargets[RtTmp].Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-	);
-	command->ResourceBarrier(1, &barrierToPixelShaderResource);
+	m_rt[RtTmp].SetResourceBarrier(command.Get(), RenderTarget::ResourceBarrierType::PixelShaderResource);
 	
 	// フルスクリーン描画
 	m_fullScreenQuad.SetPipelineState(command.Get());
 	m_fullScreenQuad.SetGraphicsRootSignature(command.Get());
-	command->SetGraphicsRootDescriptorTable(0, m_rtSrvs[RtTmp].GetGPUHandle());
+	command->SetGraphicsRootDescriptorTable(0, m_rt[RtTmp].GetShaderResourceView());
 	command->SetGraphicsRootDescriptorTable(1, m_sampler.GetGPUHandle());
 	m_fullScreenQuad.Draw(command.Get());
 
 	// ピクセルシェーダーリソースからレンダーターゲット描画可能へ
-	auto barrierToRenderTarget = CD3DX12_RESOURCE_BARRIER::Transition(
-		m_renderTargets[RtTmp].Get(),
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		D3D12_RESOURCE_STATE_RENDER_TARGET
-	);
-	command->ResourceBarrier(1, &barrierToRenderTarget);
+	m_rt[RtTmp].SetResourceBarrier(command.Get(), RenderTarget::ResourceBarrierType::RenderTarget);
 }

@@ -2,6 +2,7 @@
 
 #include <Application/Application.h>
 #include <Model/ModelLoader.h>
+#include <ConstantBuffer/ConstantBuffer.h>
 
 class MyApp : public Application
 {
@@ -19,8 +20,8 @@ public:
 
 	enum
 	{
-		CbvModel,
-		CbvNum
+		CbModel,
+		CbNum
 	};
 
 public:
@@ -31,8 +32,7 @@ public:
 private:
     ModelLoader m_modelLoader;
 
-    std::vector<ComPtr<ID3D12Resource>> m_constantBuffers;
-    std::vector<DescriptorHandle> m_cbViews;
+    ConstantBuffer m_constantBuffers[CbNum];
 
     ComPtr<ID3DBlob> m_vs, m_ps;
 

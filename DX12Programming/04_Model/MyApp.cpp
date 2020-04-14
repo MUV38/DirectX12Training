@@ -107,25 +107,9 @@ void MyApp::OnInitialize()
     }
 
     // ConstantBuffer/View.
-    m_constantBuffers.resize(CbvNum * FrameBufferCount);
-    m_cbViews.resize(CbvNum * FrameBufferCount);
-	for (UINT i = 0; i < CbvNum; ++i)
-	{
-		for (UINT j = 0; j < FrameBufferCount; ++j)
-		{
-			int index = i * FrameBufferCount + j;
-
-			UINT bufferSize = sizeof(ShaderParameters) + 255 & ~255;
-			m_constantBuffers[index] = D3D12Util::CreateBuffer(device, bufferSize, nullptr);
-
-			m_cbViews[index] = descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
-
-			D3D12_CONSTANT_BUFFER_VIEW_DESC cbDesc{};
-			cbDesc.BufferLocation = m_constantBuffers[index]->GetGPUVirtualAddress();
-			cbDesc.SizeInBytes = bufferSize;
-			device->CreateConstantBufferView(&cbDesc, m_cbViews[index].GetCPUHandle());
-		}
-	}
+    {
+        m_constantBuffers[CbModel].Create(device, &descriptorManager, sizeof(ShaderParameters));
+    }
 }
 
 void MyApp::OnFinalize()
@@ -142,6 +126,8 @@ void MyApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
     const auto frameIndex = GetFrameIndex();
     auto& descriptorManager = GetDescriptorManager();
 
+    auto& cbModel = m_constantBuffers[CbModel];
+
     // Matrix.
     ShaderParameters shaderParams;
     XMStoreFloat4x4(&shaderParams.mtxWorld, XMMatrixScaling(0.01f, 0.01f, 0.01f));
@@ -155,13 +141,11 @@ void MyApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
     XMStoreFloat4x4(&shaderParams.mtxProj, XMMatrixTranspose(mtxProj));
 
     // Update constant buffer.
-    auto& constantBuffer = m_constantBuffers[frameIndex];
     {
-        void* p;
-        D3D12_RANGE range{ 0, 0 };
-        constantBuffer->Map(0, &range, &p);
+        void* p = nullptr;
+        cbModel.Map(frameIndex, &p);
         memcpy(p, &shaderParams, sizeof(shaderParams));
-        constantBuffer->Unmap(0, nullptr);
+        cbModel.Unmap(frameIndex);
     }
 
     // PSO.
@@ -180,8 +164,7 @@ void MyApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
     command->SetDescriptorHeaps(_countof(heaps), heaps);
 
     // DescriptorTable.
-	int cbvModelIndex = CbvModel * frameIndex + frameIndex;
-    command->SetGraphicsRootDescriptorTable(0, m_cbViews[cbvModelIndex].GetGPUHandle());
+    command->SetGraphicsRootDescriptorTable(0, cbModel.getView(frameIndex));
     
     // DrawModel
     m_modelLoader.Draw(command.Get());

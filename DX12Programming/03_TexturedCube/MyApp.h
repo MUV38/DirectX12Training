@@ -2,6 +2,7 @@
 
 #include <Application/Application.h>
 #include <DirectXMath.h>
+#include <ConstantBuffer/ConstantBuffer.h>
 
 class MyApp : public Application
 {
@@ -26,8 +27,8 @@ public:
 
 	enum
 	{
-		CbvModel,
-		CbvNum
+		CbModel,
+		CbNum
 	};
 
 public:
@@ -50,9 +51,8 @@ private:
     ComPtr<ID3DBlob> m_vs, m_ps;
     ComPtr<ID3D12RootSignature> m_rootSignature;
     ComPtr<ID3D12PipelineState> m_pipeline;
-    std::vector < ComPtr<ID3D12Resource>> m_constantBuffers;
+    ConstantBuffer m_constantBuffers[CbNum];
 
     DescriptorHandle m_sampler;
 	DescriptorHandle m_srv;
-    std::vector<DescriptorHandle> m_cbViews;
 };

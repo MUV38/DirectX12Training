@@ -3,6 +3,7 @@
 #include "../framework.h"
 #include "Descriptor/DescriptorHandle.h"
 #include "Descriptor/DescriptorManager.h"
+#include "Util/FrameResource.h"
 
 //! @brief コンスタントバッファ
 class ConstantBuffer
@@ -14,13 +15,19 @@ public:
 	//! @brief 作成
 	void Create(ID3D12Device* device, DescriptorManager* descriptorManager, size_t bufferSize);
 	
-	//! @brief リソース
-	Microsoft::WRL::ComPtr<ID3D12Resource>& getResource();
+	//! @brief Map
+	void Map(uint32_t frameIndex, void** ptr);
 
-	//! @brief デスクリプターハンドル
-	const DescriptorHandle& getDescriptorHandle() const;
+	//! @brief Unmap
+	void Unmap(uint32_t frameIndex);
+	
+	//! @brief ビュー
+	const D3D12_GPU_DESCRIPTOR_HANDLE& getView(uint32_t frameIndex) const;
 
 private:
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_resource;	//!< リソース
-	DescriptorHandle m_descriptorHandle;				//!< デスクリプターハンドル
+	static const uint32_t FrameBufferCount = FrameResource::FrameBufferCount;
+
+private:
+	Microsoft::WRL::ComPtr<ID3D12Resource> m_resource[FrameBufferCount];	//!< リソース
+	DescriptorHandle m_descriptorHandle[FrameBufferCount];					//!< デスクリプターハンドル
 };

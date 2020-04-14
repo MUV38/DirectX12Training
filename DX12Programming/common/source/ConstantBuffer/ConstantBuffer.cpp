@@ -1,5 +1,7 @@
 #include "ConstantBuffer/ConstantBuffer.h"
+
 #include "D3D12/D3D12Util.h"
+#include "Util/Assert.h"
 
 ConstantBuffer::ConstantBuffer()
 	: m_resource()
@@ -19,24 +21,41 @@ void ConstantBuffer::Create(ID3D12Device* device, DescriptorManager* descriptorM
 
 	size_t alignedBufferSize = bufferSize + 255 & ~255;
 	
-	m_resource = D3D12Util::CreateBuffer(device, alignedBufferSize, nullptr);
+	for (uint32_t i = 0; i < FrameBufferCount; ++i)
+	{
+		m_resource[i] = D3D12Util::CreateBuffer(device, alignedBufferSize, nullptr);
 
-	m_descriptorHandle = descriptorManager->Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
+		m_descriptorHandle[i] = descriptorManager->Alloc(DescriptorManager::DescriptorPoolType::CbvSrvUav);
 
-	D3D12_CONSTANT_BUFFER_VIEW_DESC cbDesc{};
-	cbDesc.BufferLocation = m_resource->GetGPUVirtualAddress();
-	cbDesc.SizeInBytes = static_cast<UINT>(alignedBufferSize);
-	device->CreateConstantBufferView(&cbDesc, m_descriptorHandle.GetCPUHandle());
+		D3D12_CONSTANT_BUFFER_VIEW_DESC cbDesc{};
+		cbDesc.BufferLocation = m_resource[i]->GetGPUVirtualAddress();
+		cbDesc.SizeInBytes = static_cast<UINT>(alignedBufferSize);
+		device->CreateConstantBufferView(&cbDesc, m_descriptorHandle[i].GetCPUHandle());
+	}
 }
 
-// リソース
-Microsoft::WRL::ComPtr<ID3D12Resource>& ConstantBuffer::getResource()
+// Map
+void ConstantBuffer::Map(uint32_t frameIndex, void** ptr)
 {
-	return m_resource;
+	if (m_resource->Get())
+	{
+		D3D12_RANGE range{ 0, 0 };
+		m_resource[frameIndex]->Map(0, &range, ptr);
+	}
 }
 
-// デスクリプターハンドル
-const DescriptorHandle& ConstantBuffer::getDescriptorHandle() const
+// Unmap
+void ConstantBuffer::Unmap(uint32_t frameIndex)
 {
-	return m_descriptorHandle;
+	if (m_resource->Get())
+	{
+		m_resource[frameIndex]->Unmap(0, nullptr);
+	}
+}
+
+const D3D12_GPU_DESCRIPTOR_HANDLE& ConstantBuffer::getView(uint32_t frameIndex) const
+{
+	ASSERT(frameIndex < FrameBufferCount);
+
+	return m_descriptorHandle->GetGPUHandle();
 }

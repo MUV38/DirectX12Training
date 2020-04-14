@@ -3,6 +3,7 @@
 #include <Application/Application.h>
 #include <Model/ModelLoader.h>
 #include <Texture/Texture.h>
+#include <ConstantBuffer/ConstantBuffer.h>
 
 class MyApp : public Application
 {
@@ -20,8 +21,8 @@ public:
 
 	enum
 	{
-		CbvModel,
-		CbvNum
+		CbModel,
+		CbNum
 	};
 
 public:
@@ -33,9 +34,8 @@ private:
     ModelLoader m_modelLoader;
 	Texture m_texture;
 
-	std::vector<ComPtr<ID3D12Resource>> m_constantBuffers;
+	ConstantBuffer m_constantBuffers[CbNum];
 
-    std::vector<DescriptorHandle> m_cbViews;
 	DescriptorHandle m_sampler;
 
     ComPtr<ID3DBlob> m_vs, m_ps;
