@@ -1,22 +1,22 @@
-#include "App.h"
+#include "MyApp.h"
 
 #undef min
 #undef max
 
 #include <stdexcept>
 #include <Texture/TextureLoader.h>
-#include <Util/D3D12Util.h>
+#include <D3D12/D3D12Util.h>
 #include <Util/FullScreenQuad.h>
 
-App::App()
+MyApp::MyApp()
 {
 }
 
-App::~App()
+MyApp::~MyApp()
 {
 }
 
-void App::OnInitialize()
+void MyApp::OnInitialize()
 {
 	auto* device = GetDevice().Get();
 	auto* commandAllocator = GetCommandAllocator().Get();
@@ -252,21 +252,12 @@ void App::OnInitialize()
 	}
 }
 
-void App::OnFinalize()
+void MyApp::OnFinalize()
 {
 	WaitForGPU();
-
-#if 0
-    auto index = m_swapChain->GetCurrentBackBufferIndex();
-    auto fence = m_frameFences[index];
-    auto value = ++m_frameFenceValues[index];
-    m_commandQueue->Signal(fence.Get(), value);
-    fence->SetEventOnCompletion(value, m_fenceWaitEvent);
-    WaitForSingleObject(m_fenceWaitEvent, GpuWaitTimeout);
-#endif
 }
 
-void App::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
+void MyApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
 {
     using namespace DirectX;
 

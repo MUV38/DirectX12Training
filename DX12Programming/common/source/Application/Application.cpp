@@ -2,11 +2,11 @@
 #include <exception>
 #include <stdexcept>
 #include <experimental/filesystem>
-#include "D3D12/D3D12AppBase.h"
-#include "Util/D3D12Util.h"
+#include "Application/Application.h"
+#include "D3D12/D3D12Util.h"
 #include "Util/Assert.h"
 
-D3D12AppBase::D3D12AppBase()
+Application::Application()
     : m_frameIndex(0)
 {
 	m_backBufferRenderTargets.resize(FrameBufferCount);
@@ -15,12 +15,12 @@ D3D12AppBase::D3D12AppBase()
     m_fenceWaitEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
-D3D12AppBase::~D3D12AppBase()
+Application::~Application()
 {
 }
 
 // 実行
-int D3D12AppBase::Run(HWND hWnd)
+int Application::Run(HWND hWnd)
 {
     // 初期化
     Initialize(hWnd);
@@ -57,7 +57,7 @@ int D3D12AppBase::Run(HWND hWnd)
 }
 
 // 初期化
-void D3D12AppBase::Initialize(HWND hWnd)
+void Application::Initialize(HWND hWnd)
 {
     HRESULT hr;
 
@@ -230,7 +230,7 @@ void D3D12AppBase::Initialize(HWND hWnd)
 }
 
 // 終了
-void D3D12AppBase::Finalize()
+void Application::Finalize()
 {
     OnFinalize();
 
@@ -238,7 +238,7 @@ void D3D12AppBase::Finalize()
 }
 
 // 更新
-void D3D12AppBase::Update()
+void Application::Update()
 {
     m_imgui.NewFrame();
 
@@ -246,7 +246,7 @@ void D3D12AppBase::Update()
 }
 
 // 描画
-void D3D12AppBase::Render()
+void Application::Render()
 {
     // 描画開始
     BeginRender();
@@ -274,7 +274,7 @@ void D3D12AppBase::Render()
     EndRender();
 }
 
-void D3D12AppBase::PrepareDescriptorHeaps()
+void Application::PrepareDescriptorHeaps()
 {
 	// デスクリプターマネージャ初期化
 	if (!m_descriptorManager.Init(m_device.Get(), 5000, 100, 100, 100))
@@ -292,7 +292,7 @@ void D3D12AppBase::PrepareDescriptorHeaps()
 	m_backBufferDsvDescriptorHandle = m_descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::Dsv);
 }
 
-void D3D12AppBase::PrepareRenderTargetView()
+void Application::PrepareRenderTargetView()
 {
     // スワップチェインイメージへのレンダーターゲットビュー生成
     for (UINT i = 0; i < FrameBufferCount; ++i)
@@ -302,7 +302,7 @@ void D3D12AppBase::PrepareRenderTargetView()
     }
 }
 
-void D3D12AppBase::CreateDepthBuffer(int width, int height)
+void Application::CreateDepthBuffer(int width, int height)
 {
     auto depthBufferDesc = CD3DX12_RESOURCE_DESC::Tex2D(
         DXGI_FORMAT_D32_FLOAT,
@@ -344,7 +344,7 @@ void D3D12AppBase::CreateDepthBuffer(int width, int height)
     m_device->CreateDepthStencilView(m_depthBuffer.Get(), &dsvDesc, m_backBufferDsvDescriptorHandle.GetCPUHandle());
 }
 
-void D3D12AppBase::CreateCommandAllocators()
+void Application::CreateCommandAllocators()
 {
     HRESULT hr;
     m_commandAllocators.resize(FrameBufferCount);
@@ -361,7 +361,7 @@ void D3D12AppBase::CreateCommandAllocators()
     }
 }
 
-void D3D12AppBase::CreateFrameFences()
+void Application::CreateFrameFences()
 {
     HRESULT hr;
     m_frameFences.resize(FrameBufferCount);
@@ -380,7 +380,7 @@ void D3D12AppBase::CreateFrameFences()
 }
 
 // GPU待ち
-void D3D12AppBase::WaitForGPU()
+void Application::WaitForGPU()
 {
     // GPUが設定する値を設定
     auto& fence = m_frameFences[m_frameIndex];
@@ -400,35 +400,35 @@ void D3D12AppBase::WaitForGPU()
 }
 
 // アダプター
-D3D12AppBase::ComPtr<IDXGIAdapter1>& D3D12AppBase::GetAdapter()
+Application::ComPtr<IDXGIAdapter1>& Application::GetAdapter()
 {
     return m_adapter;
 }
 
 // デバイス
-D3D12AppBase::ComPtr<ID3D12Device>& D3D12AppBase::GetDevice()
+Application::ComPtr<ID3D12Device>& Application::GetDevice()
 {
     return m_device;
 }
 
 // コマンドキュー
-D3D12AppBase::ComPtr<ID3D12CommandQueue>& D3D12AppBase::GetCommandQueue()
+Application::ComPtr<ID3D12CommandQueue>& Application::GetCommandQueue()
 {
     return m_commandQueue;
 }
 
 // スワップチェイン
-D3D12AppBase::ComPtr<IDXGISwapChain4>& D3D12AppBase::GetSwapChain()
+Application::ComPtr<IDXGISwapChain4>& Application::GetSwapChain()
 {
     return m_swapChain;
 }
 
 // バックバッファのレンダーターゲット取得
-D3D12AppBase::ComPtr<ID3D12Resource>& D3D12AppBase::GetBackBufferRenderTarget()
+Application::ComPtr<ID3D12Resource>& Application::GetBackBufferRenderTarget()
 {
     return m_backBufferRenderTargets[m_frameIndex];
 }
-D3D12AppBase::ComPtr<ID3D12Resource>& D3D12AppBase::GetBackBufferRenderTarget(uint32_t index)
+Application::ComPtr<ID3D12Resource>& Application::GetBackBufferRenderTarget(uint32_t index)
 {
     ASSERT(index < m_backBufferRenderTargets.size());
 
@@ -436,17 +436,17 @@ D3D12AppBase::ComPtr<ID3D12Resource>& D3D12AppBase::GetBackBufferRenderTarget(ui
 }
 
 // コマンドリスト
-D3D12AppBase::ComPtr<ID3D12GraphicsCommandList>& D3D12AppBase::GetCommandList()
+Application::ComPtr<ID3D12GraphicsCommandList>& Application::GetCommandList()
 {
     return m_commandList;
 }
 
 // コマンドアロケータ
-D3D12AppBase::ComPtr<ID3D12CommandAllocator>& D3D12AppBase::GetCommandAllocator()
+Application::ComPtr<ID3D12CommandAllocator>& Application::GetCommandAllocator()
 {
     return m_commandAllocators[m_frameIndex];
 }
-D3D12AppBase::ComPtr<ID3D12CommandAllocator>& D3D12AppBase::GetCommandAllocator(uint32_t index)
+Application::ComPtr<ID3D12CommandAllocator>& Application::GetCommandAllocator(uint32_t index)
 {
     ASSERT(index < m_commandAllocators.size());
 
@@ -454,35 +454,35 @@ D3D12AppBase::ComPtr<ID3D12CommandAllocator>& D3D12AppBase::GetCommandAllocator(
 }
 
 // フレームインデックス
-UINT D3D12AppBase::GetFrameIndex() const
+UINT Application::GetFrameIndex() const
 {
     return m_frameIndex;
 }
 
 // ビューポート
-const CD3DX12_VIEWPORT& D3D12AppBase::GetViewport() const
+const CD3DX12_VIEWPORT& Application::GetViewport() const
 {
     return m_viewport;
 }
 
 // シザー矩形
-const CD3DX12_RECT& D3D12AppBase::GetScissorRect() const
+const CD3DX12_RECT& Application::GetScissorRect() const
 {
     return m_scissorRect;
 }
 
 // デスクリプターマネージャー
-DescriptorManager& D3D12AppBase::GetDescriptorManager()
+DescriptorManager& Application::GetDescriptorManager()
 {
     return m_descriptorManager;
 }
 
 // バックバッファのRTVハンドル
-const DescriptorHandle& D3D12AppBase::GetBackBufferRtvDescriptorHandle() const
+const DescriptorHandle& Application::GetBackBufferRtvDescriptorHandle() const
 {
     return m_backBufferRtvDescriptorHandle[m_frameIndex];
 }
-const DescriptorHandle& D3D12AppBase::GetBackBufferRtvDescriptorHandle(uint32_t index) const
+const DescriptorHandle& Application::GetBackBufferRtvDescriptorHandle(uint32_t index) const
 {
     ASSERT(index < FrameBufferCount);
 
@@ -490,13 +490,13 @@ const DescriptorHandle& D3D12AppBase::GetBackBufferRtvDescriptorHandle(uint32_t 
 }
 
 // バックバッファのDSVハンドル
-const DescriptorHandle& D3D12AppBase::GetBackBufferDsvDescriptorHandle() const
+const DescriptorHandle& Application::GetBackBufferDsvDescriptorHandle() const
 {
     return m_backBufferDsvDescriptorHandle;
 }
 
 // 描画開始
-void D3D12AppBase::BeginRender()
+void Application::BeginRender()
 {
     m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
@@ -513,7 +513,7 @@ void D3D12AppBase::BeginRender()
 }
 
 // 描画終了
-void D3D12AppBase::EndRender()
+void Application::EndRender()
 {
     // レンダーターゲット描画可能からスワップチェイン表示可能へ
     auto barrierToPresent = CD3DX12_RESOURCE_BARRIER::Transition(

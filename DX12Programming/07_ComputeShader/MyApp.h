@@ -1,15 +1,16 @@
 #pragma once
 
-#include <D3D12/D3D12AppBase.h>
+#include <Application/Application.h>
 #include <Model/ModelLoader.h>
 #include <Texture/Texture.h>
 #include <Util/FullScreenQuad.h>
+#include <RenderTarget/RenderTarget.h>
 
-class App : public D3D12AppBase
+class MyApp : public Application
 {
 public:
-	App();
-	virtual ~App();
+	MyApp();
+	virtual ~MyApp();
 
 public:
     struct ShaderParameters
@@ -47,17 +48,19 @@ private:
 	Texture m_texture;
 
 	std::vector<ComPtr<ID3D12Resource>> m_constantBuffers;
-	std::vector<ComPtr<ID3D12Resource>> m_renderTargets;
 
     std::vector<DescriptorHandle> m_cbViews;
 	DescriptorHandle m_sampler;
-	std::vector<DescriptorHandle> m_rtSrvs;
-	std::vector<DescriptorHandle> m_rtvs;
 
-    ComPtr<ID3DBlob> m_vs, m_ps;
+    ComPtr<ID3DBlob> m_vs, m_ps, m_cs;
 
     ComPtr<ID3D12RootSignature> m_rootSignature;
     ComPtr<ID3D12PipelineState> m_pipeline;
 
 	FullScreenQuad m_fullScreenQuad;
+
+	ComPtr<ID3D12RootSignature> m_computeRootSignature;
+	ComPtr<ID3D12PipelineState> m_computePipeline;
+
+	RenderTarget m_rtTmp;
 };

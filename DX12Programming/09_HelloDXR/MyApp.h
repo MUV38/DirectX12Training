@@ -1,7 +1,7 @@
 #pragma once
 
-#include <D3D12/D3D12AppBase.h>
-#include <Util/D3D12Util.h>
+#include <Application/Application.h>
+#include <D3D12/D3D12Util.h>
 
 namespace GlobalRootSignatureParams {
 	enum Value {
@@ -18,11 +18,11 @@ namespace LocalRootSignatureParams {
 	};
 }
 
-class App : public D3D12AppBase
+class MyApp : public Application
 {
 public:
-	App();
-	~App();
+	MyApp();
+	virtual ~MyApp();
 
 	virtual void OnInitialize() override;
 	virtual void OnFinalize() override;

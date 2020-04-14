@@ -108,7 +108,8 @@
     <ClInclude Include="..\ThirdParty\imgui\imstb_truetype.h" />
     <ClInclude Include="AssetUtil.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="include\D3D12\D3D12AppBase.h" />
+    <ClInclude Include="include\Application\Application.h" />
+    <ClInclude Include="include\D3D12\D3D12Util.h" />
     <ClInclude Include="include\D3D12\d3dx12.h" />
     <ClInclude Include="include\Descriptor\DescriptorHandle.h" />
     <ClInclude Include="include\Descriptor\DescriptorManager.h" />
@@ -123,7 +124,6 @@
     <ClInclude Include="include\ThirdParty\stb\stb_image.h" />
     <ClInclude Include="include\Util\Assert.h" />
     <ClInclude Include="include\Util\FullScreenQuad.h" />
-    <ClInclude Include="include\Util\D3D12Util.h" />
     <ClInclude Include="include\Window\Window.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
@@ -136,7 +136,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="source\D3D12\D3D12AppBase.cpp" />
+    <ClCompile Include="source\Application\Application.cpp" />
+    <ClCompile Include="source\D3D12\D3D12Util.cpp" />
     <ClCompile Include="source\Descriptor\DescriptorHandle.cpp" />
     <ClCompile Include="source\Descriptor\DescriptorManager.cpp" />
     <ClCompile Include="source\Descriptor\DescriptorPool.cpp" />
@@ -146,7 +147,6 @@
     <ClCompile Include="source\RenderTarget\RenderTarget.cpp" />
     <ClCompile Include="source\Texture\Texture.cpp" />
     <ClCompile Include="source\Texture\TextureLoder.cpp" />
-    <ClCompile Include="source\Util\D3D12Util.cpp" />
     <ClCompile Include="source\Util\FullScreenQuad.cpp" />
     <ClCompile Include="source\Window\Window.cpp" />
   </ItemGroup>

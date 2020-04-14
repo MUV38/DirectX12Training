@@ -1,13 +1,13 @@
 #pragma once
 
-#include <D3D12/D3D12AppBase.h>
+#include <Application/Application.h>
 #include <DirectXMath.h>
 
-class App : public D3D12AppBase
+class MyApp : public Application
 {
 public:
-    App();
-    virtual ~App();
+    MyApp();
+    virtual ~MyApp();
 
 public:
     struct Vertex

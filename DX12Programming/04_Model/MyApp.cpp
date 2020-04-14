@@ -1,26 +1,23 @@
-#include "App.h"
+#include "MyApp.h"
 
 #undef min
 #undef max
 
 #include <stdexcept>
-#include <Texture/TextureLoader.h>
-#include <Util/D3D12Util.h>
+#include <D3D12/D3D12Util.h>
 
-App::App()
+MyApp::MyApp()
 {
 }
 
-App::~App()
+MyApp::~MyApp()
 {
 }
 
-void App::OnInitialize()
+void MyApp::OnInitialize()
 {
-    auto& descriptorManager = GetDescriptorManager();
     auto* device = GetDevice().Get();
-    auto* commandAllocator = GetCommandAllocator().Get();
-    auto* commandQueue = GetCommandQueue().Get();
+    auto& descriptorManager = GetDescriptorManager();
 
     // モデル読み込み
     m_modelLoader.Load(device, "../assets/shaderball/shaderBall.fbx");
@@ -40,16 +37,12 @@ void App::OnInitialize()
     }
 
     // DescripterRange.
-    CD3DX12_DESCRIPTOR_RANGE cbv, srv, sampler;
+    CD3DX12_DESCRIPTOR_RANGE cbv;
     cbv.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
-	srv.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
-	sampler.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER, 1, 0);
 
     // RootParameter.
-    CD3DX12_ROOT_PARAMETER rootParams[3];
-	rootParams[0].InitAsDescriptorTable(1, &cbv, D3D12_SHADER_VISIBILITY_VERTEX);
-	rootParams[1].InitAsDescriptorTable(1, &srv, D3D12_SHADER_VISIBILITY_PIXEL);
-	rootParams[2].InitAsDescriptorTable(1, &sampler, D3D12_SHADER_VISIBILITY_PIXEL);
+    CD3DX12_ROOT_PARAMETER rootParams[1];
+    rootParams[0].InitAsDescriptorTable(1, &cbv, D3D12_SHADER_VISIBILITY_VERTEX);
 
     // RootSignature.
     CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc{};
@@ -133,62 +126,14 @@ void App::OnInitialize()
 			device->CreateConstantBufferView(&cbDesc, m_cbViews[index].GetCPUHandle());
 		}
 	}
-
-	// sampler.
-	{
-		m_sampler = descriptorManager.Alloc(DescriptorManager::DescriptorPoolType::Sampler);
-
-		// sampler desc.
-		D3D12_SAMPLER_DESC samplerDesc{};
-		{
-			samplerDesc.Filter = D3D12_ENCODE_BASIC_FILTER(
-				D3D12_FILTER_TYPE_LINEAR, // min
-				D3D12_FILTER_TYPE_LINEAR, // mag
-				D3D12_FILTER_TYPE_LINEAR, // mip
-				D3D12_FILTER_REDUCTION_TYPE_STANDARD
-			);
-			samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-			samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-			samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-			samplerDesc.MaxLOD = FLT_MAX;
-			samplerDesc.MinLOD = -FLT_MAX;
-			samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-		}
-		device->CreateSampler(&samplerDesc, m_sampler.GetCPUHandle());
-	}
-
-	// テクスチャ読み込み
-	{
-		hr = TextureLoader::LoadDDS(
-			device,
-			L"../assets/textures/antique/antique_albedo.dds",
-			descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav),
-			commandAllocator,
-			commandQueue,
-			&m_texture
-		);
-		if (FAILED(hr))
-		{
-			throw std::runtime_error("TextureLoader::LoadDDS failed");
-		}
-	}
 }
 
-void App::OnFinalize()
+void MyApp::OnFinalize()
 {
     WaitForGPU();
-
-#if 0
-    auto index = m_swapChain->GetCurrentBackBufferIndex();
-    auto fence = m_frameFences[index];
-    auto value = ++m_frameFenceValues[index];
-    m_commandQueue->Signal(fence.Get(), value);
-    fence->SetEventOnCompletion(value, m_fenceWaitEvent);
-    WaitForSingleObject(m_fenceWaitEvent, GpuWaitTimeout);
-#endif
 }
 
-void App::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
+void MyApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
 {
     using namespace DirectX;
 
@@ -229,17 +174,14 @@ void App::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
 
     // DescriptorHeap.
 	DescriptorPool* cbvSrvUavDescriptorPool = descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav);
-	DescriptorPool* samplerDescriptorPool = descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::Sampler);
-	ID3D12DescriptorHeap* heaps[] = {
-		cbvSrvUavDescriptorPool->GetHeap(), samplerDescriptorPool->GetHeap()
+    ID3D12DescriptorHeap* heaps[] = {
+		cbvSrvUavDescriptorPool->GetHeap()
     };
     command->SetDescriptorHeaps(_countof(heaps), heaps);
 
     // DescriptorTable.
-	int cbvModelIndex = CbvModel * FrameBufferCount + frameIndex;
-	command->SetGraphicsRootDescriptorTable(0, m_cbViews[cbvModelIndex].GetGPUHandle());
-	command->SetGraphicsRootDescriptorTable(1, m_texture.GetShaderResourceView());
-	command->SetGraphicsRootDescriptorTable(2, m_sampler.GetGPUHandle());
+	int cbvModelIndex = CbvModel * frameIndex + frameIndex;
+    command->SetGraphicsRootDescriptorTable(0, m_cbViews[cbvModelIndex].GetGPUHandle());
     
     // DrawModel
     m_modelLoader.Draw(command.Get());

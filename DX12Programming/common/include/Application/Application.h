@@ -4,7 +4,7 @@
 #include "Descriptor/DescriptorManager.h"
 #include "ImGui/ImGuiDx12.h"
 
-class D3D12AppBase
+class Application
 {
 public:
     template <typename T>
@@ -14,8 +14,8 @@ public:
     static const UINT GpuWaitTimeout = (10 * 1000);    /// 10s
 
 public:
-    D3D12AppBase();
-    virtual ~D3D12AppBase();
+    Application();
+    virtual ~Application();
 
     //! @brief é¿çs
     int Run(HWND hWnd);

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "D3D12/D3D12AppBase.h"
+#include "Application/Application.h"
 
-class App : public D3D12AppBase
+class MyApp : public Application
 {
 public:
-	App();
-	~App();
+	MyApp();
+	virtual ~MyApp();
 
 	virtual void OnInitialize() override;
 	virtual void OnFinalize() override;

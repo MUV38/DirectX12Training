@@ -1,18 +1,18 @@
-#include "App.h"
+#include "MyApp.h"
 #include <stdexcept>
 #define STB_IMAGE_IMPLEMENTATION
 #include <ThirdParty/stb/stb_image.h>
-#include <Util/D3D12Util.h>
+#include <D3D12/D3D12Util.h>
 
-App::App()
+MyApp::MyApp()
 {
 }
 
-App::~App()
+MyApp ::~MyApp()
 {
 }
 
-void App::OnInitialize()
+void MyApp::OnInitialize()
 {
 	auto* device = GetDevice().Get();
 	auto& descriptorManager = GetDescriptorManager();
@@ -227,21 +227,12 @@ void App::OnInitialize()
 	}
 }
 
-void App::OnFinalize()
+void MyApp::OnFinalize()
 {
 	WaitForGPU();
-
-#if 0
-    auto index = m_swapChain->GetCurrentBackBufferIndex();
-    auto fence = m_frameFences[index];
-    auto value = ++m_frameFenceValues[index];
-    m_commandQueue->Signal(fence.Get(), value);
-    fence->SetEventOnCompletion(value, m_fenceWaitEvent);
-    WaitForSingleObject(m_fenceWaitEvent, GpuWaitTimeout);
-#endif
 }
 
-void App::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
+void MyApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
 {
     using namespace DirectX;
 
@@ -302,7 +293,7 @@ void App::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
     command->DrawIndexedInstanced(m_indexCount, 1, 0, 0, 0);
 }
 
-App::ComPtr<ID3D12Resource1> App::CreateTexture(const std::string& fileName)
+MyApp::ComPtr<ID3D12Resource1> MyApp::CreateTexture(const std::string& fileName)
 {
 	auto* device = GetDevice().Get();
 	auto* commandAllocator = GetCommandAllocator().Get();

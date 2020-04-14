@@ -1,4 +1,4 @@
-#include "App.h"
+#include "MyApp.h"
 
 #include <stdexcept>
 #include <sstream>
@@ -186,15 +186,15 @@ public:
 	}
 };
 
-App::App()
+MyApp::MyApp()
 {
 }
 
-App::~App()
+MyApp::~MyApp()
 {
 }
 
-void App::OnInitialize()
+void MyApp::OnInitialize()
 {
 	auto& adapter = GetAdapter();
 	auto& descriptorManager = GetDescriptorManager();
@@ -230,12 +230,12 @@ void App::OnInitialize()
 	CreateRaytracingOutputResource();
 }
 
-void App::OnFinalize()
+void MyApp::OnFinalize()
 {
 
 }
 
-void App::OnUpdate()
+void MyApp::OnUpdate()
 {
 	static bool show_demo_window = true;
 	static bool show_another_window = true;
@@ -262,7 +262,7 @@ void App::OnUpdate()
 	ImGui::End();
 }
 
-void App::OnRender(App::ComPtr<ID3D12GraphicsCommandList>& command)
+void MyApp::OnRender(MyApp::ComPtr<ID3D12GraphicsCommandList>& command)
 {
 	auto& commandList = command;
 	const auto& viewport = GetViewport();
@@ -318,7 +318,7 @@ void App::OnRender(App::ComPtr<ID3D12GraphicsCommandList>& command)
 }
 
 /// DXRサポートかチェック
-bool App::IsDirectXRaytracingSuppoted(IDXGIAdapter* adapter) const
+bool MyApp::IsDirectXRaytracingSuppoted(IDXGIAdapter* adapter) const
 {
 	ComPtr<ID3D12Device> testDevice;
 	D3D12_FEATURE_DATA_D3D12_OPTIONS5 featureSupportData = {};
@@ -329,7 +329,7 @@ bool App::IsDirectXRaytracingSuppoted(IDXGIAdapter* adapter) const
 }
 
 /// DXRインターフェース作成
-void App::CreateRaytracingInterfaces()
+void MyApp::CreateRaytracingInterfaces()
 {
 	HRESULT hr;
 	auto& device = GetDevice();
@@ -348,7 +348,7 @@ void App::CreateRaytracingInterfaces()
 }
 
 /// RootSignature作成
-void App::CreateRootSignatures()
+void MyApp::CreateRootSignatures()
 {
 	// Global Root Signature
 	// This is a root signature that is shared across all raytracing shaders invoked during a DispatchRays() call.
@@ -401,7 +401,7 @@ void App::CreateRootSignatures()
 }
 
 /// レイトレーシングPSO作成
-void App::CreateRaytracingPipelineStateObject()
+void MyApp::CreateRaytracingPipelineStateObject()
 {
 	CD3DX12_STATE_OBJECT_DESC raytracingPipeline{ D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE };
 
@@ -448,7 +448,7 @@ void App::CreateRaytracingPipelineStateObject()
 }
 
 /// ジオメトリ構築
-void App::BuildGeometry()
+void MyApp::BuildGeometry()
 {
 	auto* device = GetDevice().Get();
 	Index indices[] =
@@ -473,7 +473,7 @@ void App::BuildGeometry()
 }
 
 /// AccelerationStructure構築
-void App::BuildAccelerationStructures()
+void MyApp::BuildAccelerationStructures()
 {
 	auto* device = GetDevice().Get();
 	auto* commandList = GetCommandList().Get();
@@ -590,7 +590,7 @@ void App::BuildAccelerationStructures()
 }
 
 /// シェーダーテーブル構築
-void App::BuildShaderTables()
+void MyApp::BuildShaderTables()
 {
 	auto* device = GetDevice().Get();
 	HRESULT hr;
@@ -653,7 +653,7 @@ void App::BuildShaderTables()
 }
 
 /// レイトレーシング出力リソース作成
-void App::CreateRaytracingOutputResource()
+void MyApp::CreateRaytracingOutputResource()
 {
 	auto* device = GetDevice().Get();
 	auto backbufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -678,7 +678,7 @@ void App::CreateRaytracingOutputResource()
 }
 
 /// RootSignatureのシリアライズと作成
-void App::SerializeAndCreateRaytracingRootSignature(D3D12_ROOT_SIGNATURE_DESC& desc, ComPtr<ID3D12RootSignature>* rootSig)
+void MyApp::SerializeAndCreateRaytracingRootSignature(D3D12_ROOT_SIGNATURE_DESC& desc, ComPtr<ID3D12RootSignature>* rootSig)
 {
 	auto& device = GetDevice();
 	ComPtr<ID3DBlob> blob;
@@ -698,7 +698,7 @@ void App::SerializeAndCreateRaytracingRootSignature(D3D12_ROOT_SIGNATURE_DESC& d
 }
 
 /// Local RootSignatureのサブオブジェクト作成
-void App::CreateLocalRootSignatureSubobjects(CD3DX12_STATE_OBJECT_DESC* raytracingPipeline)
+void MyApp::CreateLocalRootSignatureSubobjects(CD3DX12_STATE_OBJECT_DESC* raytracingPipeline)
 {
 	auto localRootSignature = raytracingPipeline->CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
 	localRootSignature->SetRootSignature(m_raytracingLocalRootSignature.Get());

@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 #include <Window/Window.h>
-#include <D3D12/D3D12AppBase.h>
+#include <Application/Application.h>
 
 const wchar_t* APP_NAME = L"01_ClearScreen";
 
@@ -13,7 +13,7 @@ const int WINDOW_HEIGHT = 720;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
     Window window;
-    D3D12AppBase app;
+    Application app;
 
     window.create(
         hInstance,

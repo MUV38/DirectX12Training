@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 #include "Window/Window.h"
-#include "App.h"
+#include "MyApp.h"
 
 const wchar_t* APP_NAME = L"04_Model";
 
@@ -13,7 +13,7 @@ const int WINDOW_HEIGHT = 720;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
     Window window;
-    App app;
+    MyApp app;
 
     window.create(
         hInstance,

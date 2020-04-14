@@ -1,25 +1,25 @@
-#include "App.h"
+#include "MyApp.h"
 
-App::App()
+MyApp::MyApp()
 {
 }
 
-App::~App()
+MyApp::~MyApp()
 {
 }
 
 
-void App::OnInitialize()
-{
-
-}
-
-void App::OnFinalize()
+void MyApp::OnInitialize()
 {
 
 }
 
-void App::OnUpdate()
+void MyApp::OnFinalize()
+{
+
+}
+
+void MyApp::OnUpdate()
 {
 	static bool show_demo_window = true;
 	static bool show_another_window = true;
@@ -46,7 +46,7 @@ void App::OnUpdate()
 	ImGui::End();
 }
 
-void App::OnRender(App::ComPtr<ID3D12GraphicsCommandList>& command)
+void MyApp::OnRender(MyApp::ComPtr<ID3D12GraphicsCommandList>& command)
 {
 
 }

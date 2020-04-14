@@ -72,6 +72,12 @@
     <Filter Include="HeaderFiles\Window">
       <UniqueIdentifier>{4aa80089-16b0-4722-8696-abf0e9306301}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SourceFiles\Application">
+      <UniqueIdentifier>{2fdd9dd9-93e3-49ae-8f5c-b78f9e1c34c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\Application">
+      <UniqueIdentifier>{97dea7dc-aa20-42f4-8cea-5438b5b0f3e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -79,9 +85,6 @@
     </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>HeaderFiles</Filter>
-    </ClInclude>
-    <ClInclude Include="include\D3D12\D3D12AppBase.h">
-      <Filter>HeaderFiles\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="include\D3D12\d3dx12.h">
       <Filter>HeaderFiles\D3D12</Filter>
@@ -105,9 +108,6 @@
       <Filter>HeaderFiles\Texture</Filter>
     </ClInclude>
     <ClInclude Include="include\Util\FullScreenQuad.h">
-      <Filter>HeaderFiles\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Util\D3D12Util.h">
       <Filter>HeaderFiles\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\RenderTarget\RenderTarget.h">
@@ -152,6 +152,12 @@
     <ClInclude Include="include\Window\Window.h">
       <Filter>HeaderFiles\Window</Filter>
     </ClInclude>
+    <ClInclude Include="include\Application\Application.h">
+      <Filter>HeaderFiles\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="include\D3D12\D3D12Util.h">
+      <Filter>HeaderFiles\D3D12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -159,9 +165,6 @@
     </ClCompile>
     <ClCompile Include="common.cpp">
       <Filter>SourceFiles</Filter>
-    </ClCompile>
-    <ClCompile Include="source\D3D12\D3D12AppBase.cpp">
-      <Filter>SourceFiles\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="source\Model\Mesh.cpp">
       <Filter>SourceFiles\Model</Filter>
@@ -176,9 +179,6 @@
       <Filter>SourceFiles\Texture</Filter>
     </ClCompile>
     <ClCompile Include="source\Util\FullScreenQuad.cpp">
-      <Filter>SourceFiles\Util</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Util\D3D12Util.cpp">
       <Filter>SourceFiles\Util</Filter>
     </ClCompile>
     <ClCompile Include="source\RenderTarget\RenderTarget.cpp">
@@ -207,6 +207,12 @@
     </ClCompile>
     <ClCompile Include="source\Window\Window.cpp">
       <Filter>SourceFiles\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Application\Application.cpp">
+      <Filter>SourceFiles\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="source\D3D12\D3D12Util.cpp">
+      <Filter>SourceFiles\D3D12</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

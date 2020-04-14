@@ -1,16 +1,16 @@
-#include "App.h"
+#include "MyApp.h"
 #include <stdexcept>
-#include <Util/D3D12Util.h>
+#include <D3D12/D3D12Util.h>
 
-App::App()
+MyApp::MyApp()
 {
 }
 
-App::~App()
+MyApp ::~MyApp()
 {
 }
 
-void App::OnInitialize()
+void MyApp::OnInitialize()
 {
     auto* device = GetDevice().Get();
 
@@ -109,21 +109,12 @@ void App::OnInitialize()
     }
 }
 
-void App::OnFinalize()
+void MyApp::OnFinalize()
 {
     WaitForGPU();
-
-#if 0
-    auto index = m_swapChain->GetCurrentBackBufferIndex();
-    auto fence = m_frameFences[index];
-    auto value = ++m_frameFenceValues[index];
-    m_commandQueue->Signal(fence.Get(), value);
-    fence->SetEventOnCompletion(value, m_fenceWaitEvent);
-    WaitForSingleObject(m_fenceWaitEvent, GpuWaitTimeout);
-#endif
 }
 
-void App::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
+void MyApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
 {
     const auto& viewport = GetViewport();
     const auto& scissorRect = GetScissorRect();
@@ -145,7 +136,7 @@ void App::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
     command->DrawIndexedInstanced(m_indexCount, 1, 0, 0, 0);
 }
 
-App::ComPtr<ID3D12Resource1> App::CreateBuffer(UINT bufferSize, const void* initialData)
+MyApp::ComPtr<ID3D12Resource1> MyApp::CreateBuffer(UINT bufferSize, const void* initialData)
 {
     auto* device = GetDevice().Get();
 

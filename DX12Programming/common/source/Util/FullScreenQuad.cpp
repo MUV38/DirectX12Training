@@ -1,7 +1,7 @@
 #include "Util/FullScreenQuad.h"
 
 #include <stdexcept>
-#include "Util/D3D12Util.h"
+#include "D3D12/D3D12Util.h"
 
 //-------------------------------------------------------------------------------------------------------------------
 // FullScreenQuad
