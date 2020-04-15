@@ -13,13 +13,13 @@ public:
 	~ConstantBuffer();
 
 	//! @brief 作成
-	void Create(ID3D12Device* device, DescriptorManager* descriptorManager, size_t bufferSize);
+	void create(ID3D12Device* device, DescriptorManager* descriptorManager, size_t bufferSize);
 	
 	//! @brief Map
-	void Map(uint32_t frameIndex, void** ptr);
+	void map(uint32_t frameIndex, void** ptr);
 
 	//! @brief Unmap
-	void Unmap(uint32_t frameIndex);
+	void unmap(uint32_t frameIndex);
 	
 	//! @brief ビュー
 	const D3D12_GPU_DESCRIPTOR_HANDLE& getView(uint32_t frameIndex) const;
@@ -28,6 +28,6 @@ private:
 	static const uint32_t FrameBufferCount = FrameResource::FrameBufferCount;
 
 private:
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_resource[FrameBufferCount];	//!< リソース
-	DescriptorHandle m_descriptorHandle[FrameBufferCount];					//!< デスクリプターハンドル
+	Microsoft::WRL::ComPtr<ID3D12Resource> mResource[FrameBufferCount];	//!< リソース
+	DescriptorHandle mDescriptorHandle[FrameBufferCount];					//!< デスクリプターハンドル
 };

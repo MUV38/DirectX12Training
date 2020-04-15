@@ -115,7 +115,7 @@ void MyApp::OnInitialize()
 
     // ConstantBuffer/View.
     {
-        m_constantBuffers[CbModel].Create(device, &descriptorManager, sizeof(ShaderParameters));
+        m_constantBuffers[CbModel].create(device, &descriptorManager, sizeof(ShaderParameters));
     }
 
 	// sampler.
@@ -190,9 +190,9 @@ void MyApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
     {
         void* p = nullptr;
         D3D12_RANGE range{ 0, 0 };
-        cbModel.Map(frameIndex, &p);
+        cbModel.map(frameIndex, &p);
         memcpy(p, &shaderParams, sizeof(shaderParams));
-        cbModel.Unmap(frameIndex);
+        cbModel.unmap(frameIndex);
     }
 
     // PSO.
