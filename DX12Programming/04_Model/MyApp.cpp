@@ -20,7 +20,7 @@ void MyApp::OnInitialize()
     auto& descriptorManager = GetDescriptorManager();
 
     // モデル読み込み
-    m_modelLoader.Load(device, "../assets/shaderball/shaderBall.fbx");
+    m_modelLoader.Load(device, ASSET_MODEL_ROOT"shaderball/shaderBall.fbx");
 
     // シェーダーをコンパイル.
     HRESULT hr;

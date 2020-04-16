@@ -152,9 +152,6 @@
     <ClInclude Include="..\ThirdParty\imgui\imstb_truetype.h">
       <Filter>HeaderFiles\ImGui\ImGuiImpl</Filter>
     </ClInclude>
-    <ClInclude Include="AssetUtil.h">
-      <Filter>HeaderFiles\Util</Filter>
-    </ClInclude>
     <ClInclude Include="include\Window\Window.h">
       <Filter>HeaderFiles\Window</Filter>
     </ClInclude>
@@ -168,6 +165,9 @@
       <Filter>HeaderFiles\ConstantBuffer</Filter>
     </ClInclude>
     <ClInclude Include="include\Util\FrameResource.h">
+      <Filter>HeaderFiles\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Util\AssetUtil.h">
       <Filter>HeaderFiles\Util</Filter>
     </ClInclude>
   </ItemGroup>
@@ -231,10 +231,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\assets\shader\FullScreenQuad_vs.hlsl">
+    <FxCompile Include="..\assets\shaders\FullScreenQuad_ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="..\assets\shader\FullScreenQuad_ps.hlsl">
+    <FxCompile Include="..\assets\shaders\FullScreenQuad_vs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

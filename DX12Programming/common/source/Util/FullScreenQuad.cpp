@@ -46,7 +46,7 @@ void FullScreenQuad::Setup(ID3D12Device* device, const SetupParam& param)
 	// シェーダー
 	{
 		ComPtr<ID3DBlob> errBlob;
-		hr = D3D12Util::CompileShaderFromFile(L"../assets/shader/FullScreenQuad_vs.hlsl", L"vs_6_0", m_vs, errBlob);
+		hr = D3D12Util::CompileShaderFromFile(ASSET_SHADER_ROOT_W"FullScreenQuad_vs.hlsl", L"vs_6_0", m_vs, errBlob);
 		if (FAILED(hr))
 		{
 			OutputDebugStringA(static_cast<const char*>(errBlob->GetBufferPointer()));
@@ -55,7 +55,7 @@ void FullScreenQuad::Setup(ID3D12Device* device, const SetupParam& param)
 		m_ps = param.psBlob;
 		if (!m_ps)
 		{
-			hr = D3D12Util::CompileShaderFromFile(L"../assets/shader/FullScreenQuad_ps.hlsl", L"ps_6_0", m_ps, errBlob);
+			hr = D3D12Util::CompileShaderFromFile(ASSET_SHADER_ROOT_W"FullScreenQuad_ps.hlsl", L"ps_6_0", m_ps, errBlob);
 			if (FAILED(hr))
 			{
 				OutputDebugStringA(static_cast<const char*>(errBlob->GetBufferPointer()));

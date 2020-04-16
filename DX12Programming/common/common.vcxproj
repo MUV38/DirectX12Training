@@ -106,7 +106,6 @@
     <ClInclude Include="..\ThirdParty\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\ThirdParty\imgui\imstb_textedit.h" />
     <ClInclude Include="..\ThirdParty\imgui\imstb_truetype.h" />
-    <ClInclude Include="AssetUtil.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="include\Application\Application.h" />
     <ClInclude Include="include\ConstantBuffer\ConstantBuffer.h" />
@@ -124,6 +123,7 @@
     <ClInclude Include="include\Texture\TextureLoader.h" />
     <ClInclude Include="include\ThirdParty\stb\stb_image.h" />
     <ClInclude Include="include\Util\Assert.h" />
+    <ClInclude Include="include\Util\AssetUtil.h" />
     <ClInclude Include="include\Util\FrameResource.h" />
     <ClInclude Include="include\Util\FullScreenQuad.h" />
     <ClInclude Include="include\Window\Window.h" />
@@ -154,14 +154,16 @@
     <ClCompile Include="source\Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\assets\shader\FullScreenQuad_ps.hlsl">
+    <FxCompile Include="..\assets\shaders\FullScreenQuad_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="..\assets\shader\FullScreenQuad_vs.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="..\assets\shaders\FullScreenQuad_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.0</ShaderModel>
     </FxCompile>
   </ItemGroup>

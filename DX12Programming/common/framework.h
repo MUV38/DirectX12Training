@@ -14,3 +14,7 @@
 #include <DirectXMath.h>
 #include <DirectXTex.h>
 #include "D3D12/d3dx12.h"
+
+// util
+#include "include/Util/Assert.h"
+#include "include/Util/AssetUtil.h"

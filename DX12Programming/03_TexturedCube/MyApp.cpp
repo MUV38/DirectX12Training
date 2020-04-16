@@ -174,7 +174,7 @@ void MyApp::OnInitialize()
 	}
 
 	// texture.
-	m_texture = CreateTexture("assets/texture/texture.tga");
+	m_texture = CreateTexture(ASSET_TEXTURE_ROOT"dx12_texture.tga");
 
 	// sampler.
 	{
