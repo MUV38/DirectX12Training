@@ -20,7 +20,7 @@ void MyApp::OnInitialize()
     auto& descriptorManager = GetDescriptorManager();
 
     // モデル読み込み
-    m_modelLoader.Load(device, ASSET_MODEL_ROOT"shaderball/shaderBall.fbx");
+    m_modelLoader.Load(device, ASSET_MODEL_ROOT"sponza/sponza.fbx");
 
     // シェーダーをコンパイル.
     HRESULT hr;
@@ -132,7 +132,7 @@ void MyApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
     ShaderParameters shaderParams;
     XMStoreFloat4x4(&shaderParams.mtxWorld, XMMatrixScaling(0.01f, 0.01f, 0.01f));
     auto mtxView = XMMatrixLookAtLH(
-        XMVectorSet(0.f, 1.5f, -5.f, 0.f),
+        XMVectorSet(-5.f, 1.5f, 0.f, 0.f),
         XMVectorSet(0.f, 1.5f, 0.f, 0.f),
         XMVectorSet(0.f, 1.f, 0.f, 0.f)
     );
