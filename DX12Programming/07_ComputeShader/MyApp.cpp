@@ -24,27 +24,16 @@ void MyApp::OnInitialize()
 	auto* commandAllocator = GetCommandAllocator().Get();
 	auto* commandQueue = GetCommandQueue().Get();
 
+	HRESULT hr;
+	ComPtr<ID3DBlob> errBlob;
+
 	// モデル読み込み
 	m_modelLoader.Load(device, ASSET_MODEL_ROOT"sponza/sponza.fbx");
 
 	// シェーダーをコンパイル.
-	HRESULT hr;
-	ComPtr<ID3DBlob> errBlob;
-	hr = D3D12Util::CompileShaderFromFile(L"VertexShader.hlsl", L"vs_6_0", m_vs, errBlob);
-	if (FAILED(hr))
-	{
-		OutputDebugStringA(static_cast<const char*>(errBlob->GetBufferPointer()));
-	}
-	hr = D3D12Util::CompileShaderFromFile(L"PixelShader.hlsl", L"ps_6_0", m_ps, errBlob);
-	if (FAILED(hr))
-	{
-		OutputDebugStringA(static_cast<const char*>(errBlob->GetBufferPointer()));
-	}
-	hr = D3D12Util::CompileShaderFromFile(L"ComputeShader.hlsl", L"cs_6_0", m_cs, errBlob);
-	if (FAILED(hr))
-	{
-		OutputDebugStringA(static_cast<const char*>(errBlob->GetBufferPointer()));
-	}
+	m_vs.compile(L"VertexShader.hlsl", L"vs_6_0");
+	m_ps.compile(L"PixelShader.hlsl", L"ps_6_0");
+	m_cs.compile(L"ComputeShader.hlsl", L"cs_6_0");
 
 	// RootSignature.
 	{
@@ -95,8 +84,8 @@ void MyApp::OnInitialize()
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
 		{
 			// Shader.
-			psoDesc.VS = CD3DX12_SHADER_BYTECODE(m_vs.Get());
-			psoDesc.PS = CD3DX12_SHADER_BYTECODE(m_ps.Get());
+			psoDesc.VS = m_vs.getShaderByteCode();
+			psoDesc.PS = m_ps.getShaderByteCode();
 			// BlendState.
 			psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 			// RasterizerState.
@@ -229,7 +218,7 @@ void MyApp::OnInitialize()
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc = {};
 		{
 			psoDesc.pRootSignature = m_computeRootSignature.Get();
-			psoDesc.CS = CD3DX12_SHADER_BYTECODE(m_cs.Get());
+			psoDesc.CS = m_cs.getShaderByteCode();
 			psoDesc.NodeMask = 0;
 			psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 		}

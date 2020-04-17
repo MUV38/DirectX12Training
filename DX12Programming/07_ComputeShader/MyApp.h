@@ -6,6 +6,7 @@
 #include <Util/FullScreenQuad.h>
 #include <RenderTarget/RenderTarget.h>
 #include <ConstantBuffer/ConstantBuffer.h>
+#include <Shader/ShaderObject.h>
 
 class MyApp : public Application
 {
@@ -52,7 +53,7 @@ private:
 
 	DescriptorHandle m_sampler;
 
-    ComPtr<ID3DBlob> m_vs, m_ps, m_cs;
+	ShaderObject m_vs, m_ps, m_cs;
 
     ComPtr<ID3D12RootSignature> m_rootSignature;
     ComPtr<ID3D12PipelineState> m_pipeline;

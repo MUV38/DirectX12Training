@@ -2,6 +2,7 @@
 
 #include <Application/Application.h>
 #include <DirectXMath.h>
+#include <Shader/ShaderObject.h>
 
 class MyApp : public Application
 {
@@ -32,7 +33,7 @@ private:
     D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
     UINT m_indexCount;
 
-    ComPtr<ID3DBlob> m_vs, m_ps;
+    ShaderObject m_vs, m_ps;
     ComPtr<ID3D12RootSignature> m_rootSignature;
     ComPtr<ID3D12PipelineState> m_pipeline;
 };

@@ -3,6 +3,7 @@
 #include <Application/Application.h>
 #include <Model/ModelLoader.h>
 #include <ConstantBuffer/ConstantBuffer.h>
+#include <Shader/ShaderObject.h>
 
 class MyApp : public Application
 {
@@ -34,7 +35,7 @@ private:
 
     ConstantBuffer m_constantBuffers[CbNum];
 
-    ComPtr<ID3DBlob> m_vs, m_ps;
+    ShaderObject m_vs, m_ps;
 
     ComPtr<ID3D12RootSignature> m_rootSignature;
     ComPtr<ID3D12PipelineState> m_pipeline;

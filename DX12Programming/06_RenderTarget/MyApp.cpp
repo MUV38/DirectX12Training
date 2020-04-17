@@ -24,22 +24,15 @@ void MyApp::OnInitialize()
 	const auto& viewport = GetViewport();
 	auto& descriptorManager = GetDescriptorManager();
 
+	HRESULT hr;
+	ComPtr<ID3DBlob> errBlob;
+
     // モデル読み込み
     m_modelLoader.Load(device, ASSET_MODEL_ROOT"sponza/sponza.fbx");
 
     // シェーダーをコンパイル.
-    HRESULT hr;
-    ComPtr<ID3DBlob> errBlob;
-	hr = D3D12Util::CompileShaderFromFile(L"VertexShader.hlsl", L"vs_6_0", m_vs, errBlob);
-    if (FAILED(hr))
-    {
-        OutputDebugStringA(static_cast<const char*>(errBlob->GetBufferPointer()));
-    }
-    hr = D3D12Util::CompileShaderFromFile(L"PixelShader.hlsl", L"ps_6_0", m_ps, errBlob);
-    if (FAILED(hr))
-    {
-        OutputDebugStringA(static_cast<const char*>(errBlob->GetBufferPointer()));
-    }
+	m_vs.compile(L"VertexShader.hlsl", L"vs_6_0");
+	m_ps.compile(L"PixelShader.hlsl", L"ps_6_0");
 
     // DescripterRange.
     CD3DX12_DESCRIPTOR_RANGE cbv, srv, sampler;
@@ -87,8 +80,8 @@ void MyApp::OnInitialize()
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
     {
         // Shader.
-        psoDesc.VS = CD3DX12_SHADER_BYTECODE(m_vs.Get());
-        psoDesc.PS = CD3DX12_SHADER_BYTECODE(m_ps.Get());
+        psoDesc.VS = m_vs.getShaderByteCode();
+        psoDesc.PS = m_ps.getShaderByteCode();
         // BlendState.
         psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
         // RasterizerState.
