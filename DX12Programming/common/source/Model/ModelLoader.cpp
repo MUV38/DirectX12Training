@@ -19,12 +19,14 @@ ModelLoader::~ModelLoader()
 {
 }
 
-bool ModelLoader::Load(ID3D12Device* device, const char* filePath)
+bool ModelLoader::Load(ID3D12Device* device, const wchar_t* filePath)
 {
     Assimp::Importer importer;
 
+    std::string filePathStr = util::toString(filePath);
+
     const aiScene* scene = importer.ReadFile(
-        filePath,
+        filePathStr.c_str(),
         aiProcess_CalcTangentSpace |
         aiProcess_Triangulate |
         aiProcess_JoinIdenticalVertices |

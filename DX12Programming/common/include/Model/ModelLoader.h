@@ -16,7 +16,7 @@ public:
     ~ModelLoader();
 
     /// ロード
-    bool Load(ID3D12Device* device, const char* filePath);
+    bool Load(ID3D12Device* device, const wchar_t* filePath);
 
     /// ロード済みか
     bool IsLoaded() const;

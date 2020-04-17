@@ -38,7 +38,7 @@ public:
 
 private:
     /// テクスチャの作成
-    ComPtr<ID3D12Resource1> CreateTexture(const std::string& fileName);
+    ComPtr<ID3D12Resource1> CreateTexture(const std::wstring& fileName);
 
 private:    
     ComPtr<ID3D12Resource> m_vertexBuffer;

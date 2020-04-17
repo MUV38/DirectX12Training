@@ -276,7 +276,7 @@ void MyApp::OnRender(ComPtr<ID3D12GraphicsCommandList>& command)
     command->DrawIndexedInstanced(m_indexCount, 1, 0, 0, 0);
 }
 
-MyApp::ComPtr<ID3D12Resource1> MyApp::CreateTexture(const std::string& fileName)
+MyApp::ComPtr<ID3D12Resource1> MyApp::CreateTexture(const std::wstring& fileName)
 {
 	auto* device = GetDevice().Get();
 	auto* commandAllocator = GetCommandAllocator().Get();
@@ -284,7 +284,7 @@ MyApp::ComPtr<ID3D12Resource1> MyApp::CreateTexture(const std::string& fileName)
 
     ComPtr<ID3D12Resource1> texture;
     int texWidth = 0, texHeight = 0, channels = 0;
-    auto* pImage = stbi_load(fileName.c_str(), &texWidth, &texHeight, &channels, 0);
+    auto* pImage = stbi_load(util::toString(fileName).c_str(), &texWidth, &texHeight, &channels, 0);
     assert(pImage);
 
     // サイズ、フォーマットからテクスチャリソースのDesc準備

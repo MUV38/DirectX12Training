@@ -84,6 +84,12 @@
     <Filter Include="SourceFiles\ConstantBuffer">
       <UniqueIdentifier>{8f31e198-90ad-437e-b7d3-dc0a696ccff2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HeaderFiles\Shader">
+      <UniqueIdentifier>{d232b84f-a3ae-439e-86e2-8bfdfc5eb503}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SourceFiles\Shader">
+      <UniqueIdentifier>{7b7aec21-1c0e-43e2-9ba4-984ca8f2e506}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -170,6 +176,15 @@
     <ClInclude Include="include\Util\AssetUtil.h">
       <Filter>HeaderFiles\Util</Filter>
     </ClInclude>
+    <ClInclude Include="include\Model\Material.h">
+      <Filter>HeaderFiles\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Shader\ShaderObject.h">
+      <Filter>HeaderFiles\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Util\StringUtil.h">
+      <Filter>HeaderFiles\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -228,6 +243,15 @@
     </ClCompile>
     <ClCompile Include="source\ConstantBuffer\ConstantBuffer.cpp">
       <Filter>SourceFiles\ConstantBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Model\Material.cpp">
+      <Filter>SourceFiles\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Shader\ShaderObject.cpp">
+      <Filter>SourceFiles\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Util\StringUtil.cpp">
+      <Filter>SourceFiles\Util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

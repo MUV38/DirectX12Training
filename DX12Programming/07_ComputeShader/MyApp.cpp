@@ -170,7 +170,7 @@ void MyApp::OnInitialize()
 	{
 		hr = TextureLoader::LoadDDS(
 			device,
-			ASSET_TEXTURE_ROOT_W"uvChecker.dds",
+			ASSET_TEXTURE_ROOT"uvChecker.dds",
 			descriptorManager.GetDescriptorPool(DescriptorManager::DescriptorPoolType::CbvSrvUav),
 			commandAllocator,
 			commandQueue,
