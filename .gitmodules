@@ -10,3 +10,6 @@
 [submodule "DX12Programming/ThirdParty/EASTL"]
 	path = DX12Programming/ThirdParty/EASTL
 	url = https://github.com/electronicarts/EASTL
+[submodule "DX12Programming/Tools"]
+	path = DX12Programming/Tools
+	url = https://github.com/MUV38/Tools.git
