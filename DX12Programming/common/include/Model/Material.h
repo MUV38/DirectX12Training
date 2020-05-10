@@ -7,9 +7,15 @@ public:
 	Material();
 	~Material();
 
+	//! @brief –¼‘O
+	const char* getName() const;
+	void setName(const char* name);
+
 private:
 	// shader
 	// texture
 	// parameter
 	// renderstate(pso)
+
+	const char* mName;
 };

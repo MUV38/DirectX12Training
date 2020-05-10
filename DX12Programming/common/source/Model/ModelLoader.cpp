@@ -38,8 +38,13 @@ bool ModelLoader::Load(ID3D12Device* device, const wchar_t* filePath)
     {
         // DoTheSceneProcessing
 
-        // ノードを処理
+        // ノード
         ProcessNode(device, scene->mRootNode, scene);
+        // マテリアル
+        for (size_t i = 0; i < scene->mNumMaterials; ++i)
+        {
+            ProcessMaterial(device, scene->mMaterials[i], scene);
+        }
     }
     else
     {
@@ -118,4 +123,26 @@ ModelLoader::MeshPtr ModelLoader::ProcessMesh(ID3D12Device* device, aiMesh* mesh
 
     MeshPtr outMesh(new Mesh(device, vertices, indices));
     return outMesh;
+}
+
+ModelLoader::MaterialPtr ModelLoader::ProcessMaterial(ID3D12Device* device, aiMaterial* material, const aiScene* scene)
+{
+    MaterialPtr outMaterials(new Material());
+    outMaterials->setName(material->GetName().C_Str());
+
+    uint32_t noneCount = material->GetTextureCount(aiTextureType_NONE);
+    uint32_t diffuseCount = material->GetTextureCount(aiTextureType_DIFFUSE);
+    uint32_t specularCount = material->GetTextureCount(aiTextureType_SPECULAR);
+    uint32_t ambientCount = material->GetTextureCount(aiTextureType_AMBIENT);
+    uint32_t emissiveCount = material->GetTextureCount(aiTextureType_EMISSIVE);
+    uint32_t heightCount = material->GetTextureCount(aiTextureType_HEIGHT);
+    uint32_t normalsCount = material->GetTextureCount(aiTextureType_NORMALS);
+    uint32_t shininessCount = material->GetTextureCount(aiTextureType_SHININESS);
+    uint32_t opacityCount = material->GetTextureCount(aiTextureType_OPACITY);
+    uint32_t displacementCount = material->GetTextureCount(aiTextureType_DISPLACEMENT);
+    uint32_t lightMapCount = material->GetTextureCount(aiTextureType_LIGHTMAP);
+    uint32_t reflectionCount = material->GetTextureCount(aiTextureType_REFLECTION);
+    uint32_t unknownCount = material->GetTextureCount(aiTextureType_UNKNOWN);
+
+    return outMaterials;
 }
