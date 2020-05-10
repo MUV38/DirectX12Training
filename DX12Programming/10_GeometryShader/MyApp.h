@@ -17,6 +17,7 @@ public:
         DirectX::XMFLOAT3 pos;
         DirectX::XMFLOAT4 color;
         DirectX::XMFLOAT2 uv;
+        DirectX::XMFLOAT3 normal;
     };
 
     struct ShaderParameters
@@ -37,10 +38,6 @@ public:
     virtual void OnFinalize() override;
     virtual void OnRender(ComPtr<ID3D12GraphicsCommandList>& command) override;
 
-private:
-    /// テクスチャの作成
-    ComPtr<ID3D12Resource1> CreateTexture(const std::wstring& fileName);
-
 private:    
     ComPtr<ID3D12Resource> m_vertexBuffer;
     ComPtr<ID3D12Resource> m_indexBuffer;
@@ -49,11 +46,8 @@ private:
     D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
     UINT m_indexCount;
 
-    ShaderObject m_vs, m_ps;
+    ShaderObject m_vs, m_gs, m_ps;
     ComPtr<ID3D12RootSignature> m_rootSignature;
     ComPtr<ID3D12PipelineState> m_pipeline;
     ConstantBuffer m_constantBuffers[CbNum];
-
-    DescriptorHandle m_sampler;
-	DescriptorHandle m_srv;
 };
