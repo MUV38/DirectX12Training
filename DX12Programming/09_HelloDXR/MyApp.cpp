@@ -235,7 +235,7 @@ void MyApp::OnFinalize()
 
 }
 
-void MyApp::OnUpdate()
+void MyApp::OnUpdate(float deltaTime)
 {
 	static bool show_demo_window = true;
 	static bool show_another_window = true;
@@ -518,7 +518,7 @@ void MyApp::BuildAccelerationStructures()
 	ASSERT(bottomLevelPrebuildInfo.ResultDataMaxSizeInBytes > 0);
 
 	ComPtr<ID3D12Resource> scratchResource;
-	scratchResource = D3D12Util::CreateUAVBuffer(device, max(topLevelPrebuildInfo.ScratchDataSizeInBytes, bottomLevelPrebuildInfo.ScratchDataSizeInBytes), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, L"ScratchResource");
+	scratchResource = D3D12Util::CreateUAVBuffer(device, std::max(topLevelPrebuildInfo.ScratchDataSizeInBytes, bottomLevelPrebuildInfo.ScratchDataSizeInBytes), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, L"ScratchResource");
 
 	// Allocate resources for acceleration structures.
 	{

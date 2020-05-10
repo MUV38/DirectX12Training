@@ -8,6 +8,7 @@
 
 Application::Application()
     : m_frameIndex(0)
+    , mDeltaTime(0)
 {
 	m_backBufferRenderTargets.resize(FrameBufferCount);
     m_frameFenceValues.resize(FrameBufferCount);
@@ -35,10 +36,14 @@ int Application::Run(HWND hWnd)
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             }
+            // フレーム開始
+            begingFrame();
             // 更新
-            Update();
+            Update(getDeltaTime());
             // 描画
             Render();
+            // フレーム終了
+            endFrame();
         }
 
         // 終了処理
@@ -226,6 +231,11 @@ void Application::Initialize(HWND hWnd)
         );
     }
 
+    // タイマー
+    {
+        mElapsedTimer.start();
+    }
+
     OnInitialize();
 }
 
@@ -238,11 +248,11 @@ void Application::Finalize()
 }
 
 // 更新
-void Application::Update()
+void Application::Update(float deltaTime)
 {
     m_imgui.NewFrame();
 
-    OnUpdate();
+    OnUpdate(deltaTime);
 }
 
 // 描画
@@ -495,6 +505,18 @@ const DescriptorHandle& Application::GetBackBufferDsvDescriptorHandle() const
     return m_backBufferDsvDescriptorHandle;
 }
 
+// 経過時間取得
+float Application::getElapsedTime() const
+{
+    return static_cast<float>(mElapsedTimer.getTime());
+}
+
+// デルタタイム取得
+float Application::getDeltaTime() const
+{
+    return mDeltaTime;
+}
+
 // 描画開始
 void Application::BeginRender()
 {
@@ -532,4 +554,23 @@ void Application::EndRender()
     m_swapChain->Present(1, 0);
 
     WaitForGPU();
+}
+
+// フレーム開始
+void Application::begingFrame()
+{
+    // デルタ時間取得
+    mDeltaTimer.stop();
+    mDeltaTime = mDeltaTimer.getTime();
+
+    // フレームのタイマー開始
+    mDeltaTimer.start();
+
+    OnBeginFrame();
+}
+
+// フレーム終了
+void Application::endFrame()
+{
+    OnEndFrame();
 }

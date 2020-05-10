@@ -26,7 +26,7 @@ public:
 
 	virtual void OnInitialize() override;
 	virtual void OnFinalize() override;
-	virtual void OnUpdate() override;
+	virtual void OnUpdate(float deltaTime) override;
 	virtual void OnRender(ComPtr<ID3D12GraphicsCommandList>& command) override;
 
 private:

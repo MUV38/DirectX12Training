@@ -19,7 +19,7 @@ void MyApp::OnFinalize()
 
 }
 
-void MyApp::OnUpdate()
+void MyApp::OnUpdate(float deltaTime)
 {
 	static bool show_demo_window = true;
 	static bool show_another_window = true;
@@ -41,7 +41,8 @@ void MyApp::OnUpdate()
 		ImGui::SameLine();
 		ImGui::Text("counter = %d", counter);
 
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", deltaTime, 1000.0f / deltaTime);
 	}
 	ImGui::End();
 }

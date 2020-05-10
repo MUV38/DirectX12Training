@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/timer/timer.h>
 #include "../framework.h"
 #include "Descriptor/DescriptorManager.h"
 #include "ImGui/ImGuiDx12.h"
@@ -25,8 +26,10 @@ protected:
     /// override in subclass
     virtual void OnInitialize() {}
     virtual void OnFinalize() {}
-    virtual void OnUpdate() {}
+    virtual void OnUpdate(float deltaTime) {}
     virtual void OnRender(ComPtr<ID3D12GraphicsCommandList>& command) {}
+    virtual void OnBeginFrame() {}
+    virtual void OnEndFrame() {}
 
 protected:
     //! @brief 初期化
@@ -34,7 +37,7 @@ protected:
     //! @brief 終了
     void Finalize();
     //! @brief 更新
-    void Update();
+    void Update(float deltaTime);
     //! @brief 描画
     void Render();
 
@@ -70,6 +73,10 @@ protected:
     const DescriptorHandle& GetBackBufferRtvDescriptorHandle(uint32_t index) const;
     //! @brief バックバッファのDSVハンドル
     const DescriptorHandle& GetBackBufferDsvDescriptorHandle() const;
+    //! @brief 経過時間取得
+    float getElapsedTime() const;
+    //! @brief デルタタイム取得
+    float getDeltaTime() const;
 
 private:
     void PrepareDescriptorHeaps();
@@ -82,6 +89,11 @@ private:
     void BeginRender();
     //! @brief 描画終了
     void EndRender();
+
+    //! @brief フレーム開始
+    void begingFrame();
+    //! @brief フレーム終了
+    void endFrame();
 
 private:
 	ComPtr<IDXGIAdapter1> m_adapter;
@@ -110,4 +122,8 @@ private:
 
 	ImGuiDx12 m_imgui;
 	DescriptorHandle m_imguiSrvDescriptorHandle;
+
+    float mDeltaTime; //!< デルタタイム
+    Timer mElapsedTimer; //!< 経過時間タイマー
+    Timer mDeltaTimer; //!< フレーム間デルタタイマー
 };
