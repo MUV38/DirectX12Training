@@ -1,7 +1,6 @@
-﻿#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <stdexcept>
+﻿#include <stdexcept>
 
+#include <core/windows/myWindows.h>
 #include <Window/Window.h>
 #include <Application/Application.h>
 

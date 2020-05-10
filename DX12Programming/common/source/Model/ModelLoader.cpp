@@ -5,11 +5,12 @@
 
 #include <vector>
 
+#include <core/windows/myWindows.h>
+#include <core/string/stringUtil.h>
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-#include <core/string/stringUtil.h>
 
 #include "Model/Polygon.h"
 

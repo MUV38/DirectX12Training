@@ -1,8 +1,7 @@
 #include "Window/Window.h"
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
 #include <stdexcept>
+#include <core/windows/myWindows.h>
 
 // ImGuiDx12のメッセージ処理
 extern LRESULT ImGuiDx12_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

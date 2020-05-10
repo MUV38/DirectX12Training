@@ -1,8 +1,7 @@
-﻿#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <stdexcept>
+﻿#include <stdexcept>
 
-#include "Window/Window.h"
+#include <core/windows/myWindows.h>
+#include <Window/Window.h>
 #include "MyApp.h"
 
 const wchar_t* APP_NAME = L"02_SimpleTriangle";

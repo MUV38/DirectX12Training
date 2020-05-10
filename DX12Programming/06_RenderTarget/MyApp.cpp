@@ -1,8 +1,5 @@
 #include "MyApp.h"
 
-#undef min
-#undef max
-
 #include <stdexcept>
 #include <Texture/TextureLoader.h>
 #include <D3D12/D3D12Util.h>
