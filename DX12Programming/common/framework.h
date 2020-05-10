@@ -16,6 +16,4 @@
 #include "D3D12/d3dx12.h"
 
 // util
-#include "include/Util/Assert.h"
 #include "include/Util/AssetUtil.h"
-#include "include/Util/StringUtil.h"

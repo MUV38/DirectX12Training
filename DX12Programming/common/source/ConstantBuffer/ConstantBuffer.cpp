@@ -1,7 +1,8 @@
 #include "ConstantBuffer/ConstantBuffer.h"
 
+#include <core/assert/assert.h>
+
 #include "D3D12/D3D12Util.h"
-#include "Util/Assert.h"
 
 ConstantBuffer::ConstantBuffer()
 	: mResource()

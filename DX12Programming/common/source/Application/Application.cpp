@@ -2,9 +2,9 @@
 #include <exception>
 #include <stdexcept>
 #include <experimental/filesystem>
+#include <core/assert/assert.h>
 #include "Application/Application.h"
 #include "D3D12/D3D12Util.h"
-#include "Util/Assert.h"
 
 Application::Application()
     : m_frameIndex(0)

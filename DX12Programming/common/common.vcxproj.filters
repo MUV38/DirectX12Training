@@ -134,9 +134,6 @@
     <ClInclude Include="include\Descriptor\DescriptorManager.h">
       <Filter>HeaderFiles\Descriptor</Filter>
     </ClInclude>
-    <ClInclude Include="include\Util\Assert.h">
-      <Filter>HeaderFiles\Util</Filter>
-    </ClInclude>
     <ClInclude Include="include\ImGui\ImGuiDx12.h">
       <Filter>HeaderFiles\ImGui</Filter>
     </ClInclude>
@@ -181,9 +178,6 @@
     </ClInclude>
     <ClInclude Include="include\Shader\ShaderObject.h">
       <Filter>HeaderFiles\Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Util\StringUtil.h">
-      <Filter>HeaderFiles\Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -249,9 +243,6 @@
     </ClCompile>
     <ClCompile Include="source\Shader\ShaderObject.cpp">
       <Filter>SourceFiles\Shader</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Util\StringUtil.cpp">
-      <Filter>SourceFiles\Util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

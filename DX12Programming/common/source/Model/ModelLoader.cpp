@@ -3,11 +3,14 @@
 #undef min
 #undef max
 
+#include <vector>
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <vector>
+#include <core/string/stringUtil.h>
+
 #include "Model/Polygon.h"
 
 ModelLoader::ModelLoader()
@@ -23,7 +26,7 @@ bool ModelLoader::Load(ID3D12Device* device, const wchar_t* filePath)
 {
     Assimp::Importer importer;
 
-    std::string filePathStr = util::toString(filePath);
+    std::string filePathStr = util::ToString(filePath);
 
     const aiScene* scene = importer.ReadFile(
         filePathStr.c_str(),

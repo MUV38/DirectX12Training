@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <unordered_map>
-#include <Util/Assert.h>
+#include <core/assert/assert.h>
 #include "CompiledShaders/Raytracing.hlsl.h"
 
 // Assign a name to the object to aid with debugging.

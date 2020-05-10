@@ -2,6 +2,7 @@
 #include <stdexcept>
 #define STB_IMAGE_IMPLEMENTATION
 #include <ThirdParty/stb/stb_image.h>
+#include <core/string/stringUtil.h>
 #include <D3D12/D3D12Util.h>
 
 MyApp::MyApp()
@@ -277,7 +278,7 @@ MyApp::ComPtr<ID3D12Resource1> MyApp::CreateTexture(const std::wstring& fileName
 
     ComPtr<ID3D12Resource1> texture;
     int texWidth = 0, texHeight = 0, channels = 0;
-    auto* pImage = stbi_load(util::toString(fileName).c_str(), &texWidth, &texHeight, &channels, 0);
+    auto* pImage = stbi_load(util::ToString(fileName).c_str(), &texWidth, &texHeight, &channels, 0);
     assert(pImage);
 
     // サイズ、フォーマットからテクスチャリソースのDesc準備
