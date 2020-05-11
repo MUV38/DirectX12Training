@@ -562,8 +562,10 @@ void Application::EndRender()
     ID3D12CommandList* lists[] = { m_commandList.Get() };
     m_commandQueue->ExecuteCommandLists(static_cast<UINT>(_countof(lists)), lists);
 
+    // スワップ
     m_swapChain->Present(1, 0);
 
+    // GPU待ち
     WaitForGPU();
 }
 
@@ -577,12 +579,14 @@ void Application::begingFrame()
     // フレームのタイマー開始
     mDeltaTimer.start();
 
+    // フレーム開始イベント
     OnBeginFrame();
 }
 
 // フレーム終了
 void Application::endFrame()
 {
+    // フレーム終了イベント
     OnEndFrame();
 }
 
