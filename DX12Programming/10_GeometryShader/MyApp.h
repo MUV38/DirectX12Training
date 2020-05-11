@@ -25,6 +25,7 @@ public:
         DirectX::XMFLOAT4X4 mtxWorld;
         DirectX::XMFLOAT4X4 mtxView;
         DirectX::XMFLOAT4X4 mtxProj;
+        DirectX::XMFLOAT4 time;
     };
 
     struct GrassParameters
@@ -35,6 +36,7 @@ public:
         DirectX::XMFLOAT4 WidthParam; // r:width g:bottomRate b:middleRate a:topRate
         DirectX::XMFLOAT4 WindParam; // r:power g:frequency b:N/A a:N/A
         DirectX::XMFLOAT4 WindParam2; // r:powerRateBottom g:powerRateMiddle b:powerRateTop a:N/A
+        DirectX::XMFLOAT4 Bend; // r:bottom g:middle b:top
     };
 
 	enum

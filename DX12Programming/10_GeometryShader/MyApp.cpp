@@ -6,12 +6,13 @@
 
 MyApp::MyApp()
 {
-	mGrassParam.BottomColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	mGrassParam.TopColor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	mGrassParam.HeightParam = DirectX::XMFLOAT4(10.0f, 0.3f, 0.4f, 0.5f);
+	mGrassParam.BottomColor = DirectX::XMFLOAT4(0.001f, 0.122f, 0.0f, 1.0f);
+	mGrassParam.TopColor = DirectX::XMFLOAT4(0.0f, 1.0f, 0.226f, 1.0f);
+	mGrassParam.HeightParam = DirectX::XMFLOAT4(4.0f, 0.3f, 0.4f, 0.5f);
 	mGrassParam.WidthParam = DirectX::XMFLOAT4(1.0f, 0.5f, 0.4f, 0.25f);
-	mGrassParam.WindParam = DirectX::XMFLOAT4(2.0f, 0.05f, 0.0f, 0.0f);
+	mGrassParam.WindParam = DirectX::XMFLOAT4(0.1f, 0.05f, 0.0f, 0.0f);
 	mGrassParam.WindParam2 = DirectX::XMFLOAT4(0.3f, 1.0f, 2.0f, 0.0f);
+	mGrassParam.Bend = DirectX::XMFLOAT4(1.0f, 1.0f, 2.0f, 0.0f);
 }
 
 MyApp ::~MyApp()
@@ -290,6 +291,23 @@ void MyApp::updateGUI(float deltaTime)
 				ImGui::TreePop();
 			}
 		}
+		if (ImGui::CollapsingHeader("Bend"))
+		{
+			DirectX::XMFLOAT4* bendPtr = &mGrassParam.Bend;
+			float bottom{ bendPtr->x }, middle{ bendPtr->y }, top{ bendPtr->z };
+			if (ImGui::DragFloat("Bottom", &bottom, 0.01f, 0.0f, 5.0f))
+			{
+				bendPtr->x = bottom;
+			}
+			if (ImGui::DragFloat("Middle", &middle, 0.01f, 0.0f, 5.0f))
+			{
+				bendPtr->y = middle;
+			}
+			if (ImGui::DragFloat("Top", &top, 0.01f, 0.0f, 5.0f))
+			{
+				bendPtr->z = top;
+			}
+		}
 		ImGui::End();
 	}
 }
@@ -317,6 +335,8 @@ void MyApp::updateConstantBuffer(float deltaTime)
 		auto mtxProj = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.f), viewport.Width / viewport.Height, 0.1f, 100.0f);
 		XMStoreFloat4x4(&shaderParams.mtxView, XMMatrixTranspose(mtxView));
 		XMStoreFloat4x4(&shaderParams.mtxProj, XMMatrixTranspose(mtxProj));
+
+		shaderParams.time = DirectX::XMFLOAT4(getElapsedTime(), deltaTime, 0.0f, 0.0f);
 
 		// Update constant buffer.
 		{
