@@ -589,15 +589,19 @@ void Application::endFrame()
 // アプリケーション情報を表示
 void Application::showAppInfo()
 {
-    const float DISTANCE = 10.0f;
+    bool* isShow = &mShowAppInfo;
+    if (!(*isShow))
+    {
+        return;
+    }
 
     ImGuiIO& io = ImGui::GetIO();
-    static int corner = 3;
-    bool* isShow = &mShowAppInfo;
+    const float distance = 10.0f;
     const float deltaTime = mDeltaTime;
+    static int corner = 3;
     if (corner != -1)
     {
-        ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
+        ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - distance : distance, (corner & 2) ? io.DisplaySize.y - distance : distance);
         ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
         ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
     }
