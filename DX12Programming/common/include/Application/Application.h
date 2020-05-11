@@ -95,6 +95,9 @@ private:
     //! @brief フレーム終了
     void endFrame();
 
+    //! @brief アプリケーション情報を表示
+    void showAppInfo();
+
 private:
 	ComPtr<IDXGIAdapter1> m_adapter;
     ComPtr<ID3D12Device> m_device;
@@ -126,4 +129,6 @@ private:
     float mDeltaTime; //!< デルタタイム
     Timer mElapsedTimer; //!< 経過時間タイマー
     Timer mDeltaTimer; //!< フレーム間デルタタイマー
+
+    bool mShowAppInfo; //!< アプリケーション情報表示
 };

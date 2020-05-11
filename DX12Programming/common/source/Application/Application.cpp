@@ -9,6 +9,7 @@
 Application::Application()
     : m_frameIndex(0)
     , mDeltaTime(0)
+    , mShowAppInfo(true)
 {
 	m_backBufferRenderTargets.resize(FrameBufferCount);
     m_frameFenceValues.resize(FrameBufferCount);
@@ -236,22 +237,30 @@ void Application::Initialize(HWND hWnd)
         mElapsedTimer.start();
     }
 
+    // 初期化イベント
     OnInitialize();
 }
 
 // 終了
 void Application::Finalize()
 {
+    // 終了イベント
     OnFinalize();
 
+    // imgui終了
     m_imgui.Shutdown();
 }
 
 // 更新
 void Application::Update(float deltaTime)
 {
+    // imguiのフレーム開始
     m_imgui.NewFrame();
+    
+    // アプリケーション情報を表示
+    showAppInfo();
 
+    // 更新イベント
     OnUpdate(deltaTime);
 }
 
@@ -273,6 +282,7 @@ void Application::Render()
     // 描画対象の設定
     m_commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
 
+    // 描画イベント
     OnRender(m_commandList);
 
     // imgui
@@ -281,6 +291,7 @@ void Application::Render()
         m_imgui.Render(m_commandList.Get());
     }
 
+    // 描画終了
     EndRender();
 }
 
@@ -561,7 +572,7 @@ void Application::begingFrame()
 {
     // デルタ時間取得
     mDeltaTimer.stop();
-    mDeltaTime = mDeltaTimer.getTime();
+    mDeltaTime = static_cast<float>(mDeltaTimer.getTime());
 
     // フレームのタイマー開始
     mDeltaTimer.start();
@@ -573,4 +584,55 @@ void Application::begingFrame()
 void Application::endFrame()
 {
     OnEndFrame();
+}
+
+// アプリケーション情報を表示
+void Application::showAppInfo()
+{
+    const float DISTANCE = 10.0f;
+
+    ImGuiIO& io = ImGui::GetIO();
+    static int corner = 3;
+    bool* isShow = &mShowAppInfo;
+    const float deltaTime = mDeltaTime;
+    if (corner != -1)
+    {
+        ImVec2 window_pos = ImVec2((corner & 1) ? io.DisplaySize.x - DISTANCE : DISTANCE, (corner & 2) ? io.DisplaySize.y - DISTANCE : DISTANCE);
+        ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
+        ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+    }
+    ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+    if (ImGui::Begin("App Info", isShow, (corner != -1 ? ImGuiWindowFlags_NoMove : 0) | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+    {
+        ImGui::Text("%.3f ms/frame (%.1f FPS)", deltaTime, 1000.0f / deltaTime);
+        if (ImGui::BeginPopupContextWindow())
+        {
+            if (ImGui::MenuItem("Custom", NULL, corner == -1)) 
+            {
+                corner = -1;
+            }
+            if (ImGui::MenuItem("Top-left", NULL, corner == 0))
+            {
+                corner = 0;
+            }
+            if (ImGui::MenuItem("Top-right", NULL, corner == 1))
+            {
+                corner = 1;
+            }
+            if (ImGui::MenuItem("Bottom-left", NULL, corner == 2))
+            {
+                corner = 2;
+            }
+            if (ImGui::MenuItem("Bottom-right", NULL, corner == 3))
+            {
+                corner = 3;
+            }
+            if (ImGui::MenuItem("Close"))
+            {
+                *isShow = false;
+            }
+            ImGui::EndPopup();
+        }
+    }
+    ImGui::End();
 }
