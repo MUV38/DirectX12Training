@@ -8,9 +8,9 @@ MyApp::MyApp()
 {
 	mGrassParam.BottomColor = DirectX::XMFLOAT4(0.001f, 0.122f, 0.0f, 1.0f);
 	mGrassParam.TopColor = DirectX::XMFLOAT4(0.0f, 1.0f, 0.226f, 1.0f);
-	mGrassParam.HeightParam = DirectX::XMFLOAT4(4.0f, 0.3f, 0.4f, 0.5f);
-	mGrassParam.WidthParam = DirectX::XMFLOAT4(1.0f, 0.5f, 0.4f, 0.25f);
-	mGrassParam.WindParam = DirectX::XMFLOAT4(0.1f, 0.05f, 0.0f, 0.0f);
+	mGrassParam.HeightParam = DirectX::XMFLOAT4(0.3f, 0.3f, 0.4f, 0.5f);
+	mGrassParam.WidthParam = DirectX::XMFLOAT4(0.01f, 2.0f, 1.0f, 0.75f);
+	mGrassParam.WindParam = DirectX::XMFLOAT4(0.01f, 0.05f, 0.0f, 0.0f);
 	mGrassParam.WindParam2 = DirectX::XMFLOAT4(0.3f, 1.0f, 2.0f, 0.0f);
 	mGrassParam.Bend = DirectX::XMFLOAT4(1.0f, 1.0f, 2.0f, 0.0f);
 }
@@ -27,27 +27,65 @@ void MyApp::OnInitialize()
 	HRESULT hr;
 	ComPtr<ID3DBlob> errBlob;
 
+	const int subdivision = 16;
 	const float k = 1.0f;
+	const DirectX::XMFLOAT3 normal(0.0f, 1.0f, 0.0f);
 	const DirectX::XMFLOAT4 white(1.f, 1.f, 1.f, 1.f);
 
-	Vertex cubeVertices[] = {
-		{ {-k, 0.0f,-k}, white, { 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f} },
-		{ {-k, 0.0f, k}, white, { 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f} },
-		{ { k, 0.0f, k}, white, { 1.0f, 0.0f}, {0.0f, 1.0f, 0.0f} },
-		{ { k, 0.0f,-k}, white, { 1.0f, 1.0f}, {0.0f, 1.0f, 0.0f} },
-	};
-	uint32_t indices[] = {
-	  0, 1, 2, 2, 3,0,
-	};
+	Vertex vertices[subdivision * subdivision * 3 * 2];
+	uint32_t indices[subdivision * subdivision * 3 * 2];
+	float vertexOffset = k / static_cast<float>(subdivision);
+	float uvOffset = 1.0f / static_cast<float>(subdivision);
+	for (int h = 0; h < subdivision; ++h)
+	{
+		int heightIndex = h * subdivision * 3 * 2;
+		for (int w = 0; w < subdivision; ++w)
+		{
+			int widthIndex = w * 3 * 2;
+
+			DirectX::XMFLOAT3 leftTopPos(
+				-vertexOffset * (static_cast<float>(subdivision) * 0.5f) + vertexOffset * static_cast<float>(w),
+				0.0f,
+				-vertexOffset * (static_cast<float>(subdivision) * 0.5f) + vertexOffset * static_cast<float>(h)
+			);
+
+			DirectX::XMFLOAT2 leftTopUV(
+				uvOffset * static_cast<float>(w),
+				uvOffset * static_cast<float>(h)
+			);
+
+			vertices[heightIndex + widthIndex + 0].pos = leftTopPos;
+			vertices[heightIndex + widthIndex + 1].pos = DirectX::XMFLOAT3(leftTopPos.x + vertexOffset, leftTopPos.y, leftTopPos.z);
+			vertices[heightIndex + widthIndex + 2].pos = DirectX::XMFLOAT3(leftTopPos.x,                leftTopPos.y, leftTopPos.z + vertexOffset);
+			vertices[heightIndex + widthIndex + 3].pos = DirectX::XMFLOAT3(leftTopPos.x + vertexOffset, leftTopPos.y, leftTopPos.z);
+			vertices[heightIndex + widthIndex + 4].pos = DirectX::XMFLOAT3(leftTopPos.x + vertexOffset, leftTopPos.y, leftTopPos.z + vertexOffset);
+			vertices[heightIndex + widthIndex + 5].pos = DirectX::XMFLOAT3(leftTopPos.x,                leftTopPos.y, leftTopPos.z + vertexOffset);
+		
+			vertices[heightIndex + widthIndex + 0].uv = leftTopUV;
+			vertices[heightIndex + widthIndex + 1].uv = DirectX::XMFLOAT2(leftTopUV.x + uvOffset, leftTopUV.y);
+			vertices[heightIndex + widthIndex + 2].uv = DirectX::XMFLOAT2(leftTopUV.x,            leftTopUV.y + uvOffset);
+			vertices[heightIndex + widthIndex + 3].uv = DirectX::XMFLOAT2(leftTopUV.x + uvOffset, leftTopUV.y);
+			vertices[heightIndex + widthIndex + 4].uv = DirectX::XMFLOAT2(leftTopUV.x + uvOffset, leftTopUV.y + uvOffset);
+			vertices[heightIndex + widthIndex + 5].uv = DirectX::XMFLOAT2(leftTopUV.x,            leftTopUV.y + uvOffset);
+
+			for (int i = 0; i < 6; ++i)
+			{
+				vertices[heightIndex + widthIndex + i].color = white;
+				vertices[heightIndex + widthIndex + i].normal = normal;
+
+				indices[heightIndex + widthIndex + i] = heightIndex + widthIndex + i;
+			}
+		}
+	}
 
 	// 頂点バッファとインデックスバッファの生成.
-	m_vertexBuffer = D3D12Util::CreateBuffer(device, sizeof(cubeVertices), cubeVertices);
+	m_vertexBuffer = D3D12Util::CreateBuffer(device, sizeof(vertices), vertices);
 	m_indexBuffer = D3D12Util::CreateBuffer(device, sizeof(indices), indices);
 	m_indexCount = _countof(indices);
 
 	// 各バッファのビューを生成.
 	m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-	m_vertexBufferView.SizeInBytes = sizeof(cubeVertices);
+	m_vertexBufferView.SizeInBytes = sizeof(vertices);
 	m_vertexBufferView.StrideInBytes = sizeof(Vertex);
 	m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
 	m_indexBufferView.SizeInBytes = sizeof(indices);
@@ -99,6 +137,11 @@ void MyApp::OnInitialize()
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, normal), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA },
 	};
 
+	// RasterizerState.
+	CD3DX12_RASTERIZER_DESC rasterizerDesc(D3D12_DEFAULT);
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE; // 両面
+	//rasterizerDesc.FillMode = D3D12_FILL_MODE_WIREFRAME;
+
 	// PipelineStateObject.
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
 	{
@@ -109,7 +152,7 @@ void MyApp::OnInitialize()
 		// BlendState.
 		psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 		// RasterizerState.
-		psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+		psoDesc.RasterizerState = rasterizerDesc;
 		// RenderTarget.
 		psoDesc.NumRenderTargets = 1;
 		psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -196,7 +239,7 @@ void MyApp::updateGUI(float deltaTime)
 	if (ImGui::Begin("GrassParameter", nullptr))
 	{
 		ImGui::SetNextWindowSize(ImVec2(300, 300));
-		if (ImGui::CollapsingHeader("Color"))
+		if (ImGui::TreeNode("Color"))
 		{
 			DirectX::XMFLOAT4* bottomPtr = &mGrassParam.BottomColor;
 			DirectX::XMFLOAT4* topPtr = &mGrassParam.TopColor;
@@ -217,8 +260,9 @@ void MyApp::updateGUI(float deltaTime)
 				topPtr->z = top[2];
 				topPtr->w = 0.0f;
 			}
+			ImGui::TreePop();
 		}
-		if (ImGui::CollapsingHeader("Height"))
+		if (ImGui::TreeNode("Height"))
 		{
 			DirectX::XMFLOAT4* heightPtr = &mGrassParam.HeightParam;
 			float height{ heightPtr->x }, bottom{ heightPtr->y }, middle{ heightPtr->z }, top{ heightPtr->w };
@@ -238,12 +282,13 @@ void MyApp::updateGUI(float deltaTime)
 			{
 				heightPtr->w = top;
 			}
+			ImGui::TreePop();
 		}
-		if (ImGui::CollapsingHeader("Width"))
+		if (ImGui::TreeNode("Width"))
 		{
 			DirectX::XMFLOAT4* widthPtr = &mGrassParam.WidthParam;
 			float width{ widthPtr->x }, bottom{ widthPtr->y }, middle{ widthPtr->z }, top{ widthPtr->w };
-			if (ImGui::DragFloat("Width", &width, 1.0f, 0.0f, 20.0f))
+			if (ImGui::DragFloat("Width", &width, 0.1f, 0.0f, 20.0f))
 			{
 				widthPtr->x = width;
 			}
@@ -259,8 +304,9 @@ void MyApp::updateGUI(float deltaTime)
 			{
 				widthPtr->w = top;
 			}
+			ImGui::TreePop();
 		}
-		if (ImGui::CollapsingHeader("Wind"))
+		if (ImGui::TreeNode("Wind"))
 		{
 			DirectX::XMFLOAT4* windPtr = &mGrassParam.WindParam;
 			float power{ windPtr->x }, frequency{ windPtr->y };
@@ -290,8 +336,9 @@ void MyApp::updateGUI(float deltaTime)
 				}
 				ImGui::TreePop();
 			}
+			ImGui::TreePop();
 		}
-		if (ImGui::CollapsingHeader("Bend"))
+		if (ImGui::TreeNode("Bend"))
 		{
 			DirectX::XMFLOAT4* bendPtr = &mGrassParam.Bend;
 			float bottom{ bendPtr->x }, middle{ bendPtr->y }, top{ bendPtr->z };
@@ -307,6 +354,7 @@ void MyApp::updateGUI(float deltaTime)
 			{
 				bendPtr->z = top;
 			}
+			ImGui::TreePop();
 		}
 		ImGui::End();
 	}
@@ -326,13 +374,18 @@ void MyApp::updateConstantBuffer(float deltaTime)
 
 		// Matrix.
 		ShaderParameters shaderParams;
-		XMStoreFloat4x4(&shaderParams.mtxWorld, XMMatrixRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(0.0f)));
+
+		XMMATRIX mtxWorld = XMMatrixScaling(256.0f, 256.0f, 256.0f);
+		mtxWorld *= XMMatrixRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(-90.0f));
+		mtxWorld *= XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+		XMStoreFloat4x4(&shaderParams.mtxWorld, mtxWorld);
+
 		auto mtxView = XMMatrixLookAtLH(
-			XMVectorSet(0.f, 3.f, -10.f, 0.f),
-			XMVectorSet(0.f, 2.f, 0.f, 0.f),
+			XMVectorSet(0.f, 300.0f, -800.0f, 0.f),
+			XMVectorSet(0.f, 100.0f, 0.f, 0.f),
 			XMVectorSet(0.f, 1.f, 0.f, 0.f)
 		);
-		auto mtxProj = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.f), viewport.Width / viewport.Height, 0.1f, 100.0f);
+		auto mtxProj = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.f), viewport.Width / viewport.Height, 0.1f, 10000.0f);
 		XMStoreFloat4x4(&shaderParams.mtxView, XMMatrixTranspose(mtxView));
 		XMStoreFloat4x4(&shaderParams.mtxProj, XMMatrixTranspose(mtxProj));
 
