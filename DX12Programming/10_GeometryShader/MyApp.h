@@ -27,16 +27,34 @@ public:
         DirectX::XMFLOAT4X4 mtxProj;
     };
 
+    struct GrassParameters
+    {
+        DirectX::XMFLOAT4 BottomColor; // rgb:color a:N/A
+        DirectX::XMFLOAT4 TopColor; // rgb:color a:N/A
+        DirectX::XMFLOAT4 HeightParam; // r:height g:bottomRate b:middleRate a:topRate
+        DirectX::XMFLOAT4 WidthParam; // r:width g:bottomRate b:middleRate a:topRate
+        DirectX::XMFLOAT4 WindParam; // r:power g:frequency b:N/A a:N/A
+        DirectX::XMFLOAT4 WindParam2; // r:powerRateBottom g:powerRateMiddle b:powerRateTop a:N/A
+    };
+
 	enum
 	{
 		CbModel,
+        CbGrass,
 		CbNum
 	};
 
 public:
     virtual void OnInitialize() override;
     virtual void OnFinalize() override;
+    virtual void OnUpdate(float deltaTime) override;
     virtual void OnRender(ComPtr<ID3D12GraphicsCommandList>& command) override;
+
+private:
+    // GUI更新
+    void updateGUI(float deltaTime);
+    // コンスタントバッファ更新
+    void updateConstantBuffer(float deltaTime);
 
 private:    
     ComPtr<ID3D12Resource> m_vertexBuffer;
@@ -50,4 +68,6 @@ private:
     ComPtr<ID3D12RootSignature> m_rootSignature;
     ComPtr<ID3D12PipelineState> m_pipeline;
     ConstantBuffer m_constantBuffers[CbNum];
+
+    GrassParameters mGrassParam;
 };
