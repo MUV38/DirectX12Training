@@ -20,7 +20,8 @@ public:
 
     struct TessellationParameters
     {
-        DirectX::XMFLOAT4 TessFactor; // x:subdivision
+        DirectX::XMFLOAT4 TessFactor; // x:edge0 y:edge1 z:edge2 w:inside
+        DirectX::XMFLOAT4 TessFactor2; // x:subdivision
     };
 
 public:

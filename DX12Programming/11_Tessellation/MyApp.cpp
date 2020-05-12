@@ -4,7 +4,8 @@
 
 MyApp::MyApp()
 {
-    m_tessParam.TessFactor = DirectX::XMFLOAT4(3.0f, 0.0f, 0.0f, 0.0f);
+    m_tessParam.TessFactor = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    m_tessParam.TessFactor2 = DirectX::XMFLOAT4(3.0f, 0.0f, 0.0f, 0.0f);
 }
 
 MyApp ::~MyApp()
@@ -210,7 +211,20 @@ void MyApp::updateGUI(float deltaTime)
         if (ImGui::TreeNode("Tessellation"))
         {
             auto* tessFactor = &m_tessParam.TessFactor;
-            if (ImGui::DragFloat("Subdivision", &tessFactor->x, 1.0f, 1.0f, 32.0f))
+            auto* tessFactor2 = &m_tessParam.TessFactor2;
+            if (ImGui::DragFloat("Edge0", &tessFactor->x, 1.0f, 1.0f, 32.0f))
+            {
+            }
+            if (ImGui::DragFloat("Edge1", &tessFactor->y, 1.0f, 1.0f, 32.0f))
+            {
+            }
+            if (ImGui::DragFloat("Edge2", &tessFactor->z, 1.0f, 1.0f, 32.0f))
+            {
+            }
+            if (ImGui::DragFloat("Inside", &tessFactor->w, 1.0f, 1.0f, 32.0f))
+            {
+            }
+            if (ImGui::DragFloat("Subdivision", &tessFactor2->x, 1.0f, 1.0f, 32.0f))
             {
             }
             ImGui::TreePop();

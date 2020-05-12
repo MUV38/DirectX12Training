@@ -23,6 +23,7 @@ struct HS_CONSTANT_DATA_OUTPUT
 cbuffer TessellationParameters : register(b0)
 {
 	float4 TessFactor;
+	float4 TessFactor2;
 }
 
 #define NUM_CONTROL_POINTS 3
@@ -35,10 +36,11 @@ HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
 	HS_CONSTANT_DATA_OUTPUT Output;
 
 	// Insert code to compute Output here
-	Output.EdgeTessFactor[0] = 
-		Output.EdgeTessFactor[1] = 
-		Output.EdgeTessFactor[2] = 
-		Output.InsideTessFactor = TessFactor.x; // e.g. could calculate dynamic tessellation factors instead
+	float subdivision = TessFactor2.x;
+	Output.EdgeTessFactor[0] = TessFactor.x * subdivision;
+	Output.EdgeTessFactor[1] = TessFactor.y * subdivision;
+	Output.EdgeTessFactor[2] = TessFactor.z * subdivision;
+	Output.InsideTessFactor = TessFactor.w * subdivision;
 
 	return Output;
 }
