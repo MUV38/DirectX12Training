@@ -7,6 +7,8 @@
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl" />
     <FxCompile Include="VertexShader.hlsl" />
+    <FxCompile Include="DomainShader.hlsl" />
+    <FxCompile Include="HullShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyApp.h" />

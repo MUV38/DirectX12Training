@@ -1,11 +1,11 @@
 struct VSInput
 {
-    float4 Position : POSITION;
+    float3 Position : POSITION;
     float4 Color : COLOR;
 };
 struct VSOutput
 {
-    float4 Position : SV_POSITION;
+    float3 Position : WORLDPOS;
     float4 Color : COLOR;
 };
 
