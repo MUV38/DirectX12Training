@@ -23,7 +23,8 @@ struct HS_CONSTANT_DATA_OUTPUT
 cbuffer TessellationParameters : register(b0)
 {
 	float4 TessFactor;
-}
+	float4 TessFactor2;
+};
 
 #define NUM_CONTROL_POINTS 3
 
