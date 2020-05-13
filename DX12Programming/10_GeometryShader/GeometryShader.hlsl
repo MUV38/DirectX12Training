@@ -39,6 +39,8 @@ void main(
 	inout TriangleStream< GSOutput > output
 )
 {
+	int i = 0;
+
 	float4x4 mtxWVP = mul(mul(world, view), proj);
 	float elapsedTime = Time.x;
 	float deltaTime = Time.y;
@@ -84,6 +86,11 @@ void main(
 	float3 dir = normalize((p2 - p0) * centerRot);
 
 	GSOutput gsOut[7];
+	[unroll]
+	for (i = 0; i < 7; ++i)
+	{
+		gsOut[i] = (GSOutput)0;
+	}
 
 	// bottom
 	gsOut[0].Position = float4(centerPos - dir * bottomWidth, 1.0f);
@@ -119,7 +126,7 @@ void main(
 	gsOut[6].Position.xyz += dir * (windPower * centerWind * topBend) * sin(elapsedTime);
 
 	[unroll]
-	for (int i = 0; i < 7; i++)
+	for (i = 0; i < 7; i++)
 	{
 		gsOut[i].Position = mul(gsOut[i].Position, mtxWVP);
 		output.Append(gsOut[i]);

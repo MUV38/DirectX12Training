@@ -1,30 +1,47 @@
 struct VSInput
 {
-    float3 Position : POSITION;
-    float3 Normal   : NORMAL;
-    float2 UV       : TEXCOORD;
+    uint VertexID : SV_VertexID;
+    float4 Color : COLOR;
 };
 
 struct VSOutput
 {
     float4 Position : SV_POSITION;
-    float2 UV       : TEXCOORD0;
-    float3 Normal   : TEXCOORD1;
+    float4 Color : COLOR;
 };
 
-cbuffer ShaderParameter : register(b0)
+cbuffer SceneParameter : register(b0)
 {
-    float4x4 world;
-    float4x4 view;
-    float4x4 proj;
+    float4 Time;
 }
+
+cbuffer ShaderParameter : register(b1)
+{
+    float4x4 World;
+    float4x4 View;
+    float4x4 Proj;
+
+    float4x4 InvView;
+}
+
+struct ParticleData
+{
+    float3 position;
+    float4 color;
+};
+
+StructuredBuffer<ParticleData> ParticleDataBuffer : register(t0);
 
 VSOutput main(VSInput In)
 {
     VSOutput result = (VSOutput)0;
-    float4x4 mtxWVP = mul(world, mul(view, proj));
-    result.Position = mul(float4(In.Position, 1.0f), mtxWVP);
-    result.UV = In.UV;
-    result.Normal = In.Normal;
+
+    float4 worldPos = float4(
+        ParticleDataBuffer.Load(In.VertexID).position,
+        1.0f
+        );
+    
+    result.Position = worldPos;
+    result.Color = In.Color;
     return result;
 }

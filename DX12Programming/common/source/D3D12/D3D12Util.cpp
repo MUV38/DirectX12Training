@@ -88,6 +88,52 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateUAVBuffer(
 	return buffer;
 }
 
+Microsoft::WRL::ComPtr<ID3D12Resource> CreateUAVBuffer(ID3D12Device* device, size_t bufferSize, const void* initialData, const wchar_t* resourceName)
+{
+	ComPtr<ID3D12Resource> buffer;
+
+	CD3DX12_HEAP_PROPERTIES uploadHeapProperties(D3D12_HEAP_TYPE_CUSTOM);
+	{
+		uploadHeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
+		uploadHeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
+	}
+	auto bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+	HRESULT hr = device->CreateCommittedResource(
+		&uploadHeapProperties,
+		D3D12_HEAP_FLAG_NONE,
+		&bufferDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&buffer)
+	);
+	if (FAILED(hr))
+	{
+		throw std::runtime_error("CreateUAVBuffer() is failed.\n");
+	}
+
+	// 初期データがあればコピー
+	if (SUCCEEDED(hr) && initialData)
+	{
+		void* mapped;
+		CD3DX12_RANGE range(0, 0);
+		hr = buffer->Map(0, &range, &mapped);
+		if (SUCCEEDED(hr))
+		{
+			memcpy(mapped, initialData, bufferSize);
+			buffer->Unmap(0, nullptr);
+		}
+	}
+
+#if defined(_DEBUG)
+	if (resourceName)
+	{
+		buffer->SetName(resourceName);
+	}
+#endif // defined(_DEBUG)
+
+	return buffer;
+}
+
 /// シェーダーコンパイル
 HRESULT CompileShaderFromFile(const std::wstring& filePath, const std::wstring& profile, ComPtr<ID3DBlob>& shaderBlob, ComPtr<ID3DBlob>& errorBlob)
 {

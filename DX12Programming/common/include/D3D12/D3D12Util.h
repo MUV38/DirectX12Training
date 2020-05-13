@@ -33,6 +33,12 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateUAVBuffer(
 	D3D12_RESOURCE_STATES initialResourceState = D3D12_RESOURCE_STATE_COMMON,
 	const wchar_t* resourceName = nullptr
 );
+Microsoft::WRL::ComPtr<ID3D12Resource> CreateUAVBuffer(
+    ID3D12Device* device,
+    size_t bufferSize,
+    const void* initialData,
+    const wchar_t* resourceName = nullptr
+);
 
 /**
  * @brief シェーダーコンパイル
