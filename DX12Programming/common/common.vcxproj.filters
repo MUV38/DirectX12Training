@@ -90,6 +90,24 @@
     <Filter Include="SourceFiles\Shader">
       <UniqueIdentifier>{7b7aec21-1c0e-43e2-9ba4-984ca8f2e506}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HeaderFiles\Camera">
+      <UniqueIdentifier>{b19d4db3-c4db-4e92-b111-6fb78ca9e12c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SourceFiles\Camera">
+      <UniqueIdentifier>{afe6f5f1-5569-4c72-9081-b2fadbaa78d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\Scene">
+      <UniqueIdentifier>{3187319d-5ee9-456c-a774-02996a0f7ef3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SourceFiles\Scene">
+      <UniqueIdentifier>{2450a655-3bad-447e-8dd1-994ebd0e6172}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\Geometry">
+      <UniqueIdentifier>{860e2c31-eea4-41c1-8152-9308f4ee3c30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SourceFiles\Geometry">
+      <UniqueIdentifier>{0f50df05-d557-48b4-9e0d-15bbef4e72d2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -179,6 +197,18 @@
     <ClInclude Include="include\Shader\ShaderObject.h">
       <Filter>HeaderFiles\Shader</Filter>
     </ClInclude>
+    <ClInclude Include="include\Camera\Camera.h">
+      <Filter>HeaderFiles\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Scene\Scene.h">
+      <Filter>HeaderFiles\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Scene\SceneContext.h">
+      <Filter>HeaderFiles\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Geometry\GeometryUtil.h">
+      <Filter>HeaderFiles\Geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -243,6 +273,18 @@
     </ClCompile>
     <ClCompile Include="source\Shader\ShaderObject.cpp">
       <Filter>SourceFiles\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Camera\Camera.cpp">
+      <Filter>SourceFiles\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Scene\Scene.cpp">
+      <Filter>SourceFiles\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Scene\SceneContext.cpp">
+      <Filter>SourceFiles\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Geometry\GeometryUtil.cpp">
+      <Filter>SourceFiles\Geometry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

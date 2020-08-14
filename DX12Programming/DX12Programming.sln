@@ -82,6 +82,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "12_DXRCube", "12_DXRCube\12
 		{E97A8A7B-EA03-4211-899E-AB5242486BC9} = {E97A8A7B-EA03-4211-899E-AB5242486BC9}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "13_IndirectDraw", "13_IndirectDraw\13_IndirectDraw.vcxproj", "{CE3BAF45-C1B7-4515-AF2F-241F2D3D8CD3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8E20A45A-3EE7-4662-854B-FC05ECD7A9AD} = {8E20A45A-3EE7-4662-854B-FC05ECD7A9AD}
+		{E97A8A7B-EA03-4211-899E-AB5242486BC9} = {E97A8A7B-EA03-4211-899E-AB5242486BC9}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -180,6 +186,12 @@ Global
 		{13CA17B7-5331-4763-B0DB-CDDB9C397711}.Release|x64.ActiveCfg = Release|x64
 		{13CA17B7-5331-4763-B0DB-CDDB9C397711}.Release|x64.Build.0 = Release|x64
 		{13CA17B7-5331-4763-B0DB-CDDB9C397711}.Release|x86.ActiveCfg = Release|x64
+		{CE3BAF45-C1B7-4515-AF2F-241F2D3D8CD3}.Debug|x64.ActiveCfg = Debug|x64
+		{CE3BAF45-C1B7-4515-AF2F-241F2D3D8CD3}.Debug|x64.Build.0 = Debug|x64
+		{CE3BAF45-C1B7-4515-AF2F-241F2D3D8CD3}.Debug|x86.ActiveCfg = Debug|x64
+		{CE3BAF45-C1B7-4515-AF2F-241F2D3D8CD3}.Release|x64.ActiveCfg = Release|x64
+		{CE3BAF45-C1B7-4515-AF2F-241F2D3D8CD3}.Release|x64.Build.0 = Release|x64
+		{CE3BAF45-C1B7-4515-AF2F-241F2D3D8CD3}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
