@@ -2,7 +2,7 @@
 
 #include <core/windows/myWindows.h>
 #include <Window/Window.h>
-#include <Application/Application.h>
+#include "MyApp.h"
 
 const wchar_t* APP_NAME = L"13_IndirectDraw";
 
@@ -12,7 +12,7 @@ const int WINDOW_HEIGHT = 720;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
     Window window;
-    Application app;
+    MyApp app;
 
     window.create(
         hInstance,
